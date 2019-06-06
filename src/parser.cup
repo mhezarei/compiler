@@ -63,7 +63,7 @@ func_dcl ::= FUNCTION type ID LPAREN arguments RPAREN SEMICOLON
 			 | FUNCTION type ID LPAREN RPAREN SEMICOLON
 			 | FUNCTION type ID LPAREN arguments RPAREN block
 			 | FUNCTION type ID LPAREN RPAREN block;
-			 
+
 extern_dcl ::= EXTERN type ID;
 
 arguments ::= type ID
@@ -105,7 +105,7 @@ statement ::= assignment SEMICOLON
 			  | RETURN SEMICOLON
 			  | BREAK SEMICOLON
 			  | CONTINUE SEMICOLON;
-			  
+
 assignment ::= variable ASSIGN expr
 			   | variable ADDASS expr
 			   | variable SUBASS expr
