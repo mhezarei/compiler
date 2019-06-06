@@ -14,12 +14,6 @@ terminal SINGLELINECOMM;
 terminal MULTILINECOMMSTART;
 terminal MULTILINECOMMFINISH;
 
-// arithmatic
-terminal EQ, NOTEQ, LESSEQ, LESS, GR, GREQ, ASSIGN, NOT;
-terminal BITNEG, ARITHAND, LOGICAND, ARITHOR, XOR;
-terminal PROD, ADD, ADDASS, SUBASS, MULTASS, DIVASS;
-terminal DIV, MOD, MINUS, LOGICOR;
-
 // strings
 terminal APOST, QUOTE;
 
@@ -35,6 +29,13 @@ terminal AUTO, VOID;
 terminal INTCONST, REALCONST, CHARCONST, BOOLCONST;
 terminal STRINGCONST, LONGCONST;
 
+// arithmatic
+terminal EQ, NOTEQ, LESSEQ, LESS, GR, GREQ, ASSIGN, NOT;
+terminal BITNEG, ARITHAND, LOGICAND, ARITHOR, XOR;
+terminal PROD, ADD, ADDASS, SUBASS, MULTASS, DIVASS;
+terminal DIV, MOD, MINUS, LOGICOR, UMINUS, UPLUS;
+terminal INC, DEC;
+
 // non-terminal part
 non terminal program, var_dcl, func_extern, struct_dec;
 non terminal func_dcl, extern_dcl;
@@ -48,7 +49,18 @@ non terminal cond_stmt_mid, variable_mid, lvalue;
 
 /* precedence part */
 
-
+precedence nonassoc COMMA;
+precedence right ASSIGN, ADDASS, SUBASS, MULTASS, DIVASS;
+precedence left LOGICOR;
+precedence left LOGICAND;
+precedence left ARITHOR;
+precedence left XOR;
+precedence left ARITHAND;
+precedence left EQ, NOTEQ;
+precedence left LESS, LESSEQ, GR, GREQ;
+precedence left ADD, MINUS;
+precedence left PROD, DIV, MOD;
+precedence right NOT, BITNEG, UMINUS, UPLUS, INC, DEC;
 
 /* grammar part */
 
@@ -134,20 +146,19 @@ loop_stmt ::= FOR LPAREN SEMICOLON expr SEMICOLON RPAREN block
 			  | REPEAT block UNTIL LPAREN expr RPAREN SEMICOLON
 			  | FOREACH LPAREN ID IN ID RPAREN block;
 
-expr ::= LPAREN expr binary_op expr RPAREN
+expr ::= expr binary_op expr
 		 | LPAREN expr RPAREN
 		 | method_call
 		 | variable
-		 | MINUS MINUS variable
-		 | ADD ADD variable
-		 | variable MINUS MINUS
-		 | variable ADD ADD
+		 | DEC variable
+		 | INC variable
+		 | variable DEC
+		 | variable INC
 		 | const_val
-		 | MINUS expr
+		 | UMINUS expr
+		 | UPLUS expr
 		 | BITNEG expr
 		 | SIZEOF LPAREN type RPAREN;
-
-//lvalue ::= ID | ID variable_mid | variable DOT ID | LPAREN lvalue RPAREN;
 
 variable ::= ID | ID variable_mid
 			 | variable DOT ID | LPAREN variable RPAREN;
