@@ -54,8 +54,7 @@ non terminal cond_stmt_mid, variable_mid;
 
 start with program;
 
-program ::= var_dcl program | func_extern program | struct_dec program
-			| var_dcl | func_extern | struct_dec;
+program ::= ???;
 
 func_extern ::= func_dcl | extern_dcl;
 
