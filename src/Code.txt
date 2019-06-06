@@ -1,0 +1,63 @@
+int main()
+{
+    int m, n;
+    int _Asdsfqwe11234a1234__1235weqweDcasd__A_SDASDA_SF_A_____ = -13146123612341234;
+    double dxddsadaf = 0X02a;
+    double dxddsadafqqww = 21654.1564888;
+    double dxddqweqwsadaf = 42E1;
+    double dxddsad123123asdqw = 2.313e-2;
+    double dxddsadaqweqwef = 123123.123123e+12312;
+
+    char s[] = "no-one is here  !@#$%^&*()_+/-*+ zxcvbnm,.//asdfghjkZXCVBNM<>?:LKJHGFDSAQWERTYUIOP{}| l;qwertyuiop[]]]]";
+
+    cin >> n >> m;
+
+    int p = 0;
+
+    if (n == m) {
+        cout << 0 << endl;
+        return 0;
+    }
+
+    int A = m / n;  // this is comment \n \t \r\n \r \f \b  " asdasdasd asd as d" \" \' \\ \\\"
+
+    // this is comment \n \t \r\n \r \f \b  " asdasdasd asd as d" \" \' \\ \\\"
+
+    printf(" \\ \n dadadasdga \t \r \" asdfaf \b \v \f \0 \' as ");
+    printf("");
+    //qw qe54 857cinaasd
+    printf(5651.5494968e1222132123);
+    printf("\'\\\'", 'a', '$', '>', '?', '|', '/', '\\', '(', '\'', '\n', '\t', '\r', '\"', '\b', '\v', '\f', '\0');
+
+    if (m % n == 0) {
+        while (A % 2 == 0) {
+            p++;
+            A /= 2;
+        }
+        while (A % 3 == 0) {
+            p++;
+            A /= 3;
+        }
+
+        if (A == 1) {
+            cout << p << endl;
+        } else {
+            cout << -1 << endl;
+        }
+    } else {
+        cout << -1 << endl;
+    }
+
+    /*
+
+        this is multi-line comment ads fasdginq[oeg 'mslk;vzc,.vc/
+        mx/cb/zxcb/l.\][l/\;[\'" asdasd asd asda"
+                        l]';[\]l;\][l;'=-0=0987654321!@#$%^&*(
+        )_}|{{|{":"?>< ?            :LK/"/b/v/n/
+        m//t/r//\n\t\r\/\\\\/\b         \
+        a\"\'
+        *&^*&^*%&^%&*$*&^*&^/asdasdasd/
+    */
+
+    return 0;
+}
