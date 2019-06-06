@@ -44,7 +44,7 @@ non terminal statement, assignment, method_call, cond_stmt;
 non terminal loop_stmt, parameters, binary_op, const_val;
 non terminal arithmatic, conditional, arguments_middle;
 non terminal struct_dec_middle, var_dcl_end, block_mid;
-non terminal cond_stmt_mid, variable_mid;
+non terminal cond_stmt_mid, variable_mid, lvalue;
 
 /* precedence part */
 
@@ -134,23 +134,24 @@ loop_stmt ::= FOR LPAREN SEMICOLON expr SEMICOLON RPAREN block
 			  | REPEAT block UNTIL LPAREN expr RPAREN SEMICOLON
 			  | FOREACH LPAREN ID IN ID RPAREN block;
 
-expr ::= expr binary_op expr
+expr ::= LPAREN expr binary_op expr RPAREN
 		 | LPAREN expr RPAREN
 		 | method_call
 		 | variable
-		 | const_val 
+		 | MINUS MINUS variable
+		 | ADD ADD variable
+		 | variable MINUS MINUS
+		 | variable ADD ADD
+		 | const_val
 		 | MINUS expr
 		 | BITNEG expr
 		 | SIZEOF LPAREN type RPAREN;
 
+//lvalue ::= ID | ID variable_mid | variable DOT ID | LPAREN lvalue RPAREN;
+
 variable ::= ID | ID variable_mid
-			 | variable DOT ID
-			 | BITNEG variable
-			 | MINUS MINUS variable
-			 | ADD ADD variable
-			 | variable MINUS MINUS
-			 | variable ADD ADD;
-			 
+			 | variable DOT ID | LPAREN variable RPAREN;
+
 variable_mid ::= LBRACK expr RBRACK | LBRACK expr RBRACK variable_mid;
 
 binary_op ::= arithmatic | conditional;
