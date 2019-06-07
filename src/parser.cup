@@ -34,7 +34,8 @@ terminal EQ, NOTEQ, LESSEQ, LESS, GR, GREQ, ASSIGN, NOT;
 terminal BITNEG, ARITHAND, LOGICAND, ARITHOR, XOR;
 terminal PROD, ADD, ADDASS, SUBASS, MULTASS, DIVASS;
 terminal DIV, MOD, MINUS, LOGICOR, UMINUS, UPLUS;
-terminal INC, DEC;
+terminal POSTINC, POSTDEC, PREINC, PREDEC, INC, DEC;
+terminal FPAREN, REFERENCE, ARRELEMENT;
 
 // non-terminal part
 non terminal program, var_dcl, func_extern, struct_dec;
@@ -45,11 +46,11 @@ non terminal statement, assignment, method_call, cond_stmt;
 non terminal loop_stmt, parameters, binary_op, const_val;
 non terminal arithmatic, conditional, arguments_middle;
 non terminal struct_dec_middle, var_dcl_end, block_mid;
-non terminal cond_stmt_mid, variable_mid, lvalue;
+non terminal cond_stmt_mid, variable_mid;
 
 /* precedence part */
 
-precedence nonassoc COMMA;
+precedence left COMMA;
 precedence right ASSIGN, ADDASS, SUBASS, MULTASS, DIVASS;
 precedence left LOGICOR;
 precedence left LOGICAND;
@@ -60,7 +61,9 @@ precedence left EQ, NOTEQ;
 precedence left LESS, LESSEQ, GR, GREQ;
 precedence left ADD, MINUS;
 precedence left PROD, DIV, MOD;
-precedence right NOT, BITNEG, UMINUS, UPLUS, INC, DEC;
+precedence right NOT, BITNEG, UMINUS, UPLUS, PREINC, PREDEC, SIZEOF;
+precedence left POSTINC, POSTDEC, FPAREN, REFERENCE, ARRELEMENT;
+precedence nonassoc LPAREN, RPAREN;
 
 /* grammar part */
 
@@ -124,8 +127,8 @@ assignment ::= variable ASSIGN expr
 			   | variable MULTASS expr
 			   | variable DIVASS expr;
 
-method_call ::= ID LPAREN parameters RPAREN
-				| ID LPAREN RPAREN;
+method_call ::= ID LPAREN parameters RPAREN %prec FPAREN
+				| ID LPAREN RPAREN %prec FPAREN;
 
 parameters ::= expr | expr COMMA parameters;
 
@@ -150,20 +153,21 @@ expr ::= expr binary_op expr
 		 | LPAREN expr RPAREN
 		 | method_call
 		 | variable
-		 | DEC variable
-		 | INC variable
-		 | variable DEC
-		 | variable INC
+		 | DEC variable %prec PREDEC
+		 | INC variable %prec PREINC
+		 | variable DEC %prec POSTDEC
+		 | variable INC %prec POSTINC
 		 | const_val
-		 | UMINUS expr
-		 | UPLUS expr
 		 | BITNEG expr
-		 | SIZEOF LPAREN type RPAREN;
+		 | SIZEOF LPAREN type RPAREN %prec SIZEOF
+		 | ADD expr %prec UPLUS
+		 | MINUS expr %prec UMINUS;
 
 variable ::= ID | ID variable_mid
-			 | variable DOT ID | LPAREN variable RPAREN;
+			 | variable DOT ID %prec REFERENCE | LPAREN variable RPAREN;
 
-variable_mid ::= LBRACK expr RBRACK | LBRACK expr RBRACK variable_mid;
+variable_mid ::= LBRACK expr RBRACK %prec ARRELEMENT
+				 | LBRACK expr RBRACK variable_mid %prec ARRELEMENT;
 
 binary_op ::= arithmatic | conditional;
 

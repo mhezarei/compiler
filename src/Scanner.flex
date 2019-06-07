@@ -139,6 +139,8 @@ WhiteSpace = {EOL} | [ \t\f]
 	"+"					 { return symbol(sym.ADD); }
 	"+="				 { return symbol(sym.ADDASS); }
 	"-"					 { return symbol(sym.MINUS); }
+	"++"				 { return symbol(sym.INC); }
+	"--"				 { return symbol(sym.DEC); }
 	"-="				 { return symbol(sym.SUBASS); }
 	"*="				 { return symbol(sym.MULTASS); }
 	"/="				 { return symbol(sym.DIVASS); }
