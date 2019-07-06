@@ -110,9 +110,22 @@ start with program;
 identifier ::= ID:i
     {: RESULT = new IdentifierNode(i); :};
 
+const_val ::= INTCONST:i
+    {: RESULT = new IntegerLiteralNode(i); :}
+        |     REALCONST:r
+    {: RESULT = new FloatLiteralNode(r); :}
+        |     CHARCONST:c
+    {: RESULT = new CharLiteralNode(c); :}
+        |     BOOLCONST:b
+    {: RESULT = new BooleanLiteralNode(b); :}
+	    |     STRINGCONST:s
+	{: RESULT = new StringLiteralNode(s); :}
+	    |     LONGCONST:l
+	{: RESULT = new LongLiteralNode(l); :};
 
 
-//base grammer
+
+//base grammar
 program ::= var_dcl program | func_extern program | struct_dec program
 			| var_dcl | func_extern | struct_dec;
 
@@ -221,5 +234,4 @@ arithmatic ::= ADD | MINUS | PROD | DIV | MOD | ARITHAND
 conditional ::= EQ | NOTEQ | GREQ | LESSEQ | GR | LESS
 			    | LOGICAND | LOGICOR | NOT;
 
-const_val ::= INTCONST | REALCONST | CHARCONST | BOOLCONST
-			  | STRINGCONST | LONGCONST;
+
