@@ -96,6 +96,8 @@ WhiteSpace = {EOL} | [ \t\f]
     "string"			 { return symbol(sym.STRING); }
     "true"				 { return symbol(sym.BOOLCONST); }
     "end"				 { return symbol(sym.END); }
+    "null"               { return symbol(sym.NULL); }
+    "NULL"               { return symbol(sym.NULL); }
 
     "=="				 { return symbol(sym.EQ); }
     "!="				 { return symbol(sym.NOTEQ); }

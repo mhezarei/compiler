@@ -35,7 +35,7 @@ terminal CONST, CONTINUE, DEFAULT, DOUBLE, ELSE, END;
 terminal FLOAT, FOR, IF, INT, LONG, RETURN, RECORD;
 terminal SIZEOF, STRING, SWITCH, OF;
 terminal FOREACH, UNTIL, IN, REPEAT;
-terminal AUTO, VOID;
+terminal AUTO, VOID, NULL;
 
 //literals
 terminal Integer INTCONST;
@@ -121,8 +121,9 @@ const_val ::= INTCONST:i
 	    |     STRINGCONST:s
 	{: RESULT = new StringLiteralNode(s); :}
 	    |     LONGCONST:l
-	{: RESULT = new LongLiteralNode(l); :};
-
+	{: RESULT = new LongLiteralNode(l); :}
+	    |     NULL
+	{: RESULT = new BaseASTNode(NodeType.NULL_LITERAL); :};
 
 
 //base grammar
