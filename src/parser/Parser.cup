@@ -1,9 +1,21 @@
-import java_cup.runtime.*;
+package parser;
 
-/* terminal and non-terminal part */
+import java_cup.runtime.*;
+import ast.*;
+
+parser code {:
+    protected Program root;
+
+    void setRoot(Program p) { this.root = p; }
+
+    public Program getRoot() { return this.root; }
+:};
+
+
+/* terminal and nonterminal part */
 
 // some shit that I don't know
-terminal ID;
+terminal String ID;
 
 // symbols
 terminal LCURLY, RCURLY, LBRACK, RBRACK, LPAREN, RPAREN;
@@ -25,9 +37,13 @@ terminal SIZEOF, STRING, SWITCH, OF;
 terminal FOREACH, UNTIL, IN, REPEAT;
 terminal AUTO, VOID;
 
-// numbers
-terminal INTCONST, REALCONST, CHARCONST, BOOLCONST;
-terminal STRINGCONST, LONGCONST;
+//literals
+terminal Integer INTCONST;
+terminal Double REALCONST;
+terminal Charecter CHARCONST;
+terminal Boolean BOOLCONST;
+terminal String STRINGCONST;
+terminal Long LONGCONST;
 
 // arithmatic
 terminal EQ, NOTEQ, LESSEQ, LESS, GR, GREQ, ASSIGN, NOT;
@@ -37,19 +53,41 @@ terminal DIV, MOD, MINUS, LOGICOR, UMINUS, UPLUS;
 terminal POSTINC, POSTDEC, PREINC, PREDEC, INC, DEC;
 terminal FPAREN, REFERENCE, ARRELEMENT;
 
-// non-terminal part
-non terminal program, var_dcl, func_extern, struct_dec;
-non terminal func_dcl, extern_dcl;
-non terminal type, arguments, block;
-non terminal var_dcl_cnt, variable, expr;
-non terminal statement, assignment, method_call, cond_stmt;
-non terminal loop_stmt, parameters, binary_op, const_val;
-non terminal arithmatic, conditional, arguments_middle;
-non terminal struct_dec_middle, var_dcl_end, block_mid;
-non terminal cond_stmt_mid, variable_mid;
+// nonterminal part
+nonterminal ASTNode program;
+nonterminal ASTNode var_dcl;
+nonterminal ASTNode func_extern;
+nonterminal ASTNode struct_dec;
+nonterminal ASTNode func_dcl;
+nonterminal ASTNode extern_dcl;
+nonterminal ASTNode type;
+nonterminal ASTNode arguments;
+nonterminal ASTNode block;
+nonterminal ASTNode var_dcl_cnt;
+nonterminal ASTNode variable;
+nonterminal ASTNode expr;
+nonterminal ASTNode statement;
+nonterminal ASTNode assignment;
+nonterminal ASTNode method_call;
+nonterminal ASTNode cond_stmt;
+nonterminal ASTNode loop_stmt;
+nonterminal ASTNode parameters;
+nonterminal ASTNode binary_op;
+nonterminal ASTNode const_val;
+nonterminal ASTNode arithmatic;
+nonterminal ASTNode conditional;
+nonterminal ASTNode arguments_middle;
+nonterminal ASTNode struct_dec_middle;
+nonterminal ASTNode var_dcl_end;
+nonterminal ASTNode block_mid;
+nonterminal ASTNode cond_stmt_mid;
+nonterminal ASTNode variable_mid;
+
+nonterminal ASTNode identifier;
+nonterminal ASTNode literal;
+
 
 /* precedence part */
-
 precedence left COMMA;
 precedence right ASSIGN, ADDASS, SUBASS, MULTASS, DIVASS;
 precedence left LOGICOR;
@@ -66,33 +104,39 @@ precedence left POSTINC, POSTDEC, FPAREN, REFERENCE, ARRELEMENT;
 precedence nonassoc LPAREN, RPAREN;
 
 /* grammar part */
-
 start with program;
 
+//added for code gen
+identifier ::= ID:i
+    {: RESULT = new IdentifierNode(i); :};
+
+
+
+//base grammer
 program ::= var_dcl program | func_extern program | struct_dec program
 			| var_dcl | func_extern | struct_dec;
 
 func_extern ::= func_dcl | extern_dcl;
 
-func_dcl ::= FUNCTION type ID LPAREN arguments RPAREN SEMICOLON
-			 | FUNCTION type ID LPAREN RPAREN SEMICOLON
-			 | FUNCTION type ID LPAREN arguments RPAREN block
-			 | FUNCTION type ID LPAREN RPAREN block;
+func_dcl ::= FUNCTION type identifier LPAREN arguments RPAREN SEMICOLON
+			 | FUNCTION type identifier LPAREN RPAREN SEMICOLON
+			 | FUNCTION type identifier LPAREN arguments RPAREN block
+			 | FUNCTION type identifier LPAREN RPAREN block;
 
-extern_dcl ::= EXTERN type ID;
+extern_dcl ::= EXTERN type identifier;
 
-arguments ::= type ID
-			  | type ID arguments_middle
-			  | type ID COMMA arguments
-			  | type ID arguments_middle COMMA arguments;
+arguments ::= type identifier
+			  | type identifier arguments_middle
+			  | type identifier COMMA arguments
+			  | type identifier arguments_middle COMMA arguments;
 
 arguments_middle ::= LBRACK RBRACK
 					 | LBRACK RBRACK arguments_middle;
 
 type ::= INT | BOOL | FLOAT | LONG | CHAR | DOUBLE
-		 | ID | STRING | VOID | AUTO;
+		 | identifier | STRING | VOID | AUTO;
 
-struct_dec ::= RECORD ID BEGIN struct_dec_middle END RECORD;
+struct_dec ::= RECORD identifier BEGIN struct_dec_middle END RECORD;
 
 struct_dec_middle ::= var_dcl | var_dcl struct_dec_middle;
 
@@ -127,15 +171,15 @@ assignment ::= variable ASSIGN expr
 			   | variable MULTASS expr
 			   | variable DIVASS expr;
 
-method_call ::= ID LPAREN parameters RPAREN %prec FPAREN
-				| ID LPAREN RPAREN %prec FPAREN;
+method_call ::= identifier LPAREN parameters RPAREN %prec FPAREN
+				| identifier LPAREN RPAREN %prec FPAREN;
 
 parameters ::= expr | expr COMMA parameters;
 
 cond_stmt ::= IF LPAREN expr RPAREN block
 			  | IF LPAREN expr RPAREN block ELSE block
-			  | SWITCH LPAREN ID RPAREN OF COLON BEGIN DEFAULT COLON block END
-			  | SWITCH LPAREN ID RPAREN OF COLON BEGIN cond_stmt_mid DEFAULT COLON block END;
+			  | SWITCH LPAREN identifier RPAREN OF COLON BEGIN DEFAULT COLON block END
+			  | SWITCH LPAREN identifier RPAREN OF COLON BEGIN cond_stmt_mid DEFAULT COLON block END;
 
 cond_stmt_mid ::= CASE INTCONST COLON block
 				  | CASE INTCONST COLON block cond_stmt_mid;
@@ -147,7 +191,7 @@ loop_stmt ::= FOR LPAREN SEMICOLON expr SEMICOLON RPAREN block
 			  | FOR LPAREN SEMICOLON expr SEMICOLON assignment RPAREN block
 			  | FOR LPAREN SEMICOLON expr SEMICOLON expr RPAREN block
 			  | REPEAT block UNTIL LPAREN expr RPAREN SEMICOLON
-			  | FOREACH LPAREN ID IN ID RPAREN block;
+			  | FOREACH LPAREN identifier IN identifier RPAREN block;
 
 expr ::= expr binary_op expr
 		 | LPAREN expr RPAREN
@@ -163,8 +207,8 @@ expr ::= expr binary_op expr
 		 | ADD expr %prec UPLUS
 		 | MINUS expr %prec UMINUS;
 
-variable ::= ID | ID variable_mid
-			 | variable DOT ID %prec REFERENCE | LPAREN variable RPAREN;
+variable ::= identifier | identifier variable_mid
+			 | variable DOT identifier %prec REFERENCE | LPAREN variable RPAREN;
 
 variable_mid ::= LBRACK expr RBRACK %prec ARRELEMENT
 				 | LBRACK expr RBRACK variable_mid %prec ARRELEMENT;

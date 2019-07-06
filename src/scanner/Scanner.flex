@@ -1,14 +1,13 @@
-/*
-Here you can do your imports and codes that need to be added out side of your Scanner Class
-*/
+package scanner;
 
 import java_cup.runtime.*;
+import parser.sym;
 
-%% // END OF USER CODE
+%%
 
 %class Lexer
 %unicode
-%cup
+%type Symbol
 %char
 %line
 %column
@@ -25,29 +24,6 @@ import java_cup.runtime.*;
     private Symbol symbol(int type, Object value) {
     	return new Symbol(type, yyline, yycolumn, value);
     }
-
-//    this is the advanced version from the CUP website
-//    public Lexer(java.io.Reader in, ComplexSymbolFactory sf) {
-//        this(in);
-//        symbolFactory = sf;
-//    }
-//
-//    ComplexSymbolFactory symbolFactory;
-//
-//    private Symbol symbol(String name, int sym) {
-//        return symbolFactory.newSymbol(name, sym, new Location(yyline+1,yycolumn+1,yychar), new Location(yyline+1,yycolumn+yylength(),yychar+yylength()));
-//    }
-//
-//    private Symbol symbol(String name, int sym, Object val) {
-//        Location left = new Location(yyline+1,yycolumn+1,yychar);
-//        Location right= new Location(yyline+1,yycolumn+yylength(), yychar+yylength());
-//        return symbolFactory.newSymbol(name, sym, left, right,val);
-//    }
-//    private Symbol symbol(String name, int sym, Object val,int buflength) {
-//        Location left = new Location(yyline+1,yycolumn+yylength()-buflength,yychar+yylength()-buflength);
-//        Location right= new Location(yyline+1,yycolumn+yylength(), yychar+yylength());
-//        return symbolFactory.newSymbol(name, sym, left, right,val);
-//   }
 %}
 
 %function scanFunction
@@ -85,33 +61,33 @@ WhiteSpace = {EOL} | [ \t\f]
     "auto"               { return symbol(sym.AUTO); }
     "double"             { return symbol(sym.DOUBLE); }
     "int"                { return symbol(sym.INT); }
-    //"struct"             { return symbol(sym.STRUCT); }
+    //"struct"             { return symbol(parser.sym.STRUCT); }
     "float"              { return symbol(sym.FLOAT); }
-    //"short"              { return symbol(sym.SHORT); }
-    //"unsigned"           { return symbol(sym.BOOL); }
+    //"short"              { return symbol(parser.sym.SHORT); }
+    //"unsigned"           { return symbol(parser.sym.BOOL); }
     "else"               { return symbol(sym.ELSE); }
     "long"               { return symbol(sym.LONG); }
     "switch"             { return symbol(sym.SWITCH); }
     "continue"           { return symbol(sym.CONTINUE); }
     "for"                { return symbol(sym.FOR); }
-    //"signed"             { return symbol(sym.BOOL); }
+    //"signed"             { return symbol(parser.sym.BOOL); }
     "void"               { return symbol(sym.VOID); }
     "case"               { return symbol(sym.CASE); }
-    //"enum"               { return symbol(sym.BOOL); }
-    //"register"           { return symbol(sym.BOOL); }
-    //"typedef"            { return symbol(sym.BOOL); }
+    //"enum"               { return symbol(parser.sym.BOOL); }
+    //"register"           { return symbol(parser.sym.BOOL); }
+    //"typedef"            { return symbol(parser.sym.BOOL); }
     "default"            { return symbol(sym.DEFAULT); }
-    //"goto"               { return symbol(sym.BOOL); }
+    //"goto"               { return symbol(parser.sym.BOOL); }
     "sizeof"             { return symbol(sym.SIZEOF); }
-    //"volatile"           { return symbol(sym.BOOL); }
+    //"volatile"           { return symbol(parser.sym.BOOL); }
     "char"               { return symbol(sym.CHAR); }
     "extern"             { return symbol(sym.EXTERN); }
     "return"             { return symbol(sym.RETURN); }
-    //"union"              { return symbol(sym.BOOL); }
-    //"do"                 { return symbol(sym.BOOL); }
+    //"union"              { return symbol(parser.sym.BOOL); }
+    //"do"                 { return symbol(parser.sym.BOOL); }
     "if"                 { return symbol(sym.IF); }
-    //"static"             { return symbol(sym.STATIC); }
-    //"while"              { return symbol(sym.WHILE); }
+    //"static"             { return symbol(parser.sym.STATIC); }
+    //"while"              { return symbol(parser.sym.WHILE); }
     // NEW SHIT
     "begin"				 { return symbol(sym.BEGIN); }
     "false"				 { return symbol(sym.BOOLCONST); }
@@ -165,7 +141,7 @@ WhiteSpace = {EOL} | [ \t\f]
 
     // Hexadecimal
     // HEX IS REMOVED
-    //{Hex} { return symbol(sym.REALCONST, new Double(yytext())); }
+    //{Hex} { return symbol(parser.sym.REALCONST, new Double(yytext())); }
 
     // Float
     {Float} { return symbol(sym.REALCONST, new Double(yytext())); }
@@ -186,21 +162,6 @@ WhiteSpace = {EOL} | [ \t\f]
 }
 
 <YYINITIAL> {
-
-    // Special Characters
-    // FOR NOW LET IT BE BUT LATER DO SOMETHING ABOUT IT
-//    \\\' { return new Element("\\\'", Type.SpecialChar); }
-//    \\t { return new Element("\\t", Type.SpecialChar); }
-//    \\n { return new Element("\\n", Type.SpecialChar); }
-//    \\r { return new Element("\\r", Type.SpecialChar); }
-//    \\\" { return new Element("\\\"", Type.SpecialChar); }
-//    \\\\ { return new Element("\\\\", Type.SpecialChar); }
-//    \\b { return new Element("\\b", Type.SpecialChar); }
-//    \\v { return new Element("\\v", Type.SpecialChar); }
-//    \\f { return new Element("\\f", Type.SpecialChar); }
-////    \\? { return new Element("\\?", Type.SpecialChar); }
-//    \\0 { return new Element("\\0", Type.SpecialChar); }
-
     <<EOF>> { return symbol(sym.EOF); }
 }
 
