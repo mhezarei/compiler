@@ -16,7 +16,7 @@ public class Compiler {
 
     public static void main(String[] args) throws Exception {
         if (args.length < 1) {
-            System.err.println("Please enter file name");
+            System.err.println("enter file-name");
             System.exit(-1);
         }
 
