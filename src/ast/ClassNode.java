@@ -3,7 +3,8 @@ package ast;
 import java.util.HashMap;
 
 public class ClassNode extends BaseASTNode {
-    private HashMap<String, String> methodMap = new HashMap<String, String>();
+    //name of method -> signature
+    private HashMap<String, String> methodMap = new HashMap<>();
 
     public ClassNode() {
         super(NodeType.CLASS);

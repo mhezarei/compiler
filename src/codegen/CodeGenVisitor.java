@@ -166,8 +166,6 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     /**
      * Output the code to push this node's resulting value onto the stack
-     *
-     * @throws Exception
      */
     private int getVarIndexFromIDNode(ASTNode idNode) {
         return ((IdentifierNode) idNode).getSymbolInfo().getLocalVarIndex();
@@ -186,15 +184,46 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitAdditionNode(ASTNode node) throws Exception {
+        //todo "add" code
         visitAllChildren(node);
         stream.println("  iadd");
 
     }
 
-    //Assigns thing at top of stack,
-    //OR if it's a literal, pushes the literal then assigns that val
-    //OR if it's an ID loads the ID's value and assigns
+    private void visitSubtractionNode(ASTNode node) throws Exception {
+        //todo "sub" code
+        visitAllChildren(node);
+        stream.println("  isub");
+    }
+
+    private void visitDivisionNode(ASTNode node) throws Exception {
+        //todo "div" code
+        visitAllChildren(node);
+        stream.println("  idiv");
+    }
+
+    private void visitMultiplicationNode(ASTNode node) throws Exception {
+        // todo "mult" code
+        visitAllChildren(node);
+        stream.println("  imul");
+    }
+
+    private void visitUnaryMinusNode(ASTNode node) throws Exception {
+        //todo "umines" code
+        visitAllChildren(node);
+        stream.println("  ineg");
+    }
+
+    private void visitUnaryPlusNode(ASTNode node) throws Exception {
+        visitAllChildren(node);
+    }
+
+    /*Assigns thing at top of stack,
+      OR if it's a literal, pushes the literal then assigns that val
+      OR if it's an ID loads the ID's value and assigns*/
     private void visitAssignNode(ASTNode node) throws Exception {
+        //todo need to understand
+        //todo "assign" code
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
         SymbolInfo si = idNode.getSymbolInfo();
         int lvIndex = si.getLocalVarIndex();
@@ -210,27 +239,19 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitBooleanAndNode(ASTNode node) throws Exception {
-        // TODO
-    }
-
-    private void visitBooleanLiteralNode(ASTNode node) {
-        BooleanLiteralNode boolNode = (BooleanLiteralNode) node;
-        if (boolNode.getValue()) {
-            stream.println("  iconst_1");
-        } else {
-            stream.println("  iconst_0");
-        }
+        // TODO "boolAnd" code
     }
 
     private void visitBooleanNotNode(ASTNode node) throws Exception {
-        // todo
+        // todo "boolNot" code
     }
 
     private void visitBooleanOrNode(ASTNode node) throws Exception {
-        // todo
+        // todo "boolOr" code
     }
 
     private void visitClassNode(ASTNode node) throws Exception {
+        //todo "class" code
         classNode = (ClassNode) node;
 
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
@@ -250,24 +271,32 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     }
 
-    private void visitDivisionNode(ASTNode node) throws Exception {
-        visitAllChildren(node);
-        stream.println("  idiv");
-    }
-
     private void visitEqualNode(ASTNode node) throws Exception {
-        // todo
+        // todo "EQ" code
     }
 
     private void visitGreaterThanNode(ASTNode node) throws Exception {
-        // todo
+        // todo "GT" code
     }
 
     private void visitGreaterThanOrEqualNode(ASTNode node) throws Exception {
-        // todo
+        // todo "GE" code
+    }
+
+    private void visitNotEqualNode(ASTNode node) throws Exception {
+        // todo "NE" code
+    }
+
+    private void visitLessThanNode(ASTNode node) throws Exception {
+        // todo "LT" code
+    }
+
+    private void visitLessThanOrEqualNode(ASTNode node) throws Exception {
+        // todo "LE" code
     }
 
     private void visitIfStatementNode(ASTNode node) throws Exception {
+        //todo "if" code
         stream.println("; if statement");
         node.getChild(0).accept(this); //predicate
         stream.println("  iconst_0");
@@ -287,20 +316,28 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     }
 
+    private void visitWhileStatementNode(ASTNode node) throws Exception {
+        // todo "while" code
+    }
+
     private void visitIntegerLiteralNode(ASTNode node) {
+        //todo "Integer literal" code
         int val = getValueFromIntNode(node);
         stream.println("  ldc " + val);
     }
 
-    private void visitLessThanNode(ASTNode node) throws Exception {
-        // todo
-    }
-
-    private void visitLessThanOrEqualNode(ASTNode node) throws Exception {
-        // todo
+    private void visitBooleanLiteralNode(ASTNode node) {
+        //todo "boolean literal" code
+        BooleanLiteralNode boolNode = (BooleanLiteralNode) node;
+        if (boolNode.getValue()) {
+            stream.println("  iconst_1");
+        } else {
+            stream.println("  iconst_0");
+        }
     }
 
     private void visitMethodAccessNode(ASTNode node) throws Exception {
+        //todo need to understand
         node.getChild(1).accept(this);
 
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
@@ -311,6 +348,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitMethodDeclarationNode(ASTNode node) throws Exception {
+        //todo "method dec" code
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
         String methodName = idNode.getValue();
 
@@ -339,16 +377,8 @@ public class CodeGenVisitor implements SimpleVisitor {
         stream.println(".end method");
     }
 
-    private void visitMultiplicationNode(ASTNode node) throws Exception {
-        visitAllChildren(node);
-        stream.println("  imul");
-    }
-
-    private void visitNotEqualNode(ASTNode node) throws Exception {
-        // todo
-    }
-
     private void visitParameterNode(ASTNode node) throws Exception {
+        // todo "parameters" code
         TypeNode typeNode = (TypeNode) node.getChild(1);
         String typeSig = typeNode.getType().getSignature();
         stream.print(typeSig);
@@ -356,6 +386,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitReturnStatementNode(ASTNode node) throws Exception {
+        // todo "return" code
         visitAllChildren(node);
 
         returnGenerated = true;
@@ -366,21 +397,8 @@ public class CodeGenVisitor implements SimpleVisitor {
         }
     }
 
-    private void visitSubtractionNode(ASTNode node) throws Exception {
-        visitAllChildren(node);
-        stream.println("  isub");
-    }
-
-    private void visitUnaryMinusNode(ASTNode node) throws Exception {
-        visitAllChildren(node);
-        stream.println("  ineg");
-    }
-
-    private void visitUnaryPlusNode(ASTNode node) throws Exception {
-        visitAllChildren(node);
-    }
-
     private void visitVarUse(ASTNode node) {
+        //todo need to understand
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
         SymbolInfo si = idNode.getSymbolInfo();
         int lvIndex = si.getLocalVarIndex();
@@ -388,15 +406,12 @@ public class CodeGenVisitor implements SimpleVisitor {
         returnGenerated = false;
     }
 
-    private void visitWhileStatementNode(ASTNode node) throws Exception {
-        // todo
-    }
-
     private String generateLabel() {
         return "label" + (++labelIndex);
     }
 
     private void outputDefaultConstructor() {
+        //todo need to understand
         stream.println("");
         stream.println(";");
         stream.println("; standard constructor");
@@ -410,6 +425,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void outputMainMethod() {
+        //todo "main" code
         stream.println("");
         stream.println(";");
         stream.println("; main method");
@@ -422,6 +438,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void outputPrintlnMethod() {
+        //todo "println" code
         stream.println("");
         stream.println(";");
         stream.println("; println method");

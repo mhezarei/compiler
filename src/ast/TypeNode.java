@@ -1,5 +1,6 @@
 package ast;
 
+//todo need to understand
 public class TypeNode extends BaseASTNode {
     private PrimitiveType type;
 

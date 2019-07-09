@@ -3,6 +3,9 @@ package semantic;
 import ast.ASTNode;
 import ast.PrimitiveType;
 
+/**
+ * todo need to understand
+ */
 public class SymbolInfo {
     private ASTNode node;
     private PrimitiveType type;

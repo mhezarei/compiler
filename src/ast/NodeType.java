@@ -1,5 +1,8 @@
 package ast;
 
+/**
+ * An enum to declare type of an AST node
+ */
 public enum NodeType {
     ADDITION,
     ARGUMENTS,

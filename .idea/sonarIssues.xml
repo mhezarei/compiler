@@ -68,12 +68,37 @@
             <set />
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/src/ast/BooleanLiteralNode.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/ast/ClassNode.java">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/src/ast/LongLiteralNode.java">
           <value>
             <set />
           </value>
         </entry>
         <entry key="$PROJECT_DIR$/src/ast/NodeType.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/ast/PrimitiveType.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/ast/Program.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/ast/TypeNode.java">
           <value>
             <set />
           </value>
@@ -124,6 +149,11 @@
           </value>
         </entry>
         <entry key="$PROJECT_DIR$/src/scanner/Scanner.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/semantic/SemanticException.java">
           <value>
             <set />
           </value>

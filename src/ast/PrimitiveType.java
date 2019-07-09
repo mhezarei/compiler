@@ -1,5 +1,8 @@
 package ast;
 
+/**
+ * todo need to understand
+ */
 public enum PrimitiveType {
     BOOLEAN ("Z"),
     CHAR ("C"),

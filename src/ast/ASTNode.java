@@ -6,7 +6,7 @@ import codegen.SimpleVisitor;
 import java.util.List;
 
 /**
- * The AST Node interface.
+ * The Abstract syn Node interface.
  */
 public interface ASTNode {
 

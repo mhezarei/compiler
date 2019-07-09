@@ -7,6 +7,9 @@ import codegen.SimpleVisitor;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Base node type of AST
+ */
 public class BaseASTNode implements ASTNode {
     private ArrayList<ASTNode> children = new ArrayList<>();
     private ASTNode parent;
