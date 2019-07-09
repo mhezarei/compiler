@@ -2,7 +2,7 @@ package semantic;
 
 
 import ast.*;
-import visitor.SimpleVisitor;
+import codegen.SimpleVisitor;
 
 /**
  * A visitor which attaches SymbolInfo to Identfier nodes and method signatures

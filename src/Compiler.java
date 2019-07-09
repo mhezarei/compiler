@@ -1,15 +1,12 @@
-
 import ast.Program;
 import codegen.CodeGenVisitor;
 import codegen.LocalVarMapVisitor;
 import parser.Parser;
 import scanner.Scanner;
 import semantic.TypeVisitor;
-import visitor.PrinterVisitor;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 
 public class Compiler {
@@ -32,30 +29,23 @@ public class Compiler {
     }
 
     private void run() throws Exception {
-        processFile(new File(source));
+        processFile();
     }
 
-    private void processFile(File sourceFile) throws Exception {
-        Program cu = parse(sourceFile);
+    private void processFile() throws Exception {
+        Program cu = parse();
         performSemanticAnalysis(cu);
         performLocalVarMapping(cu);
         generateCode(cu);
     }
 
-    private Program parse(File sourceFile) throws Exception {
-        FileInputStream istream = new FileInputStream(source);
-        DataInputStream distream = new DataInputStream(new BufferedInputStream(istream));
+    private Program parse() throws Exception {
+        FileInputStream inStream = new FileInputStream(source);
+        DataInputStream distress = new DataInputStream(new BufferedInputStream(inStream));
 
-        Parser parser = new Parser(new Scanner(distream));
+        Parser parser = new Parser(new Scanner(distress));
         parser.parse();
         return parser.getRoot();
-    }
-
-    /**
-     * Debugging pass: print the ASTs.
-     */
-    private void printAST(Program cu) {
-        cu.accept(new PrinterVisitor(System.out));
     }
 
     private void performSemanticAnalysis(Program cu) throws Exception {

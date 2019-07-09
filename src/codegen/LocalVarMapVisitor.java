@@ -3,7 +3,6 @@ package codegen;
 import ast.ASTNode;
 import ast.IdentifierNode;
 import semantic.SymbolInfo;
-import visitor.SimpleVisitor;
 
 /**
  * A visitor which sets the local var table index for local variables and method

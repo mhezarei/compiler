@@ -2,17 +2,16 @@ package ast;
 
 
 import semantic.SymbolInfo;
-import visitor.ASTVisitor;
-import visitor.SimpleVisitor;
+import codegen.SimpleVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BaseASTNode implements ASTNode {
-    protected ArrayList<ASTNode> children = new ArrayList<>();
-    protected ASTNode parent;
-    protected NodeType nodeType;
-    protected SymbolInfo symbolInfo;
+    private ArrayList<ASTNode> children = new ArrayList<>();
+    private ASTNode parent;
+    private NodeType nodeType;
+    SymbolInfo symbolInfo;
     
     public BaseASTNode(NodeType nodeType) {
         this.nodeType = nodeType;
@@ -44,17 +43,6 @@ public class BaseASTNode implements ASTNode {
     @Override
     public void accept(SimpleVisitor visitor) throws Exception {
         visitor.visit(this);
-    }
-
-    @Override
-    public void accept(ASTVisitor visitor) {
-        visitor.previsit(this);
-        
-        for (ASTNode child : children) {
-            child.accept(visitor);
-        }
-        
-        visitor.postvisit(this);
     }
 
     @Override

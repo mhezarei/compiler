@@ -1,8 +1,7 @@
 package ast;
 
 import semantic.SymbolInfo;
-import visitor.ASTVisitor;
-import visitor.SimpleVisitor;
+import codegen.SimpleVisitor;
 
 import java.util.List;
 
@@ -30,11 +29,6 @@ public interface ASTNode {
      * Accepts a simple visitor.
      */
     void accept(SimpleVisitor visitor) throws Exception;
-
-    /**
-     * Accepts visitors (the Visitor pattern).
-     */
-    void accept(ASTVisitor visitor);
 
     /**
      * Adds a node to the end of the list of children.

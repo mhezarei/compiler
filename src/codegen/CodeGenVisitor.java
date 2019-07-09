@@ -3,10 +3,8 @@ package codegen;
 
 import ast.*;
 import semantic.SymbolInfo;
-import visitor.SimpleVisitor;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

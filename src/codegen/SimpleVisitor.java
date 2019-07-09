@@ -2,7 +2,7 @@
  * CSE 431S Programming Assignment 3
  */
 
-package visitor;
+package codegen;
 
 
 import ast.ASTNode;
