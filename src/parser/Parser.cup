@@ -40,7 +40,7 @@ terminal AUTO, VOID, NULL;
 //literals
 terminal Integer INTCONST;
 terminal Double REALCONST;
-terminal Charecter CHARCONST;
+terminal Character CHARCONST;
 terminal Boolean BOOLCONST;
 terminal String STRINGCONST;
 terminal Long LONGCONST;
