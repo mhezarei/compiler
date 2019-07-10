@@ -13,12 +13,32 @@
             <set />
           </value>
         </entry>
+        <entry key="/fragment.java">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="$USER_HOME$/Desktop/Workshop/code-generation/src/cse431/lab5/parser/Parser.cup">
           <value>
             <set />
           </value>
         </entry>
         <entry key="$PROJECT_DIR$/../MatrixSegment/src/MatrixTree.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../code-generation/src/CompilerTest/compilerTest.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../code-generation/src/cse431/lab5/Compiler.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/Code.txt">
           <value>
             <set />
           </value>

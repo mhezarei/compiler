@@ -10,16 +10,11 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 
 public class Compiler {
-
     public static void main(String[] args) throws Exception {
-        if (args.length < 1) {
-            System.err.println("enter file-name");
-            System.exit(-1);
-        }
+        String source="src/Code.txt";
 
-        Compiler compiler = new Compiler(args[0]);
+        Compiler compiler = new Compiler(source);
         compiler.run();
-
     }
 
     private String source;

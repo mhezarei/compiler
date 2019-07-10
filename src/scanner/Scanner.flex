@@ -55,7 +55,7 @@ WhiteSpace = {EOL} | [ \t\f]
 <YYINITIAL> {
 
     // Reserved keywords
-    "bool"            { return symbol(sym.BOOL); }
+    "bool"               { return symbol(sym.BOOL); }
     "const"              { return symbol(sym.CONST); }
     "break"              { return symbol(sym.BREAK); }
     "auto"               { return symbol(sym.AUTO); }

@@ -1,7 +1,7 @@
-int main()
-{
+function int main()
+begin
     int m, n;
-    int _Asdsfqwe11234a1234__1235weqweDcasd__A_SDASDA_SF_A_____ = -13146123612341234;
+    int Asdsfqwe11234a1234__1235weqweDcasd__A_SDASDA_SF_A_____ = -13146123612341234;
     double dxddsadaf = 0X02a;
     double dxddsadafqqww = 21654.1564888;
     double dxddqweqwsadaf = 42E1;
@@ -14,14 +14,14 @@ int main()
 
     int p = 0;
 
-    if (n == m) {
+    if (n == m) begin
         cout << 0 << endl;
         return 0;
-    }
+    end
 
     int A = m / n;  // this is comment \n \t \r\n \r \f \b  " asdasdasd asd as d" \" \' \\ \\\"
 
-    // this is comment \n \t \r\n \r \f \b  " asdasdasd asd as d" \" \' \\ \\\"
+    ## this is comment \n \t \r\n \r \f \b  " asdasdasd asd as d" \" \' \\ \\\"
 
     printf(" \\ \n dadadasdga \t \r \" asdfaf \b \v \f \0 \' as ");
     printf("");
@@ -29,35 +29,35 @@ int main()
     printf(5651.5494968e1222132123);
     printf("\'\\\'", 'a', '$', '>', '?', '|', '/', '\\', '(', '\'', '\n', '\t', '\r', '\"', '\b', '\v', '\f', '\0');
 
-    if (m % n == 0) {
-        while (A % 2 == 0) {
+    if (m % n == 0) begin
+        while (A % 2 == 0) begin
             p++;
             A /= 2;
-        }
-        while (A % 3 == 0) {
+        end
+        while (A % 3 == 0) begin
             p++;
             A /= 3;
-        }
+        end
 
-        if (A == 1) {
+        if (A == 1) begin
             cout << p << endl;
-        } else {
+        end else begin
             cout << -1 << endl;
-        }
-    } else {
+        end
+    end else begin
         cout << -1 << endl;
-    }
+    end
 
-    /*
+    /#
 
         this is multi-line comment ads fasdginq[oeg 'mslk;vzc,.vc/
         mx/cb/zxcb/l.\][l/\;[\'" asdasd asd asda"
                         l]';[\]l;\][l;'=-0=0987654321!@#$%^&*(
-        )_}|{{|{":"?>< ?            :LK/"/b/v/n/
+        )_}|begin{|{":"?>< ?            :LK/"/b/v/n/
         m//t/r//\n\t\r\/\\\\/\b         \
         a\"\'
         *&^*&^*%&^%&*$*&^*&^/asdasdasd/
-    */
+    #/
 
     return 0;
-}
+end
