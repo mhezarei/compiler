@@ -72,9 +72,7 @@ nonterminal ASTNode method_call;
 nonterminal ASTNode cond_stmt;
 nonterminal ASTNode loop_stmt;
 nonterminal ASTNode parameters;
-nonterminal ASTNode binary_op;
 nonterminal ASTNode const_val;
-nonterminal ASTNode arithmatic;
 nonterminal ASTNode conditional;
 nonterminal ASTNode arguments_middle;
 nonterminal ASTNode struct_dec_middle;
@@ -82,9 +80,11 @@ nonterminal ASTNode var_dcl_end;
 nonterminal ASTNode block_mid;
 nonterminal ASTNode cond_stmt_mid;
 nonterminal ASTNode variable_mid;
-
 nonterminal ASTNode identifier;
+
+/*added by m.sey*/
 nonterminal ASTNode literal;
+nonterminal ASTNode expr_operation;
 
 
 /* precedence part */
@@ -207,7 +207,7 @@ loop_stmt ::= FOR LPAREN SEMICOLON expr SEMICOLON RPAREN block
 			  | REPEAT block UNTIL LPAREN expr RPAREN SEMICOLON
 			  | FOREACH LPAREN identifier IN identifier RPAREN block;
 
-expr ::= expr binary_op expr
+expr ::= expr_operation
 		 | LPAREN expr RPAREN
 		 | method_call
 		 | variable
@@ -227,12 +227,73 @@ variable ::= identifier | identifier variable_mid
 variable_mid ::= LBRACK expr RBRACK %prec ARRELEMENT
 				 | LBRACK expr RBRACK variable_mid %prec ARRELEMENT;
 
-binary_op ::= arithmatic | conditional;
-
-arithmatic ::= ADD | MINUS | PROD | DIV | MOD | ARITHAND
-			   | ARITHOR | XOR;
-
-conditional ::= EQ | NOTEQ | GREQ | LESSEQ | GR | LESS
-			    | LOGICAND | LOGICOR | NOT;
+expr_operation ::= expr:e1 ADD expr:e2
+    {: RESULT = new BaseASTNode(NodeType.ADDITION);
+       RESULT.addChild(e1);
+       RESULT.addChild(e2); :}
+                 | expr:e1 MINUS expr:e2
+    {: RESULT = new BaseASTNode(NodeType.SUBTRACTION);
+       RESULT.addChild(e1);
+       RESULT.addChild(e2); :}
+                 | expr:e1 PROD expr:e2
+    {: RESULT = new BaseASTNode(NodeType.MULTIPLICATION);
+       RESULT.addChild(e1);
+       RESULT.addChild(e2); :}
+                 | expr:e1 DIV expr:e2
+    {: RESULT = new BaseASTNode(NodeType.DIVISION);
+       RESULT.addChild(e1);
+       RESULT.addChild(e2); :}
+                 | expr:e1 MOD expr:e2
+    {: RESULT = new BaseASTNode(NodeType.MOD);
+       RESULT.addChild(e1);
+       RESULT.addChild(e2); :}
+                 | expr:e1 ARITHAND expr:e2
+    {: RESULT = new BaseASTNode(NodeType.AREHTMATIC_AND);
+       RESULT.addChild(e1);
+       RESULT.addChild(e2); :}
+                 | expr:e1 ARITHOR expr:e2
+    {: RESULT = new BaseASTNode(NodeType.AREHTMATIC_OR);
+       RESULT.addChild(e1);
+       RESULT.addChild(e2); :}
+                 | expr:e1 XOR expr:e2
+    {: RESULT = new BaseASTNode(NodeType.XOR);
+       RESULT.addChild(e1);
+       RESULT.addChild(e2); :}
+                 | expr:e1 EQ expr:e2
+    {: RESULT = new BaseASTNode(NodeType.EQUAL);
+       RESULT.addChild(e1);
+       RESULT.addChild(e2); :}
+                 | expr:e1 NOEQ expr:e2
+    {: RESULT = new BaseASTNode(NodeType.NOT_EQUAL);
+       RESULT.addChild(e1);
+       RESULT.addChild(e2); :}
+                 | expr:e1 GREQ expr:e2
+    {: RESULT = new BaseASTNode(NodeType.GREATER_THAN_OR_EQUAL);
+       RESULT.addChild(e1);
+       RESULT.addChild(e2); :}
+                 | expr:e1 LESSEQ expr:e2
+    {: RESULT = new BaseASTNode(NodeType.LESS_THAN_OR_EQUAL);
+       RESULT.addChild(e1);
+       RESULT.addChild(e2); :}
+                 | expr:e1 GR expr:e2
+    {: RESULT = new BaseASTNode(NodeType.GREATER_THAN);
+       RESULT.addChild(e1);
+       RESULT.addChild(e2); :}
+                 | expr:e1 LESS expr:e2
+    {: RESULT = new BaseASTNode(NodeType.LESS_THAN);
+       RESULT.addChild(e1);
+       RESULT.addChild(e2); :}
+                 | expr:e1 NOT expr:e2
+    {: RESULT = new BaseASTNode(NodeType.BOOLEAN_NOT);
+       RESULT.addChild(e1);
+       RESULT.addChild(e2); :}
+                 | expr:e1 LOGICAND expr:e2
+    {: RESULT = new BaseASTNode(NodeType.BOOLEAN_AND);
+       RESULT.addChild(e1);
+       RESULT.addChild(e2); :}
+                 | expr:e1 LOGICOR expr:e2
+    {: RESULT = new BaseASTNode(NodeType.BOOLEAN_OR);
+       RESULT.addChild(e1);
+       RESULT.addChild(e2); :}
 
 
