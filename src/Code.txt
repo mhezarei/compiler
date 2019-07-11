@@ -1,1 +1,4 @@
-function void start();
+function void start()
+    begin
+        int a;
+    end

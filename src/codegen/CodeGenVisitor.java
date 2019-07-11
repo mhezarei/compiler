@@ -126,7 +126,7 @@ public class CodeGenVisitor implements SimpleVisitor {
                 visitVarUse(node);
                 break;
 
-            case WHILE_STATEMENT:
+            case REPEAT_STATEMENT:
                 visitWhileStatementNode(node);
                 break;
 
@@ -148,14 +148,12 @@ public class CodeGenVisitor implements SimpleVisitor {
             case INT_TYPE:
             case LOCAL_VAR_DECLARATION:
             case NULL_LITERAL:
-            case PARAMETERS:
             case POST_DECREMENT:
             case POST_INCREMENT:
             case PRE_DECREMENT:
             case PRE_INCREMENT:
             case STRING_LITERAL:
             case VARIABLE_DECLARATION:
-            case VARIABLE_DECLARATIONS:
             case VOID:
             default:
                 visitAllChildren(node);
