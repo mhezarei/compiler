@@ -47,6 +47,11 @@ public enum NodeType {
     DOUBLE_TYPE,
     CHAR_TYPE,
     INT_TYPE,
+    FLOAT_TYPE,
+    LONG_TYPE,
+    STRING_TYPE,
+    VOID,
+    AUTO_TYPE,
 
     CAST,
     CLASS,
@@ -69,6 +74,5 @@ public enum NodeType {
     VAR_USE,
     VARIABLE_DECLARATION,
     VARIABLE_DECLARATIONS,
-    VOID,
     WHILE_STATEMENT
 }

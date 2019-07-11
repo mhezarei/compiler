@@ -1,15 +1,20 @@
 package ast;
 
 /**
- * todo need to understand
+ * An enum that shows type of a var
  */
 public enum PrimitiveType {
-    BOOLEAN ("Z"),
+    BOOL ("Z"),
     CHAR ("C"),
     DOUBLE ("D"),
     INT ("I"),
-    VOID ("V");
-    
+    VOID ("V"),
+    LONG(""),
+    STRING(""),
+    AUTO(""),
+    FLOAT (" ");
+
+    /*todo need to change to llvm syntax*/
     private final String signature;
     
     PrimitiveType(String signature) {

@@ -1,6 +1,8 @@
 package ast;
 
-//todo need to understand
+/**
+ * A class to keep a type like int or char
+ */
 public class TypeNode extends BaseASTNode {
     private PrimitiveType type;
 

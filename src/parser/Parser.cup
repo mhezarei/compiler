@@ -74,7 +74,6 @@ nonterminal ASTNode cond_stmt;
 nonterminal ASTNode loop_stmt;
 nonterminal ASTNode parameters;
 nonterminal ASTNode const_val;
-nonterminal ASTNode conditional;
 nonterminal ASTNode arguments_middle;
 nonterminal ASTNode struct_dec_middle;
 nonterminal ASTNode var_dcl_end;
@@ -82,9 +81,6 @@ nonterminal ASTNode block_mid;
 nonterminal ASTNode cond_stmt_mid;
 nonterminal ASTNode variable_mid;
 nonterminal ASTNode identifier;
-
-/*added by m.sey*/
-nonterminal ASTNode literal;
 nonterminal ASTNode expr_operation;
 
 
@@ -150,8 +146,26 @@ arguments ::= type identifier
 arguments_middle ::= LBRACK RBRACK
 					 | LBRACK RBRACK arguments_middle;
 
-type ::= INT | BOOL | FLOAT | LONG | CHAR | DOUBLE
-		 | identifier | STRING | VOID | AUTO;
+type ::= INT
+     {: RESULT = new TypeNode(NodeType.INT_TYPE, PrimitiveType.INT); :}
+       | BOOL
+     {: RESULT = new TypeNode(NodeType.BOOLEAN_TYPE, PrimitiveType.BOOL); :}
+       | FLOAT
+     {: RESULT = new TypeNode(NodeType.FLOAT_TYPE, PrimitiveType.FLOAT); :}
+       | LONG
+     {: RESULT = new TypeNode(NodeType.LONG_TYPE, PrimitiveType.LONG); :}
+       | CHAR
+     {: RESULT = new TypeNode(NodeType.CHAR_TYPE, PrimitiveType.CHAR); :}
+       | DOUBLE
+     {: RESULT = new TypeNode(NodeType.DOUBLE_TYPE, PrimitiveType.DOUBLE); :}
+	   | STRING
+     {: RESULT = new TypeNode(NodeType.STRING_TYPE, PrimitiveType.STRING); :}
+	   | VOID
+     {: RESULT = new TypeNode(NodeType.VOID, PrimitiveType.VOID); :}
+	   | AUTO
+     {: RESULT = new TypeNode(NodeType.AUTO_TYPE, PrimitiveType.AUTO); :}
+	   | identifier:t
+	 {: RESULT = t; :};
 
 struct_dec ::= RECORD identifier BEGIN struct_dec_middle END RECORD;
 
