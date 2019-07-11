@@ -263,7 +263,7 @@ expr_operation ::= expr:e1 ADD expr:e2
     {: RESULT = new BaseASTNode(NodeType.EQUAL);
        RESULT.addChild(e1);
        RESULT.addChild(e2); :}
-                 | expr:e1 NOEQ expr:e2
+                 | expr:e1 NOTEQ expr:e2
     {: RESULT = new BaseASTNode(NodeType.NOT_EQUAL);
        RESULT.addChild(e1);
        RESULT.addChild(e2); :}
@@ -294,6 +294,6 @@ expr_operation ::= expr:e1 ADD expr:e2
                  | expr:e1 LOGICOR expr:e2
     {: RESULT = new BaseASTNode(NodeType.BOOLEAN_OR);
        RESULT.addChild(e1);
-       RESULT.addChild(e2); :}
+       RESULT.addChild(e2); :};
 
 
