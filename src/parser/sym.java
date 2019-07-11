@@ -11,75 +11,76 @@ public class sym {
   public static final int BOOL = 21;
   public static final int REALCONST = 50;
   public static final int LCURLY = 3;
-  public static final int GR = 59;
+  public static final int GR = 60;
   public static final int CONST = 25;
-  public static final int NOTEQ = 56;
-  public static final int PREDEC = 83;
-  public static final int ARITHAND = 64;
+  public static final int NOTEQ = 57;
+  public static final int PREDEC = 84;
+  public static final int ARITHAND = 65;
   public static final int UNTIL = 43;
   public static final int RBRACK = 6;
   public static final int SIZEOF = 38;
   public static final int COMMA = 10;
-  public static final int ARITHOR = 66;
+  public static final int ARITHOR = 67;
   public static final int RPAREN = 8;
   public static final int LBRACK = 5;
-  public static final int DIVASS = 73;
-  public static final int ADDASS = 70;
+  public static final int DIVASS = 74;
+  public static final int ADDASS = 71;
   public static final int CHARCONST = 51;
   public static final int DOUBLE = 28;
   public static final int LPAREN = 7;
-  public static final int POSTINC = 80;
-  public static final int NOT = 62;
-  public static final int DEC = 85;
+  public static final int POSTINC = 81;
+  public static final int FALSE = 52;
+  public static final int NOT = 63;
+  public static final int DEC = 86;
   public static final int FLOAT = 31;
   public static final int MULTILINECOMMSTART = 14;
-  public static final int ARRELEMENT = 88;
-  public static final int PROD = 68;
+  public static final int ARRELEMENT = 89;
+  public static final int PROD = 69;
   public static final int INTCONST = 49;
   public static final int RECORD = 37;
-  public static final int EQ = 55;
-  public static final int LOGICAND = 65;
-  public static final int MOD = 75;
-  public static final int FPAREN = 86;
+  public static final int EQ = 56;
+  public static final int LOGICAND = 66;
+  public static final int MOD = 76;
+  public static final int FPAREN = 87;
   public static final int APOST = 16;
-  public static final int UPLUS = 79;
+  public static final int UPLUS = 80;
+  public static final int TRUE = 53;
   public static final int LONG = 35;
   public static final int QUOTE = 17;
-  public static final int PREINC = 82;
-  public static final int MULTASS = 72;
-  public static final int ASSIGN = 61;
+  public static final int PREINC = 83;
+  public static final int MULTASS = 73;
+  public static final int ASSIGN = 62;
   public static final int CHAR = 24;
   public static final int SWITCH = 40;
   public static final int FOR = 32;
-  public static final int DIV = 74;
+  public static final int DIV = 75;
   public static final int VOID = 47;
-  public static final int ADD = 69;
+  public static final int ADD = 70;
   public static final int EXTERN = 18;
   public static final int RETURN = 36;
   public static final int ELSE = 29;
   public static final int BREAK = 22;
   public static final int DOT = 9;
   public static final int INT = 34;
-  public static final int BOOLCONST = 52;
-  public static final int REFERENCE = 87;
+  public static final int REFERENCE = 88;
   public static final int NULL = 48;
   public static final int EOF = 0;
   public static final int SEMICOLON = 12;
   public static final int DEFAULT = 27;
-  public static final int GREQ = 60;
+  public static final int GREQ = 61;
   public static final int FUNCTION = 19;
-  public static final int SUBASS = 71;
-  public static final int INC = 84;
+  public static final int SUBASS = 72;
+  public static final int INC = 85;
   public static final int REPEAT = 45;
-  public static final int MINUS = 76;
+  public static final int MINUS = 77;
   public static final int SINGLELINECOMM = 13;
-  public static final int LONGCONST = 54;
+  public static final int LONGCONST = 55;
   public static final int IN = 44;
   public static final int error = 1;
-  public static final int LESSEQ = 57;
+  public static final int LESSEQ = 58;
   public static final int CONTINUE = 26;
   public static final int IF = 33;
-  public static final int BITNEG = 63;
+  public static final int BITNEG = 64;
   public static final int ID = 2;
   public static final int OF = 41;
   public static final int END = 30;
@@ -88,15 +89,15 @@ public class sym {
   public static final int MULTILINECOMMFINISH = 15;
   public static final int BEGIN = 20;
   public static final int CASE = 23;
-  public static final int POSTDEC = 81;
+  public static final int POSTDEC = 82;
   public static final int STRING = 39;
-  public static final int LESS = 58;
-  public static final int STRINGCONST = 53;
-  public static final int LOGICOR = 77;
-  public static final int UMINUS = 78;
+  public static final int LESS = 59;
+  public static final int STRINGCONST = 54;
+  public static final int LOGICOR = 78;
+  public static final int UMINUS = 79;
   public static final int RCURLY = 4;
   public static final int AUTO = 46;
-  public static final int XOR = 67;
+  public static final int XOR = 68;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
@@ -150,7 +151,8 @@ public class sym {
   "INTCONST",
   "REALCONST",
   "CHARCONST",
-  "BOOLCONST",
+  "FALSE",
+  "TRUE",
   "STRINGCONST",
   "LONGCONST",
   "EQ",

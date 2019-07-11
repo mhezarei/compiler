@@ -90,11 +90,11 @@ WhiteSpace = {EOL} | [ \t\f]
     //"while"              { return symbol(parser.sym.WHILE); }
     // NEW SHIT
     "begin"				 { return symbol(sym.BEGIN); }
-    "false"				 { return symbol(sym.BOOLCONST); }
+    "false"				 { return symbol(sym.FALSE); }
     "function"			 { return symbol(sym.FUNCTION); }
     "record"			 { return symbol(sym.RECORD); }
     "string"			 { return symbol(sym.STRING); }
-    "true"				 { return symbol(sym.BOOLCONST); }
+    "true"				 { return symbol(sym.TRUE); }
     "end"				 { return symbol(sym.END); }
     "null"               { return symbol(sym.NULL); }
     "NULL"               { return symbol(sym.NULL); }

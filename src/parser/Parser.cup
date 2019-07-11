@@ -41,7 +41,8 @@ terminal AUTO, VOID, NULL;
 terminal Integer INTCONST;
 terminal Double REALCONST;
 terminal Character CHARCONST;
-terminal Boolean BOOLCONST;
+terminal Boolean FALSE;
+terminal Boolean TRUE;
 terminal String STRINGCONST;
 terminal Long LONGCONST;
 
@@ -112,17 +113,19 @@ identifier ::= ID:i
 
 const_val ::= INTCONST:i
     {: RESULT = new IntegerLiteralNode(i); :}
-        |     REALCONST:r
+            | REALCONST:r
     {: RESULT = new FloatLiteralNode(r); :}
-        |     CHARCONST:c
+            | CHARCONST:c
     {: RESULT = new CharLiteralNode(c); :}
-        |     BOOLCONST:b
-    {: RESULT = new BooleanLiteralNode(b); :}
-	    |     STRINGCONST:s
+            | FALSE
+    {: RESULT = new BooleanLiteralNode(false); :}
+            | TRUE
+    {: RESULT = new BooleanLiteralNode(true); :}
+	        | STRINGCONST:s
 	{: RESULT = new StringLiteralNode(s); :}
-	    |     LONGCONST:l
+	        | LONGCONST:l
 	{: RESULT = new LongLiteralNode(l); :}
-	    |     NULL
+	        | NULL
 	{: RESULT = new BaseASTNode(NodeType.NULL_LITERAL); :};
 
 
