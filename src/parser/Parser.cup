@@ -56,6 +56,7 @@ terminal FPAREN, REFERENCE, ARRELEMENT;
 
 // nonterminal part
 nonterminal ASTNode program;
+nonterminal ASTNode program2;
 nonterminal ASTNode var_dcl;
 nonterminal ASTNode func_extern;
 nonterminal ASTNode struct_dec;
@@ -124,9 +125,14 @@ const_val ::= INTCONST:i
 	        | NULL
 	{: RESULT = new BaseASTNode(NodeType.NULL_LITERAL); :};
 
+program ::= program2:t
+     {:
+       Program p = new Program();
+       p.addChild(t);
+       setRoot(p);
+     :};
 
-//base grammar
-program ::= var_dcl program | func_extern program | struct_dec program
+program2 ::= var_dcl program | func_extern program | struct_dec program
 			| var_dcl | func_extern | struct_dec;
 
 func_extern ::= func_dcl | extern_dcl;
