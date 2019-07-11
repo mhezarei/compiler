@@ -137,7 +137,7 @@ public class CodeGenVisitor implements SimpleVisitor {
             case CHAR_LITERAL:
             case CHAR_TYPE:
             case CLASS_BODY:
-            case COMPILATION_UNIT:
+            case START:
             case DECLARATIONS:
             case DOUBLE_TYPE:
             case EMPTY_STATEMENT:

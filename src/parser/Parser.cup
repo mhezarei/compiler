@@ -105,218 +105,356 @@ precedence nonassoc LPAREN, RPAREN;
 start with program;
 
 //added for code gen
-identifier ::= ID:i
-    {: RESULT = new IdentifierNode(i); :};
+identifier ::=
+    ID:i
+        {: RESULT = new IdentifierNode(i); :};
 
-const_val ::= INTCONST:i
-    {: RESULT = new IntegerLiteralNode(i); :}
-            | REALCONST:r
-    {: RESULT = new FloatLiteralNode(r); :}
-            | CHARCONST:c
-    {: RESULT = new CharLiteralNode(c); :}
-            | FALSE
-    {: RESULT = new BooleanLiteralNode(false); :}
-            | TRUE
-    {: RESULT = new BooleanLiteralNode(true); :}
-	        | STRINGCONST:s
-	{: RESULT = new StringLiteralNode(s); :}
-	        | LONGCONST:l
-	{: RESULT = new LongLiteralNode(l); :}
-	        | NULL
-	{: RESULT = new BaseASTNode(NodeType.NULL_LITERAL); :};
+const_val ::=
+    INTCONST:i
+        {: RESULT = new IntegerLiteralNode(i); :}
+    | REALCONST:r
+        {: RESULT = new FloatLiteralNode(r); :}
+    | CHARCONST:c
+        {: RESULT = new CharLiteralNode(c); :}
+    | FALSE
+        {: RESULT = new BooleanLiteralNode(false); :}
+    | TRUE
+        {: RESULT = new BooleanLiteralNode(true); :}
+    | STRINGCONST:s
+	    {: RESULT = new StringLiteralNode(s); :}
+    | LONGCONST:l
+	    {: RESULT = new LongLiteralNode(l); :}
+    | NULL
+    	{: RESULT = new BaseASTNode(NodeType.NULL_LITERAL); :};
 
-program ::= program2:t
-     {:
-       Program p = new Program();
-       p.addChild(t);
-       setRoot(p);
-     :};
+program ::=
+    program2:t
+        {:
+           Program p = new Program();
+           p.addChild(t);
+           setRoot(p);
+        :};
 
-program2 ::= var_dcl program | func_extern program | struct_dec program
-			| var_dcl | func_extern | struct_dec;
+program2 ::=
+    var_dcl:t program:p
+        {:
+           RESULT = p;
+           RESULT.addChild(t);
+        :}
+    | func_extern:t program:p
+        {:
+           RESULT = p;
+           RESULT.addChild(t);
+        :}
+    | struct_dec:t program:p
+        {:
+           RESULT = p;
+           RESULT.addChild(t);
+        :}
+    | var_dcl:t
+        {: RESULT = t; :}
+    | func_extern:t
+	    {: RESULT = t; :}
+    | struct_dec:t
+	    {: RESULT = t; :};
 
-func_extern ::= func_dcl | extern_dcl;
+func_extern ::=
+    func_dcl:t
+        {: RESULT = t; :}
+    | extern_dcl:t
+        {: RESULT = t; :};
 
-func_dcl ::= FUNCTION type identifier LPAREN arguments RPAREN SEMICOLON
-			 | FUNCTION type identifier LPAREN RPAREN SEMICOLON
-			 | FUNCTION type identifier LPAREN arguments RPAREN block
-			 | FUNCTION type identifier LPAREN RPAREN block;
+func_dcl ::=
+    FUNCTION type:t identifier:i LPAREN arguments:a RPAREN SEMICOLON
+        {:
+           RESULT = new BaseASTNode(NodeType.METHOD_DECLARATION);
+           RESULT.addChild(t,i,a);
+        :}
+    | FUNCTION type:t identifier:i LPAREN RPAREN SEMICOLON
+        {:
+           RESULT = new BaseASTNode(NodeType.METHOD_DECLARATION);
+           RESULT.addChild(t,i);
+        :}
+    | FUNCTION type:t identifier:i LPAREN arguments:a RPAREN block:b
+        {:
+           RESULT = new BaseASTNode(NodeType.METHOD_DECLARATION);
+           RESULT.addChild(t,i,a,b);
+        :}
+    | FUNCTION type:t identifier:i LPAREN RPAREN block:b
+        {:
+           RESULT = new BaseASTNode(NodeType.METHOD_DECLARATION);
+           RESULT.addChild(t,i,b);
+        :};
 
-extern_dcl ::= EXTERN type identifier;
+extern_dcl ::=
+    EXTERN type:t identifier:i
+        {:
+            RESULT = new BaseASTNode(NodeType.VARIABLE_DECLARATION);
+            RESULT.addChild(t,i);
+        :};
 
-arguments ::= type identifier
-			  | type identifier arguments_middle
-			  | type identifier COMMA arguments
-			  | type identifier arguments_middle COMMA arguments;
+arguments ::=
+    type:t identifier:i
+        {:
+            RESULT = new BaseASTNode(NodeType.ARGUMENTS);
+            RESULT.addChild(t,i);
+        :}
+    | type:t identifier:i arguments_middle:am
+        {:
+            RESULT = new BaseASTNode(NodeType.ARGUMENTS);
+            RESULT.addChild(t,i,am);
+        :}
+    | type:t identifier:i COMMA arguments:a
+        {:
+            RESULT = new BaseASTNode(NodeType.ARGUMENTS);
+            RESULT.addChild(t,i,a);
+        :}
+    | type:t identifier:i arguments_middle:am COMMA arguments:a
+        {:
+            RESULT = new BaseASTNode(NodeType.ARGUMENTS);
+            RESULT.addChild(t,i,am,a);
+        :};
 
-arguments_middle ::= LBRACK RBRACK
-					 | LBRACK RBRACK arguments_middle;
+arguments_middle ::=
+    LBRACK RBRACK
+    {: //todo :}
+    | LBRACK RBRACK arguments_middle:am
+    {: //todo :};
 
-type ::= INT
-     {: RESULT = new TypeNode(NodeType.INT_TYPE, PrimitiveType.INT); :}
-       | BOOL
-     {: RESULT = new TypeNode(NodeType.BOOLEAN_TYPE, PrimitiveType.BOOL); :}
-       | FLOAT
-     {: RESULT = new TypeNode(NodeType.FLOAT_TYPE, PrimitiveType.FLOAT); :}
-       | LONG
-     {: RESULT = new TypeNode(NodeType.LONG_TYPE, PrimitiveType.LONG); :}
-       | CHAR
-     {: RESULT = new TypeNode(NodeType.CHAR_TYPE, PrimitiveType.CHAR); :}
-       | DOUBLE
-     {: RESULT = new TypeNode(NodeType.DOUBLE_TYPE, PrimitiveType.DOUBLE); :}
-	   | STRING
-     {: RESULT = new TypeNode(NodeType.STRING_TYPE, PrimitiveType.STRING); :}
-	   | VOID
-     {: RESULT = new TypeNode(NodeType.VOID, PrimitiveType.VOID); :}
-	   | AUTO
-     {: RESULT = new TypeNode(NodeType.AUTO_TYPE, PrimitiveType.AUTO); :}
-	   | identifier:t
-	 {: RESULT = t; :};
+type ::=
+    INT
+        {: RESULT = new TypeNode(NodeType.INT_TYPE, PrimitiveType.INT); :}
+    | BOOL
+        {: RESULT = new TypeNode(NodeType.BOOLEAN_TYPE, PrimitiveType.BOOL); :}
+    | FLOAT
+        {: RESULT = new TypeNode(NodeType.FLOAT_TYPE, PrimitiveType.FLOAT); :}
+    | LONG
+        {: RESULT = new TypeNode(NodeType.LONG_TYPE, PrimitiveType.LONG); :}
+    | CHAR
+        {: RESULT = new TypeNode(NodeType.CHAR_TYPE, PrimitiveType.CHAR); :}
+    | DOUBLE
+        {: RESULT = new TypeNode(NodeType.DOUBLE_TYPE, PrimitiveType.DOUBLE); :}
+    | STRING
+        {: RESULT = new TypeNode(NodeType.STRING_TYPE, PrimitiveType.STRING); :}
+    | VOID
+        {: RESULT = new TypeNode(NodeType.VOID, PrimitiveType.VOID); :}
+    | AUTO
+        {: RESULT = new TypeNode(NodeType.AUTO_TYPE, PrimitiveType.AUTO); :}
+    | identifier:t
+	    {: RESULT = t; :};
 
-struct_dec ::= RECORD identifier BEGIN struct_dec_middle END RECORD;
+struct_dec ::=
+    RECORD identifier:i BEGIN struct_dec_middle:sdm END RECORD
+        {:
+            RESULT = new BaseASTNode(NodeType.STRUCT_DECLARATION);
+            RESULT.addChild(i,sdm);
+        :};
 
-struct_dec_middle ::= var_dcl | var_dcl struct_dec_middle;
+struct_dec_middle ::=
+    var_dcl:v
+        {: RESULT = v; :}
+    | var_dcl:vd struct_dec_middle:s
+        {:
+            RESULT = s;
+            RESULT.addChild(vd);
+        :};
 
-var_dcl ::= type var_dcl_cnt var_dcl_end
-			| CONST type var_dcl var_dcl_end
-			| type var_dcl_cnt
-			| CONST type var_dcl;
+var_dcl ::=
+    type:t var_dcl_cnt:vdc var_dcl_end:vde
+    | CONST type:t var_dcl:vd var_dcl_end:vde
+	| type:t var_dcl_cnt:vdc
+	| CONST type:t var_dcl:vd;
 
-var_dcl_end ::= COMMA var_dcl_cnt var_dcl_end
-				| COMMA var_dcl_cnt;
+var_dcl_end ::=
+    COMMA var_dcl_cnt:vdc var_dcl_end:vde
+    | COMMA var_dcl_cnt:vdc;
 
-var_dcl_cnt ::= variable | variable ASSIGN expr;
+var_dcl_cnt ::=
+    variable:v
+    | variable:v ASSIGN expr:e;
 
-block ::= BEGIN block_mid END
-		  | BEGIN END;
+block ::=
+    BEGIN block_mid:b END
+    | BEGIN END;
 
-block_mid ::= var_dcl block_mid | statement block_mid
-			  | var_dcl | statement;
+block_mid ::=
+    var_dcl:vd block_mid:b
+    | statement:s block_mid:b
+    | var_dcl:vd
+    | statement:s;
 
-statement ::= assignment SEMICOLON
-			  | method_call SEMICOLON
-			  | cond_stmt
-			  | loop_stmt
-			  | RETURN expr SEMICOLON
-			  | RETURN SEMICOLON
-			  | BREAK SEMICOLON
-			  | CONTINUE SEMICOLON;
+statement ::=
+    assignment:a SEMICOLON
+    | method_call:m SEMICOLON
+    | cond_stmt:cs
+    | loop_stmt:ls
+    | RETURN expr:e SEMICOLON
+    | RETURN SEMICOLON
+    | BREAK SEMICOLON
+    | CONTINUE SEMICOLON;
 
-assignment ::= variable ASSIGN expr
-			   | variable ADDASS expr
-			   | variable SUBASS expr
-			   | variable MULTASS expr
-			   | variable DIVASS expr;
+assignment ::=
+    variable:v ASSIGN expr:e
+    | variable:v ADDASS expr:e
+    | variable:v SUBASS expr:e
+    | variable:v MULTASS expr:e
+    | variable:v DIVASS expr:e;
 
-method_call ::= identifier LPAREN parameters RPAREN %prec FPAREN
-				| identifier LPAREN RPAREN %prec FPAREN;
+method_call ::=
+    identifier:i LPAREN parameters:ps RPAREN %prec FPAREN
+    | identifier:i LPAREN RPAREN %prec FPAREN;
 
-parameters ::= expr | expr COMMA parameters;
+parameters ::=
+    expr:e
+    | expr:e COMMA parameters:ps;
 
-cond_stmt ::= IF LPAREN expr RPAREN block
-			  | IF LPAREN expr RPAREN block ELSE block
-			  | SWITCH LPAREN identifier RPAREN OF COLON BEGIN DEFAULT COLON block END
-			  | SWITCH LPAREN identifier RPAREN OF COLON BEGIN cond_stmt_mid DEFAULT COLON block END;
+cond_stmt ::=
+    IF LPAREN expr:e RPAREN block:b
+    | IF LPAREN expr:e RPAREN block:b_if ELSE block:b_else
+    | SWITCH LPAREN identifier:i RPAREN OF COLON BEGIN DEFAULT COLON block:b END
+    | SWITCH LPAREN identifier:i RPAREN OF COLON BEGIN cond_stmt_mid:s DEFAULT COLON block:b END;
 
-cond_stmt_mid ::= CASE INTCONST COLON block
-				  | CASE INTCONST COLON block cond_stmt_mid;
+cond_stmt_mid ::=
+    CASE INTCONST COLON block:b
+    | CASE INTCONST COLON block:b cond_stmt_mid:s;
 
-loop_stmt ::= FOR LPAREN SEMICOLON expr SEMICOLON RPAREN block
-			  | FOR LPAREN assignment SEMICOLON expr SEMICOLON RPAREN block
-			  | FOR LPAREN assignment SEMICOLON expr SEMICOLON assignment RPAREN block
-			  | FOR LPAREN assignment SEMICOLON expr SEMICOLON expr RPAREN block
-			  | FOR LPAREN SEMICOLON expr SEMICOLON assignment RPAREN block
-			  | FOR LPAREN SEMICOLON expr SEMICOLON expr RPAREN block
-			  | REPEAT block UNTIL LPAREN expr RPAREN SEMICOLON
-			  | FOREACH LPAREN identifier IN identifier RPAREN block;
+loop_stmt ::=
+    FOR LPAREN SEMICOLON expr:e SEMICOLON RPAREN block:b
+    | FOR LPAREN assignment:a SEMICOLON expr:e SEMICOLON RPAREN block
+    | FOR LPAREN assignment:a1 SEMICOLON expr:e SEMICOLON assignment:a2 RPAREN block:b
+    | FOR LPAREN assignment:a SEMICOLON expr:e1 SEMICOLON expr:e2 RPAREN block:b
+    | FOR LPAREN SEMICOLON expr:e SEMICOLON assignment:a RPAREN block:b
+    | FOR LPAREN SEMICOLON expr:e1 SEMICOLON expr:e2 RPAREN block:b
+	| REPEAT block:b UNTIL LPAREN expr:e RPAREN SEMICOLON
+	| FOREACH LPAREN identifier:i1 IN identifier:i2 RPAREN block:b;
 
-expr ::= expr_operation
-		 | LPAREN expr RPAREN
-		 | method_call
-		 | variable
-		 | DEC variable %prec PREDEC
-		 | INC variable %prec PREINC
-		 | variable DEC %prec POSTDEC
-		 | variable INC %prec POSTINC
-		 | const_val
-		 | BITNEG expr
-		 | SIZEOF LPAREN type RPAREN %prec SIZEOF
-		 | ADD expr %prec UPLUS
-		 | MINUS expr %prec UMINUS;
+expr ::=
+    expr_operation:e
+    | LPAREN expr:e RPAREN
+    | method_call:mc
+    | variable:v
+    | DEC variable:v %prec PREDEC
+    | INC variable:v %prec PREINC
+    | variable:v DEC %prec POSTDEC
+    | variable:v INC %prec POSTINC
+    | const_val:v
+    | BITNEG expr:e
+    | SIZEOF LPAREN type:t RPAREN %prec SIZEOF
+    | ADD expr:e %prec UPLUS
+    | MINUS expr:e %prec UMINUS;
 
-variable ::= identifier | identifier variable_mid
-			 | variable DOT identifier %prec REFERENCE | LPAREN variable RPAREN;
+variable ::=
+    identifier:i
+    | identifier:i variable_mid:vm
+    | variable:v DOT identifier:i %prec REFERENCE
+    | LPAREN variable:v RPAREN;
 
-variable_mid ::= LBRACK expr RBRACK %prec ARRELEMENT
-				 | LBRACK expr RBRACK variable_mid %prec ARRELEMENT;
+variable_mid ::=
+    LBRACK expr:e RBRACK %prec ARRELEMENT
+    | LBRACK expr:e RBRACK variable_mid:vm %prec ARRELEMENT;
 
-expr_operation ::= expr:e1 ADD expr:e2
-    {: RESULT = new BaseASTNode(NodeType.ADDITION);
-       RESULT.addChild(e1);
-       RESULT.addChild(e2); :}
-                 | expr:e1 MINUS expr:e2
-    {: RESULT = new BaseASTNode(NodeType.SUBTRACTION);
-       RESULT.addChild(e1);
-       RESULT.addChild(e2); :}
-                 | expr:e1 PROD expr:e2
-    {: RESULT = new BaseASTNode(NodeType.MULTIPLICATION);
-       RESULT.addChild(e1);
-       RESULT.addChild(e2); :}
-                 | expr:e1 DIV expr:e2
-    {: RESULT = new BaseASTNode(NodeType.DIVISION);
-       RESULT.addChild(e1);
-       RESULT.addChild(e2); :}
-                 | expr:e1 MOD expr:e2
-    {: RESULT = new BaseASTNode(NodeType.MOD);
-       RESULT.addChild(e1);
-       RESULT.addChild(e2); :}
-                 | expr:e1 ARITHAND expr:e2
-    {: RESULT = new BaseASTNode(NodeType.AREHTMATIC_AND);
-       RESULT.addChild(e1);
-       RESULT.addChild(e2); :}
-                 | expr:e1 ARITHOR expr:e2
-    {: RESULT = new BaseASTNode(NodeType.AREHTMATIC_OR);
-       RESULT.addChild(e1);
-       RESULT.addChild(e2); :}
-                 | expr:e1 XOR expr:e2
-    {: RESULT = new BaseASTNode(NodeType.XOR);
-       RESULT.addChild(e1);
-       RESULT.addChild(e2); :}
-                 | expr:e1 EQ expr:e2
-    {: RESULT = new BaseASTNode(NodeType.EQUAL);
-       RESULT.addChild(e1);
-       RESULT.addChild(e2); :}
-                 | expr:e1 NOTEQ expr:e2
-    {: RESULT = new BaseASTNode(NodeType.NOT_EQUAL);
-       RESULT.addChild(e1);
-       RESULT.addChild(e2); :}
-                 | expr:e1 GREQ expr:e2
-    {: RESULT = new BaseASTNode(NodeType.GREATER_THAN_OR_EQUAL);
-       RESULT.addChild(e1);
-       RESULT.addChild(e2); :}
-                 | expr:e1 LESSEQ expr:e2
-    {: RESULT = new BaseASTNode(NodeType.LESS_THAN_OR_EQUAL);
-       RESULT.addChild(e1);
-       RESULT.addChild(e2); :}
-                 | expr:e1 GR expr:e2
-    {: RESULT = new BaseASTNode(NodeType.GREATER_THAN);
-       RESULT.addChild(e1);
-       RESULT.addChild(e2); :}
-                 | expr:e1 LESS expr:e2
-    {: RESULT = new BaseASTNode(NodeType.LESS_THAN);
-       RESULT.addChild(e1);
-       RESULT.addChild(e2); :}
-                 | expr:e1 NOT expr:e2
-    {: RESULT = new BaseASTNode(NodeType.BOOLEAN_NOT);
-       RESULT.addChild(e1);
-       RESULT.addChild(e2); :}
-                 | expr:e1 LOGICAND expr:e2
-    {: RESULT = new BaseASTNode(NodeType.BOOLEAN_AND);
-       RESULT.addChild(e1);
-       RESULT.addChild(e2); :}
-                 | expr:e1 LOGICOR expr:e2
-    {: RESULT = new BaseASTNode(NodeType.BOOLEAN_OR);
-       RESULT.addChild(e1);
-       RESULT.addChild(e2); :};
+expr_operation ::=
+    expr:e1 ADD expr:e2
+        {:
+            RESULT = new BaseASTNode(NodeType.ADDITION);
+            RESULT.addChild(e1);
+            RESULT.addChild(e2);
+        :}
+    | expr:e1 MINUS expr:e2
+        {:
+            RESULT = new BaseASTNode(NodeType.SUBTRACTION);
+            RESULT.addChild(e1);
+            RESULT.addChild(e2);
+        :}
+    | expr:e1 PROD expr:e2
+        {:
+            RESULT = new BaseASTNode(NodeType.MULTIPLICATION);
+            RESULT.addChild(e1);
+            RESULT.addChild(e2);
+        :}
+    | expr:e1 DIV expr:e2
+        {:
+            RESULT = new BaseASTNode(NodeType.DIVISION);
+            RESULT.addChild(e1);
+            RESULT.addChild(e2);
+        :}
+    | expr:e1 MOD expr:e2
+        {:
+            RESULT = new BaseASTNode(NodeType.MOD);
+            RESULT.addChild(e1);
+            RESULT.addChild(e2);
+        :}
+    | expr:e1 ARITHAND expr:e2
+        {:
+            RESULT = new BaseASTNode(NodeType.ARITHMETIC_AND);
+            RESULT.addChild(e1);
+            RESULT.addChild(e2);
+        :}
+    | expr:e1 ARITHOR expr:e2
+        {:
+            RESULT = new BaseASTNode(NodeType.ARITHMETIC_OR);
+            RESULT.addChild(e1);
+            RESULT.addChild(e2);
+        :}
+    | expr:e1 XOR expr:e2
+        {:
+            RESULT = new BaseASTNode(NodeType.XOR);
+            RESULT.addChild(e1);
+            RESULT.addChild(e2);
+        :}
+    | expr:e1 EQ expr:e2
+        {:
+            RESULT = new BaseASTNode(NodeType.EQUAL);
+            RESULT.addChild(e1);
+            RESULT.addChild(e2);
+        :}
+    | expr:e1 NOTEQ expr:e2
+        {:
+            RESULT = new BaseASTNode(NodeType.NOT_EQUAL);
+            RESULT.addChild(e1);
+            RESULT.addChild(e2);
+        :}
+    | expr:e1 GREQ expr:e2
+        {:
+            RESULT = new BaseASTNode(NodeType.GREATER_THAN_OR_EQUAL);
+            RESULT.addChild(e1);
+            RESULT.addChild(e2);
+        :}
+    | expr:e1 LESSEQ expr:e2
+        {:
+            RESULT = new BaseASTNode(NodeType.LESS_THAN_OR_EQUAL);
+            RESULT.addChild(e1);
+            RESULT.addChild(e2);
+        :}
+    | expr:e1 GR expr:e2
+        {:
+            RESULT = new BaseASTNode(NodeType.GREATER_THAN);
+            RESULT.addChild(e1);
+            RESULT.addChild(e2);
+        :}
+    | expr:e1 LESS expr:e2
+        {:
+            RESULT = new BaseASTNode(NodeType.LESS_THAN);
+            RESULT.addChild(e1);
+            RESULT.addChild(e2);
+        :}
+    | expr:e1 NOT expr:e2
+        {:
+            RESULT = new BaseASTNode(NodeType.BOOLEAN_NOT);
+            RESULT.addChild(e1);
+            RESULT.addChild(e2);
+        :}
+    | expr:e1 LOGICAND expr:e2
+        {:
+            RESULT = new BaseASTNode(NodeType.BOOLEAN_AND);
+            RESULT.addChild(e1);
+            RESULT.addChild(e2);
+        :}
+    | expr:e1 LOGICOR expr:e2
+        {:
+            RESULT = new BaseASTNode(NodeType.BOOLEAN_OR);
+            RESULT.addChild(e1);
+            RESULT.addChild(e2);
+        :};
 
 

@@ -1,10 +1,11 @@
 package ast;
 
 
-import semantic.SymbolInfo;
 import codegen.SimpleVisitor;
+import semantic.SymbolInfo;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -61,6 +62,11 @@ public class BaseASTNode implements ASTNode {
     @Override
     public void addChildren(List<ASTNode> nodes) {
         children.addAll(nodes);
+    }
+
+    @Override
+    public void addChild(ASTNode... nodes) {
+        Collections.addAll(children, nodes);
     }
 
     @Override

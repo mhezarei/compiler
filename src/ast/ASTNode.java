@@ -46,6 +46,11 @@ public interface ASTNode {
     void addChildren(List<ASTNode> nodes);
 
     /**
+     * Adds a list of nodes to the end of the list of children.
+     */
+    void addChild(ASTNode... nodes);
+
+    /**
      * Returns the list of children.
      */
     List<ASTNode> getChildren();
