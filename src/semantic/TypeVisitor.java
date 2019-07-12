@@ -90,7 +90,7 @@ public class TypeVisitor implements SimpleVisitor {
     }
 
     private void visitMethodDeclarationNode(ASTNode node) throws Exception {
-        IdentifierNode idNode = (IdentifierNode) node.getChild(0);
+        IdentifierNode idNode = (IdentifierNode) node.getChild(1);
         String methodName = idNode.getValue();
 
         StringBuilder sig = new StringBuilder(methodName + "(");
@@ -103,10 +103,10 @@ public class TypeVisitor implements SimpleVisitor {
         sig.append(")");
 
         //todo seems to wrong
-        TypeNode typeNode = (TypeNode) node.getChild(2);
+        TypeNode typeNode = (TypeNode) node.getChild(0);
         sig.append(typeNode.getType().getSignature());
 
-        classNode.putMethodSig(methodName, sig.toString());
+//        classNode.putMethodSig(methodName, sig.toString());
 
         symbolTable.enterScope();
         visitAllChildren(node);
@@ -123,7 +123,9 @@ public class TypeVisitor implements SimpleVisitor {
     }
 
     private void visitVariableDeclarationNode(ASTNode node) throws Exception {
-        IdentifierNode idNode = (IdentifierNode) node.getChild(0);
+        if(node.getChildren().size()<1)
+            return;
+        IdentifierNode idNode = (IdentifierNode) node.getChild(1);
         String id = idNode.getValue();
 
         SymbolInfo si = new SymbolInfo(node);

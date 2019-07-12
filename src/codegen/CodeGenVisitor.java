@@ -347,10 +347,10 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     private void visitMethodDeclarationNode(ASTNode node) throws Exception {
         //todo "method dec" code
-        IdentifierNode idNode = (IdentifierNode) node.getChild(0);
+        IdentifierNode idNode = (IdentifierNode) node.getChild(1);
         String methodName = idNode.getValue();
 
-        TypeNode typeNode = (TypeNode) node.getChild(2);
+        TypeNode typeNode = (TypeNode) node.getChild(0);
         String returnType = typeNode.getType().getSignature();
 
         stream.println("");

@@ -1,5 +1,5 @@
 <component name="libraryTable">
-  <library name="jflex-full-1.7.0">
+  <library name="lib">
     <CLASSES>
       <root url="file://$PROJECT_DIR$/lib" />
     </CLASSES>
