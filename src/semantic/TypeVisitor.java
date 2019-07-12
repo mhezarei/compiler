@@ -126,8 +126,24 @@ public class TypeVisitor implements SimpleVisitor {
 
     private void visitVariableDeclarationNode(ASTNode node) throws Exception {
         //may has not child
-        if(node.getChildren().isEmpty())
+        if (node.getChildren().isEmpty())
             return;
+
+        TypeNode typePrimitive=null;
+        IdentifierNode typeID=null;
+        boolean isPrimitive;
+        if (node.getChild(0) instanceof TypeNode) {
+            isPrimitive=true;
+            typePrimitive = (TypeNode) node.getChild(0);
+        } else {
+            isPrimitive=false;
+            typeID = (IdentifierNode) node.getChild(0);
+        }
+
+        if(!isPrimitive && typeID.getSymbolInfo()==null)
+            throw new Exception(typeID.getValue()+" not declared");
+
+
         IdentifierNode idNode = (IdentifierNode) node.getChild(1);
         String id = idNode.getValue();
 
