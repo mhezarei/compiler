@@ -1,4 +1,4 @@
-function void start(int a)
+function int start(int a)
     begin
         int a = 1 + 2;
         int b;
