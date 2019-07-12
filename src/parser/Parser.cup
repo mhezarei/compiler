@@ -137,17 +137,17 @@ program ::=
         :};
 
 program2 ::=
-    var_dcl:t program:p
+    program2:p var_dcl:t
         {:
            RESULT = p;
            RESULT.addChild(t);
         :}
-    | func_extern:t program:p
+    | program2:p func_extern:t
         {:
            RESULT = p;
            RESULT.addChild(t);
         :}
-    | struct_dec:t program:p
+    | program2:p struct_dec:t
         {:
            RESULT = p;
            RESULT.addChild(t);
@@ -209,12 +209,12 @@ arguments ::=
             RESULT = new BaseASTNode(NodeType.ARGUMENTS);
             RESULT.addChild(t, i, am);
         :}
-    | type:t identifier:i COMMA arguments:a
+    | arguments:a COMMA type:t identifier:i
         {:
             RESULT = a;
             RESULT.addChild(t, i);
         :}
-    | type:t identifier:i arguments_middle:am COMMA arguments:a
+    | arguments:a COMMA type:t identifier:i arguments_middle:am
         {:
             RESULT = a;
             RESULT.addChild(t, i, am);
@@ -223,7 +223,7 @@ arguments ::=
 arguments_middle ::=
     LBRACK RBRACK
 //    {: RESULT = new BaseASTNode(NodeType.NOT_EQUAL); :}
-    | LBRACK RBRACK arguments_middle:am
+    | arguments_middle:am LBRACK RBRACK
 //    {: RESULT = new BaseASTNode(NodeType.NOT_EQUAL); :}
 ;
 
@@ -259,7 +259,7 @@ struct_dec ::=
 struct_dec_middle ::=
     var_dcl:v
         {: RESULT = v; :}
-    | var_dcl:vd struct_dec_middle:s
+    | struct_dec_middle:s var_dcl:vd
         {:
             RESULT = s;
             RESULT.addChild(vd);
@@ -290,7 +290,7 @@ var_dcl ::=
         :};
 
 var_dcl_end ::=
-    COMMA var_dcl_cnt:vdc var_dcl_end:vde
+    var_dcl_end:vde COMMA var_dcl_cnt:vdc
         {:
             RESULT = vde;
             RESULT.addChild(vdc);
@@ -401,7 +401,7 @@ method_call ::=
 parameters ::=
     expr:e
         {: RESULT = new BaseASTNode(NodeType.PARAMETER); :}
-    | expr:e COMMA parameters:ps
+    | parameters:ps COMMA expr:e
         {:
             RESULT = ps;
             RESULT.addChild(e);
@@ -436,7 +436,7 @@ cond_stmt_mid ::=
             RESULT = new BaseASTNode(NodeType.CASE_STATEMENT);
             RESULT.addChild(b);
         :}
-    | CASE INTCONST COLON block:b cond_stmt_mid:s
+    | cond_stmt_mid:s CASE INTCONST COLON block:b
         {:
             RESULT = s;
             RESULT.addChild(b);
@@ -658,5 +658,3 @@ expr_operation ::=
             RESULT.addChild(e1);
             RESULT.addChild(e2);
         :};
-
-
