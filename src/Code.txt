@@ -1,5 +1,5 @@
 function void start()
     begin
         int a = 1 + 2;
-        a = 2 + 2;
+        a = b + 2;
     end

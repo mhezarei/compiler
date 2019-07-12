@@ -539,7 +539,10 @@ expr ::=
 
 variable ::=
     identifier:i
-        {: RESULT = i; :}
+        {:
+            RESULT = new BaseASTNode(NodeType.VAR_USE);
+            RESULT.addChild(i);
+        :}
     | identifier:i variable_mid:vm
 //        {: RESULT = new BaseASTNode(NodeType.NOT_EQUAL); :}
     | variable:v DOT identifier:i %prec REFERENCE

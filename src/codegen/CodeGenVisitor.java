@@ -219,12 +219,17 @@ public class CodeGenVisitor implements SimpleVisitor {
       OR if it's an ID loads the ID's value and assigns*/
     private void visitAssignNode(ASTNode node) throws Exception {
         //todo "assign" code
-        IdentifierNode idNode = (IdentifierNode) node.getChild(0);
+        //node -> VAR_USE -> ID
+        IdentifierNode idNode = (IdentifierNode) node.getChild(0).getChild(0);
         SymbolInfo si = idNode.getSymbolInfo();
-        int lvIndex = si.getLocalVarIndex();
-        /* Expression node */
-        node.getChild(1).accept(this);
-        stream.println("  istore " + lvIndex);
+        try {
+            int lvIndex = si.getLocalVarIndex();
+            /* Expression node */
+            node.getChild(1).accept(this);
+            stream.println("  istore ");
+        } catch (NullPointerException e) {
+            throw new Exception(idNode.getValue() + " not declared");
+        }
 
     }
 
@@ -234,7 +239,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     private void visitBooleanNotNode(ASTNode node) throws Exception {
         // todo "boolNot" code
-    }
+    }///////////
 
     private void visitBooleanOrNode(ASTNode node) throws Exception {
         // todo "boolOr" code
@@ -387,13 +392,17 @@ public class CodeGenVisitor implements SimpleVisitor {
         }
     }
 
-    private void visitVarUse(ASTNode node) {
+    private void visitVarUse(ASTNode node) throws Exception {
         //todo need to understand
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
         SymbolInfo si = idNode.getSymbolInfo();
-        int lvIndex = si.getLocalVarIndex();
-        stream.println("  iload " + lvIndex);
-        returnGenerated = false;
+        try {
+            int lvIndex = si.getLocalVarIndex();
+            stream.println("  iload " + lvIndex);
+            returnGenerated = false;
+        } catch (NullPointerException e) {
+            throw new Exception(idNode.getValue() + " not declared");
+        }
     }
 
     private String generateLabel() {
