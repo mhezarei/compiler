@@ -337,7 +337,8 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
         String methodName = idNode.getValue();
-        String sig = classNode.getMethodSig(methodName);
+//        String sig = classNode.getMethodSig(methodName);
+        String sig = methodName;
         stream.println("  invokestatic " + className + "/" + sig);
         returnGenerated = false;
     }

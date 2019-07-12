@@ -94,6 +94,7 @@ public enum NodeType {
     IDENTIFIER,
     METHOD_ACCESS,
     PARAMETER,
+    PARAMETERS,
     BLOCK,
     VAR_USE,
     START

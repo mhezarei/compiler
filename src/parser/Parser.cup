@@ -394,17 +394,24 @@ method_call ::=
     | identifier:i LPAREN RPAREN
         {:
             RESULT = new BaseASTNode(NodeType.METHOD_ACCESS);
-            ASTNode ps = new BaseASTNode(NodeType.PARAMETER);
+            ASTNode ps = new BaseASTNode(NodeType.PARAMETERS);
             RESULT.addChild(i, ps);
         :} %prec FPAREN;
 
 parameters ::=
     expr:e
-        {: RESULT = new BaseASTNode(NodeType.PARAMETER); :}
+        {:
+            RESULT = new BaseASTNode(NodeType.PARAMETERS);
+            ASTNode p = new BaseASTNode(NodeType.PARAMETER);
+            p.addChild(e);
+            RESULT.addChild(p);
+        :}
     | parameters:ps COMMA expr:e
         {:
             RESULT = ps;
-            RESULT.addChild(e);
+            ASTNode p = new BaseASTNode(NodeType.PARAMETER);
+            p.addChild(e);
+            RESULT.addChild(p);
         :};
 
 cond_stmt ::=
