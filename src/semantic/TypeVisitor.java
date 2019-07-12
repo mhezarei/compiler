@@ -11,7 +11,7 @@ import codegen.SimpleVisitor;
 public class TypeVisitor implements SimpleVisitor {
     private SymbolTable symbolTable = new SymbolTable();
     private PrimitiveType currentType;
-    private ClassNode classNode;
+    private ClassNode classNode = new ClassNode();
 
     @Override
     public void visit(ASTNode node) throws Exception {
@@ -90,25 +90,29 @@ public class TypeVisitor implements SimpleVisitor {
     }
 
     private void visitMethodDeclarationNode(ASTNode node) throws Exception {
-        //0 -> 1
+        StringBuilder sig = new StringBuilder();
+        //type
+        TypeNode typeNode = (TypeNode) node.getChild(0);
+        sig.append(typeNode.getType().getSignature()).append(" ");
+        //identifier
         IdentifierNode idNode = (IdentifierNode) node.getChild(1);
         String methodName = idNode.getValue();
+        sig.append("@").append(methodName).append("(");
 
-        StringBuilder sig = new StringBuilder(methodName + "(");
-
-        //seems to wrong
-        for (ASTNode paramNode : node.getChild(2).getChildren()) {
-            TypeNode typeNode = (TypeNode) paramNode.getChild(0);
-            sig.append(typeNode.getType().getSignature());
+        //parameters
+        ASTNode[] params = node.getChild(2).getChildren().toArray(new ASTNode[0]);
+        for (int i = 0; i < params.length; i++) {
+            ASTNode paramNode = params[i];
+            TypeNode paramTypeNode = (TypeNode) paramNode.getChild(0);
+            sig.append(paramTypeNode.getType().getSignature());
+            IdentifierNode paramIDNode = (IdentifierNode) paramNode.getChild(1);
+            sig.append(" ").append("%").append(paramIDNode.getValue());
+            if (i > 0 && i < params.length - 1)
+                sig.append(",");
         }
-
         sig.append(")");
 
-        //todo seems to wrong
-        TypeNode typeNode = (TypeNode) node.getChild(0);
-        sig.append(typeNode.getType().getSignature());
-
-//        classNode.putMethodSig(methodName, sig.toString());
+        classNode.putMethodSig(methodName, sig.toString());
 
         symbolTable.enterScope();
         visitAllChildren(node);
@@ -129,19 +133,19 @@ public class TypeVisitor implements SimpleVisitor {
         if (node.getChildren().isEmpty())
             return;
 
-        TypeNode typePrimitive=null;
-        IdentifierNode typeID=null;
+        TypeNode typePrimitive = null;
+        IdentifierNode typeID = null;
         boolean isPrimitive;
         if (node.getChild(0) instanceof TypeNode) {
-            isPrimitive=true;
+            isPrimitive = true;
             typePrimitive = (TypeNode) node.getChild(0);
         } else {
-            isPrimitive=false;
+            isPrimitive = false;
             typeID = (IdentifierNode) node.getChild(0);
         }
 
-        if(!isPrimitive && typeID.getSymbolInfo()==null)
-            throw new Exception(typeID.getValue()+" not declared");
+        if (!isPrimitive && typeID.getSymbolInfo() == null)
+            throw new Exception(typeID.getValue() + " not declared");
 
 
         IdentifierNode idNode = (IdentifierNode) node.getChild(1);

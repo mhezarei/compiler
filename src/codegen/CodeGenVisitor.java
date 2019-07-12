@@ -14,7 +14,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     private PrintStream stream;
     private int labelIndex;
     private String className;
-    private ClassNode classNode;
+    private ClassNode classNode = new ClassNode();
     private boolean returnGenerated;
 
     public CodeGenVisitor(PrintStream stream) {
@@ -127,8 +127,11 @@ public class CodeGenVisitor implements SimpleVisitor {
             case REPEAT_STATEMENT:
                 visitWhileStatementNode(node);
                 break;
-
             case ARGUMENTS:
+                visitArgumentNode(node);
+                break;
+
+
             case BLOCK:
             case BOOLEAN_TYPE:
             case CAST:
@@ -158,6 +161,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         }
     }
 
+
     ////////////////////  My Helpers  /////////////////////////////
 
     /**
@@ -173,6 +177,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     ////////////////////////////////////////////
     ////////////////////////////////////////////
+
     private void visitAllChildren(ASTNode node) throws Exception {
         for (ASTNode child : node.getChildren()) {
             child.accept(this);
@@ -217,6 +222,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     /*Assigns thing at top of stack,
       OR if it's a literal, pushes the literal then assigns that val
       OR if it's an ID loads the ID's value and assigns*/
+
     private void visitAssignNode(ASTNode node) throws Exception {
         //todo "assign" code
         //node -> VAR_USE -> ID
@@ -337,32 +343,26 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
         String methodName = idNode.getValue();
-//        String sig = classNode.getMethodSig(methodName);
-        String sig = methodName;
+        String sig = classNode.getMethodSig(methodName);
+//        String sig = methodName;
         stream.println("  invokestatic " + className + "/" + sig);
         returnGenerated = false;
     }
 
     private void visitMethodDeclarationNode(ASTNode node) throws Exception {
-        //todo "method dec" code
+        //type
+        TypeNode typeNode = (TypeNode) node.getChild(0);
+        String returnType = typeNode.getType().getSignature();
+        //identifier
         IdentifierNode idNode = (IdentifierNode) node.getChild(1);
         String methodName = idNode.getValue();
 
-        TypeNode typeNode = (TypeNode) node.getChild(0);
-        String returnType = typeNode.getType().getSignature();
-
-        stream.println("");
-        stream.println(";");
-        stream.println("; method");
-        stream.println(";");
-
-        stream.print(".method public static " + methodName + "(");
-        node.getChild(1).accept(this);
-        stream.println(")" + returnType);
-
-        stream.println("  .limit locals 10");
-        stream.println("  .limit stack 10");
-
+        stream.print("define " + returnType + " @" + methodName);
+        //arguments
+        node.getChild(2).accept(this);
+        stream.println(" {");
+        stream.println("entry:");
+        //block
         node.getChild(3).accept(this);
 
         if (!returnGenerated) {
@@ -370,7 +370,24 @@ public class CodeGenVisitor implements SimpleVisitor {
             returnGenerated = true;
         }
 
-        stream.println(".end method");
+        stream.println("}");
+    }
+
+    private void visitArgumentNode(ASTNode node) {
+        stream.print("(");
+        ASTNode[] params = node.getChildren().toArray(new ASTNode[0]);
+        for (int i = 0; i < params.length; i++) {
+            ASTNode paramNode = params[i];
+            //type
+            TypeNode paramTypeNode = (TypeNode) paramNode.getChild(0);
+            stream.print(paramTypeNode.getType().getSignature() + " ");
+            //identifier
+            IdentifierNode paramIDNode = (IdentifierNode) paramNode.getChild(1);
+            stream.print("%" + paramIDNode.getValue());
+            if (i > 0 && i < params.length - 1)
+                stream.print(",");
+        }
+        stream.print(")");
     }
 
     private void visitParameterNode(ASTNode node) throws Exception {
