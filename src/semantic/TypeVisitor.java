@@ -90,11 +90,13 @@ public class TypeVisitor implements SimpleVisitor {
     }
 
     private void visitMethodDeclarationNode(ASTNode node) throws Exception {
+        //0 -> 1
         IdentifierNode idNode = (IdentifierNode) node.getChild(1);
         String methodName = idNode.getValue();
 
         StringBuilder sig = new StringBuilder(methodName + "(");
 
+        //seems to wrong
         for (ASTNode paramNode : node.getChild(1).getChildren()) {
             TypeNode typeNode = (TypeNode) paramNode.getChild(1);
             sig.append(typeNode.getType().getSignature());
@@ -123,7 +125,8 @@ public class TypeVisitor implements SimpleVisitor {
     }
 
     private void visitVariableDeclarationNode(ASTNode node) throws Exception {
-        if(node.getChildren().size()<1)
+        //may has not child
+        if(node.getChildren().isEmpty())
             return;
         IdentifierNode idNode = (IdentifierNode) node.getChild(1);
         String id = idNode.getValue();

@@ -39,6 +39,7 @@ public class LocalVarMapVisitor implements SimpleVisitor {
     }
 
     private void visitVariableDeclarationNode(ASTNode node) throws Exception {
+        //0 -> 1 Change
         IdentifierNode idNode = (IdentifierNode) node.getChild(1);
         SymbolInfo si = idNode.getSymbolInfo();
         si.setLocalVarIndex(nextLocalVarIndex);
