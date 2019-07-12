@@ -271,10 +271,10 @@ var_dcl ::=
             RESULT =  new BaseASTNode(NodeType.VARIABLE_DECLARATION);
             RESULT.addChild(t, vdc, vde);
         :}
-    | CONST type:t var_dcl:vd var_dcl_end:vde SEMICOLON
+    | CONST type:t var_dcl_cnt:vdc var_dcl_end:vde SEMICOLON
         {:
             RESULT =  new BaseASTNode(NodeType.VARIABLE_CONST_DECLARATION);
-            RESULT.addChild(t, vd, vde);
+            RESULT.addChild(t, vdc, vde);
         :}
 	| type:t var_dcl_cnt:vdc SEMICOLON
         {:
@@ -282,11 +282,11 @@ var_dcl ::=
             ASTNode vde = new BaseASTNode(NodeType.VARIABLE_DECLARATION);
             RESULT.addChild(t, vdc, vde);
         :}
-	| CONST type:t var_dcl:vd SEMICOLON
+	| CONST type:t var_dcl_cnt:vdc SEMICOLON
         {:
             RESULT =  new BaseASTNode(NodeType.VARIABLE_CONST_DECLARATION);
             ASTNode vde = new BaseASTNode(NodeType.VARIABLE_CONST_DECLARATION);
-            RESULT.addChild(t, vd, vde);
+            RESULT.addChild(t, vdc, vde);
         :};
 
 var_dcl_end ::=
@@ -300,7 +300,9 @@ var_dcl_end ::=
 
 var_dcl_cnt ::=
     identifier:i
-        {: RESULT = i; :}
+        {:
+            RESULT = i;
+        :}
     | identifier:i ASSIGN expr:e
         {:
             RESULT = i;
@@ -314,12 +316,12 @@ block ::=
         {: RESULT = new BaseASTNode(NodeType.BLOCK); :};
 
 block_mid ::=
-    var_dcl:vd block_mid:b
+    block_mid:b var_dcl:vd
         {:
             RESULT = b;
             RESULT.addChild(vd);
         :}
-    | statement:s block_mid:b
+    | block_mid:b statement:s
         {:
             RESULT = b;
             RESULT.addChild(s);

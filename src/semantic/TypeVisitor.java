@@ -97,7 +97,7 @@ public class TypeVisitor implements SimpleVisitor {
         StringBuilder sig = new StringBuilder(methodName + "(");
 
         //seems to wrong
-        for (ASTNode paramNode : node.getChild(1).getChildren()) {
+        for (ASTNode paramNode : node.getChild(2).getChildren()) {
             TypeNode typeNode = (TypeNode) paramNode.getChild(1);
             sig.append(typeNode.getType().getSignature());
         }
@@ -133,6 +133,7 @@ public class TypeVisitor implements SimpleVisitor {
 
         SymbolInfo si = new SymbolInfo(node);
         si.setType(currentType);
+        idNode.setSymbolInfo(si);
 
         symbolTable.put(id, si);
 
