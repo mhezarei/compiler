@@ -23,6 +23,7 @@ public enum NodeType {
     DECREMENT,
     BITWISE_NEGATIVE,
     SIZEOF,
+
     /*Condition operations*/
     LESS_THAN,
     LESS_THAN_OR_EQUAL,
@@ -30,10 +31,12 @@ public enum NodeType {
     GREATER_THAN_OR_EQUAL,
     EQUAL,
     NOT_EQUAL,
+
     /*Logical operations*/
     BOOLEAN_AND,
     BOOLEAN_NOT,
     BOOLEAN_OR,
+
     /*Literals*/
     BOOLEAN_LITERAL,
     CHAR_LITERAL,
@@ -42,6 +45,7 @@ public enum NodeType {
     FLOAT_LITERAL,
     STRING_LITERAL,
     LONG_LITERAL,
+
     /*Types*/
     BOOLEAN_TYPE,
     DOUBLE_TYPE,
@@ -52,6 +56,7 @@ public enum NodeType {
     STRING_TYPE,
     VOID,
     AUTO_TYPE,
+
     /*Declarations*/
     FIELD_DECLARATION,
     LOCAL_VAR_DECLARATION,
@@ -60,12 +65,14 @@ public enum NodeType {
     METHOD_DECLARATION,
     STRUCT_DECLARATION,
     DECLARATIONS,
+
     /*Assignments*/
     ASSIGN,
     ADD_ASSIGN,
     SUB_ASSIGN,
     MULT_ASSIGN,
     DIV_ASSIGN,
+
     /*Statements*/
     EXPRESSION_STATEMENT,
     BREAK_STATEMENT,
