@@ -202,23 +202,30 @@ arguments ::=
     type:t identifier:i
         {:
             RESULT = new BaseASTNode(NodeType.ARGUMENTS);
-            RESULT.addChild(t, i);
+            ASTNode a = new BaseASTNode(NodeType.ARGUMENT);
+            a.addChild(t, i);
+            RESULT.addChild(a);
         :}
     | type:t identifier:i arguments_middle:am
+//        {:
+//            RESULT = am;
+//            ASTNode a = new BaseASTNode(NodeType.ARGUMENT);
+//            a.addChild(t, i);
+//            RESULT.addChild(a);
+//        :}
+    | arguments:as COMMA type:t identifier:i
         {:
-            RESULT = new BaseASTNode(NodeType.ARGUMENTS);
-            RESULT.addChild(t, i, am);
-        :}
-    | arguments:a COMMA type:t identifier:i
-        {:
-            RESULT = a;
-            RESULT.addChild(t, i);
+            RESULT = as;
+            ASTNode a = new BaseASTNode(NodeType.ARGUMENT);
+            a.addChild(t, i);
+            RESULT.addChild(a);
         :}
     | arguments:a COMMA type:t identifier:i arguments_middle:am
-        {:
-            RESULT = a;
-            RESULT.addChild(t, i, am);
-        :};
+//        {:
+//            RESULT = a;
+//            RESULT.addChild(t, i, am);
+//        :}
+;
 
 arguments_middle ::=
     LBRACK RBRACK

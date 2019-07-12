@@ -98,7 +98,7 @@ public class TypeVisitor implements SimpleVisitor {
 
         //seems to wrong
         for (ASTNode paramNode : node.getChild(2).getChildren()) {
-            TypeNode typeNode = (TypeNode) paramNode.getChild(1);
+            TypeNode typeNode = (TypeNode) paramNode.getChild(0);
             sig.append(typeNode.getType().getSignature());
         }
 
