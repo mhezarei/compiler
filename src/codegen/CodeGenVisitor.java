@@ -16,8 +16,6 @@ public class CodeGenVisitor implements SimpleVisitor {
     private String className;
     private ClassNode classNode;
     private boolean returnGenerated;
-    // Fix all of the FIXMEs below.
-
 
     public CodeGenVisitor(PrintStream stream) {
         this.stream = stream;
@@ -220,18 +218,12 @@ public class CodeGenVisitor implements SimpleVisitor {
       OR if it's a literal, pushes the literal then assigns that val
       OR if it's an ID loads the ID's value and assigns*/
     private void visitAssignNode(ASTNode node) throws Exception {
-        //todo need to understand
         //todo "assign" code
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
         SymbolInfo si = idNode.getSymbolInfo();
         int lvIndex = si.getLocalVarIndex();
-
-        List<ASTNode> children = node.getChildren();
-
-        //Push vals of the R value node(s)?
-        for (int i = 1; i < children.size(); i++) {
-            children.get(i).accept(this);
-        }
+        /* Expression node */
+        node.getChild(1).accept(this);
         stream.println("  istore " + lvIndex);
 
     }
