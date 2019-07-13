@@ -575,17 +575,14 @@ public class CodeGenVisitor implements SimpleVisitor {
         //todo must check parameters
         Signature newSig = new Signature(returnType, methodName);
 
-        //Expression
-        node.getChild(1).accept(this);
+        for (ASTNode child : node.getChild(1).getChildren()) {
+            child.getChild(0).accept(this);
+        }
 
         String result = "tmp" + getTemp();
 
         stream.print("\t%"+result+" = call " + returnType + " @" + methodName);
         visitParameterNode(node.getChild(1));
-        if (node.getParent() != null) {
-            //it is an expr
-            node.getChild(1).accept(this);
-        }
 
         returnGenerated = false;
 
@@ -604,8 +601,8 @@ public class CodeGenVisitor implements SimpleVisitor {
             ASTNode paramNode = params[i];
             ASTNode paramValue=paramNode.getChild(0).getChild(0);
             if(paramValue.getNodeType()==NodeType.VAR_USE)
-                paramNode=paramValue.getChild(0);
-            stream.print(paramNode);
+                paramValue=paramValue.getChild(0);
+            stream.print(paramValue);
         }
         stream.println(")");
         returnGenerated = false;

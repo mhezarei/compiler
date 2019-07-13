@@ -1,0 +1,6 @@
+define i32 @fun() {
+entry:
+	%tmp0 = call VOID @fun(1)
+	%a = %tmp0
+  return
+}
