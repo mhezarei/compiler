@@ -31,7 +31,7 @@ public class TypeVisitor implements SimpleVisitor {
                 visitMethodDeclarationNode(node);
                 break;
 
-            case PARAMETER:
+            case ARGUMENT:
                 visitParameterNode(node);
                 break;
 
@@ -105,7 +105,7 @@ public class TypeVisitor implements SimpleVisitor {
     }
 
     private void visitParameterNode(ASTNode node) throws Exception {
-        TypeNode typeNode = (TypeNode) node.getChild(1);
+        TypeNode typeNode = (TypeNode) node.getChild(0);
         currentType = typeNode.getType();
 
         node.getChild(0).accept(this);

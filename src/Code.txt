@@ -2,5 +2,5 @@ function int fun(int a,int b)
 begin
     float a;
     int b;
-    a = 4 + fun();
+    fun(4+a);
 end
