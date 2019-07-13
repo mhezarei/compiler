@@ -2,18 +2,15 @@ package codegen;
 
 import ast.*;
 import semantic.SymbolInfo;
-
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class CodeGenVisitor implements SimpleVisitor {
     private PrintStream stream;
     private int labelIndex;
     private String className;
-    private Set<Signature> signatures = new HashSet<>();
+    private ClassNode classNode = new ClassNode();
     private boolean returnGenerated;
     private Set<Integer> usedTemps = new HashSet<>();
 
@@ -72,6 +69,11 @@ public class CodeGenVisitor implements SimpleVisitor {
                 visitMethodDeclarationNode(node);
                 break;
 
+
+            case PARAMETER:
+                visitParameterNode(node);
+                break;
+
             case RETURN_STATEMENT:
                 visitReturnStatementNode(node);
                 break;
@@ -122,10 +124,6 @@ public class CodeGenVisitor implements SimpleVisitor {
             case ARGUMENT:
             case ARGUMENTS:
                 break;
-            case PARAMETER:
-                visitParameterNode(node);
-                break;
-            case PARAMETERS:
             case STRUCT_DECLARATION:
             case CONTINUE_STATEMENT:
             case FOREACH_STATEMENT:
@@ -136,6 +134,7 @@ public class CodeGenVisitor implements SimpleVisitor {
             case AUTO_TYPE:
             case SWITCH_STATEMENT:
             case CASE_STATEMENT:
+            case PARAMETERS:
             case VARIABLE_CONST_DECLARATION:
             case FOR_STATEMENT:
             case BLOCK:
@@ -209,18 +208,18 @@ public class CodeGenVisitor implements SimpleVisitor {
         switch (e1.getType()) {
             case FLOAT:
             case DOUBLE:
-                result = "f";
+                result="f";
             case LONG:
             case CHAR:
             case INT:
             case BOOL:
-                if (nodeType == NodeType.GREATER_THAN ||
-                        nodeType == NodeType.GREATER_THAN_OR_EQUAL ||
-                        nodeType == NodeType.LESS_THAN ||
-                        nodeType == NodeType.LESS_THAN_OR_EQUAL ||
-                        nodeType == NodeType.EQUAL ||
-                        nodeType == NodeType.NOT_EQUAL)
-                    result = "i";
+                if(nodeType==NodeType.GREATER_THAN||
+                        nodeType==NodeType.GREATER_THAN_OR_EQUAL||
+                        nodeType==NodeType.LESS_THAN||
+                        nodeType==NodeType.LESS_THAN_OR_EQUAL||
+                        nodeType==NodeType.EQUAL||
+                        nodeType==NodeType.NOT_EQUAL)
+                    result="i";
         }
         switch (nodeType) {
             case ADDITION:
@@ -238,12 +237,12 @@ public class CodeGenVisitor implements SimpleVisitor {
         switch (e1.getType()) {
             case FLOAT:
             case DOUBLE:
-                result = result + "u";
+                result=result+"u";
             case LONG:
             case CHAR:
             case INT:
             case BOOL:
-                result = result + "s";
+                    result=result+"s";
         }
 
         switch (nodeType) {
@@ -422,7 +421,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     private void visitClassNode(ASTNode node) throws Exception {
         //todo "class" code
-//        classNode = (ClassNode) node;
+        classNode = (ClassNode) node;
 
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
         className = idNode.getValue();
@@ -478,34 +477,26 @@ public class CodeGenVisitor implements SimpleVisitor {
         //Check the signature
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
         String methodName = idNode.getValue();
-        //todo must detect left hand side of assign
-        TypeNode returnType = new TypeNode(NodeType.VOID, PrimitiveType.VOID);
-        Signature newSig = new Signature(returnType, methodName);
+        String sig = classNode.getMethodSig(methodName);
 
-        //Expression
-        node.getChild(1).accept(this);
+        if(sig==null)
+            throw new Exception(methodName + " not declared");
 
-        stream.print("\tcall " + returnType + " @" + methodName + "(");
-        stream.println(")");
-        if (node.getParent() != null) //is an expr
+        String returnType=sig.split("\\s")[0];
+        String[] params=sig.split("[(]")[1].split(",");
+
+        if(node.getParent()!=null) //is an expr
 
 
         {
             node.getChild(1).accept(this);
         }
 
+        stream.println("  invokestatic " + className + "/" + sig);
         returnGenerated = false;
-    }
-
-    private List<Signature.Argument> visitParameterNode(ASTNode node) throws Exception {
-        //PARAMETER -> EXPR
-        node.getChild(0).accept(this);
-        returnGenerated = false;
-        return null;
     }
 
     private void visitMethodDeclarationNode(ASTNode node) throws Exception {
-
         //type
         TypeNode returnType = (TypeNode) node.getChild(0);
         String returnSig = returnType.getType().getSignature();
@@ -513,20 +504,20 @@ public class CodeGenVisitor implements SimpleVisitor {
         IdentifierNode idNode = (IdentifierNode) node.getChild(1);
         String methodName = idNode.getValue();
 
-        Signature signature = new Signature(returnType, methodName);
-
+        StringBuilder signatureBuilder=new StringBuilder();
         stream.print("define ");
-        stream.print(returnSig + " @" + methodName);
+        signatureBuilder.append(returnSig).append(" @").append(methodName);
         //arguments
-        signature.addArgs(visitArgumentNode(node.getChild(2)));
-        signatures.add(signature);
+        signatureBuilder.append(visitArgumentNode(node.getChild(2)));
+        stream.print(signatureBuilder);
+
+        classNode.putMethodSig(methodName,signatureBuilder.toString());
 
         stream.println(" {");
         stream.println("entry:");
         //block
         node.getChild(3).accept(this);
 
-        //todo return must do
         if (!returnGenerated) {
             stream.println("  return");
             returnGenerated = true;
@@ -535,30 +526,31 @@ public class CodeGenVisitor implements SimpleVisitor {
         stream.println("}");
     }
 
-    private List<Signature.Argument> visitArgumentNode(ASTNode node) throws Exception {
-        List<Signature.Argument> arguments = new ArrayList<>();
-
-        stream.print("(");
+    private String visitArgumentNode(ASTNode node) {
+        StringBuilder builder=new StringBuilder("(");
         ASTNode[] params = node.getChildren().toArray(new ASTNode[0]);
         for (int i = 0; i < params.length; i++) {
             if (i > 0)
-                stream.print(",");
+                builder.append(",");
 
             ASTNode paramNode = params[i];
             //type
             TypeNode paramTypeNode = (TypeNode) paramNode.getChild(0);
-            stream.print(paramTypeNode.getType().getSignature() + " ");
+            builder.append(paramTypeNode.getType().getSignature()).append(" ");
             //identifier
             IdentifierNode paramIDNode = (IdentifierNode) paramNode.getChild(1);
-            stream.print("%" + paramIDNode.getValue());
-
-            Signature.Argument argument = new Signature.Argument(paramTypeNode, paramIDNode.getValue());
-            if (arguments.contains(argument))
-                throw new Exception(paramIDNode.getValue() + " is declared before");
-            arguments.add(argument);
+            builder.append("%").append(paramIDNode.getValue());
         }
-        stream.print(")");
-        return arguments;
+        builder.append(")");
+        return builder.toString();
+    }
+
+    private void visitParameterNode(ASTNode node) {
+        // todo "parameters" code
+        TypeNode typeNode = (TypeNode) node.getChild(1);
+        String typeSig = typeNode.getType().getSignature();
+        stream.print(typeSig);
+        returnGenerated = false;
     }
 
     private void visitReturnStatementNode(ASTNode node) throws Exception {
