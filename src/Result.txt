@@ -1,8 +1,8 @@
 define i32 @fun() {
 entry:
-	%tmp0 = add i32 %b, 3
-	%tmp1 = add i32 %tmp0, 4
-	%tmp2 = add i32 %tmp1, %b
+	%tmp0 = fadd float %a, 3
+	%tmp1 = fadd float %tmp0, 4
+	%tmp2 = fadd float %tmp1, %b
 	%a = %tmp2
   return
 }

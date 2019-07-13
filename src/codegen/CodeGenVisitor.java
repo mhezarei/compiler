@@ -37,6 +37,12 @@ public class CodeGenVisitor implements SimpleVisitor {
             case ARITHMETIC_OR:
             case XOR:
             case MOD:
+            case GREATER_THAN:
+            case GREATER_THAN_OR_EQUAL:
+            case LESS_THAN:
+            case LESS_THAN_OR_EQUAL:
+            case EQUAL:
+            case NOT_EQUAL:
                 twoOperandOperation(node);
                 break;
 
@@ -52,18 +58,6 @@ public class CodeGenVisitor implements SimpleVisitor {
                 visitClassNode(node);
                 break;
 
-            case EQUAL:
-                visitEqualNode(node);
-                break;
-
-            case GREATER_THAN:
-                visitGreaterThanNode(node);
-                break;
-
-            case GREATER_THAN_OR_EQUAL:
-                visitGreaterThanOrEqualNode(node);
-                break;
-
             case IF_STATEMENT:
                 visitIfStatementNode(node);
                 break;
@@ -72,13 +66,6 @@ public class CodeGenVisitor implements SimpleVisitor {
                 visitLiteralNode(node);
                 break;
 
-            case LESS_THAN:
-                visitLessThanNode(node);
-                break;
-
-            case LESS_THAN_OR_EQUAL:
-                visitLessThanOrEqualNode(node);
-                break;
 
             case METHOD_ACCESS:
                 visitMethodAccessNode(node);
@@ -88,9 +75,6 @@ public class CodeGenVisitor implements SimpleVisitor {
                 visitMethodDeclarationNode(node);
                 break;
 
-            case NOT_EQUAL:
-                visitNotEqualNode(node);
-                break;
 
             case PARAMETER:
                 visitParameterNode(node);
@@ -222,12 +206,11 @@ public class CodeGenVisitor implements SimpleVisitor {
         e1.accept(this);
         e2.accept(this);
 
-        String op = getOperation(node.getNodeType());
+        PrimitiveType resultType = checkType(e1, e2, node.getNodeType());
+        //operands are casted now
+        String op = getOperation(node.getNodeType(), e1);
 
         String result = "tmp" + getTemp();
-        PrimitiveType resultType = checkType(e1, e2, node.getNodeType());
-        if (resultType == PrimitiveType.FLOAT || resultType == PrimitiveType.DOUBLE)
-            op = "f" + op;
 
         stream.println("\t%" + result + " = " + op + " " + resultType + " " + e1.getResultName() + ", " + e2.getResultName());
 
@@ -243,14 +226,58 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     }
 
-    private String getOperation(NodeType nodeType) throws Exception {
+    private String getOperation(NodeType nodeType, ExpressionNode e1) throws Exception {
+        String result = "";
+        switch (e1.getType()) {
+            case FLOAT:
+            case DOUBLE:
+                result="f";
+            case LONG:
+            case CHAR:
+            case INT:
+            case BOOL:
+                if(nodeType==NodeType.GREATER_THAN||
+                        nodeType==NodeType.GREATER_THAN_OR_EQUAL||
+                        nodeType==NodeType.LESS_THAN||
+                        nodeType==NodeType.LESS_THAN_OR_EQUAL||
+                        nodeType==NodeType.EQUAL||
+                        nodeType==NodeType.NOT_EQUAL)
+                    result="i";
+        }
         switch (nodeType) {
             case ADDITION:
-                return "add";
+                return result + "add";
+            case SUBTRACTION:
+                return result + "sub";
+            case GREATER_THAN_OR_EQUAL:
+            case GREATER_THAN:
+                result = result + "cmp ";
+                break;
             //todo other operations
         }
 
-        throw new Exception("operation not detected");
+        //Only compares can reach here
+        switch (e1.getType()) {
+            case FLOAT:
+            case DOUBLE:
+                result=result+"u";
+            case LONG:
+            case CHAR:
+            case INT:
+            case BOOL:
+                    result=result+"s";
+        }
+
+        switch (nodeType) {
+            case GREATER_THAN_OR_EQUAL:
+                result = result + "ge";
+                break;
+            case GREATER_THAN:
+                result = result + "gt";
+                break;
+            //todo other operations
+        }
+        return result;
     }
 
     private int getTemp() {
@@ -380,7 +407,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitUnaryMinusNode(ASTNode node) throws Exception {
-
+        //todo
     }
 
     private void visitUnaryPlusNode(ASTNode node) throws Exception {
@@ -433,30 +460,6 @@ public class CodeGenVisitor implements SimpleVisitor {
         //todo
     }
 
-    private void visitEqualNode(ASTNode node) throws Exception {
-        // todo "EQ" code
-    }
-
-    private void visitGreaterThanNode(ASTNode node) throws Exception {
-        // todo "GT" code
-    }
-
-    private void visitGreaterThanOrEqualNode(ASTNode node) throws Exception {
-        // todo "GE" code
-    }
-
-    private void visitNotEqualNode(ASTNode node) throws Exception {
-        // todo "NE" code
-    }
-
-    private void visitLessThanNode(ASTNode node) throws Exception {
-        // todo "LT" code
-    }
-
-    private void visitLessThanOrEqualNode(ASTNode node) throws Exception {
-        // todo "LE" code
-    }
-
     private void visitIfStatementNode(ASTNode node) throws Exception {
         //todo "if" code
         stream.println("; if statement");
@@ -478,22 +481,12 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     }
 
-    private void visitWhileStatementNode(ASTNode node) throws Exception {
+    private void visitWhileStatementNode(ASTNode node) {
         // todo "while" code
     }
 
     private void visitLiteralNode(ASTNode node) throws Exception {
         ((ExpressionNode) node.getParent()).setIsIdentifier();
-    }
-
-    private void visitBooleanLiteralNode(ASTNode node) {
-        //todo "boolean literal" code
-        BooleanLiteralNode boolNode = (BooleanLiteralNode) node;
-        if (boolNode.getValue()) {
-            stream.println("  iconst_1");
-        } else {
-            stream.println("  iconst_0");
-        }
     }
 
     private void visitMethodAccessNode(ASTNode node) throws Exception {
@@ -549,7 +542,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         stream.print(")");
     }
 
-    private void visitParameterNode(ASTNode node) throws Exception {
+    private void visitParameterNode(ASTNode node) {
         // todo "parameters" code
         TypeNode typeNode = (TypeNode) node.getChild(1);
         String typeSig = typeNode.getType().getSignature();

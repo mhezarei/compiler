@@ -1,7 +1,6 @@
 function int fun()
 begin
-    int a;
+    float a;
     int b;
-    a = b + 3 + 4 + b;
-    ##return 0;
+    a = a + 3 + 4 + b;
 end

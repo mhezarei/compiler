@@ -10,6 +10,7 @@ import java.io.*;
 
 public class Compiler {
     public static void main(String[] args) throws Exception {
+        System.out.println(('a' + 1));
         String source = "src/Code.txt";
 
         Compiler compiler = new Compiler(source);
