@@ -175,24 +175,24 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitAllChildren(ASTNode node) throws Exception {
-//        System.out.println("--THE NODE IN VAC IS " + node + " " + node.getNodeType());
-//        System.out.println("--THE CHILDREN ARE " + node.getChildren());
+        System.out.println("--THE NODE IN VAC IS " + node + " " + node.getNodeType());
+        System.out.println("--THE CHILDREN ARE " + node.getChildren());
         for (ASTNode child : node.getChildren()) {
             child.accept(this);
         }
-//        System.out.println("--FINISHED VAC\n");
+        System.out.println("--FINISHED VAC\n");
     }
 
     private void binaryOperation(ASTNode node) throws Exception {
         ExpressionNode parent = (ExpressionNode) node.getParent();
-//        System.out.println("node is " + node);
-//        System.out.println("parent is " + parent);
-//        System.out.println("G parent is " + parent.getParent());
-//        System.out.println("parent child is " + parent.getChildren());
+        System.out.println("node is " + node);
+        System.out.println("parent is " + parent);
+        System.out.println("G parent is " + parent.getParent());
+        System.out.println("parent child is " + parent.getChildren());
         ExpressionNode e1 = (ExpressionNode) node.getChild(0);
-//        System.out.println("first child is " + e1.getChildren());
+        System.out.println("first child is " + e1.getChildren());
         ExpressionNode e2 = (ExpressionNode) node.getChild(1);
-//        System.out.println("second child is " + e2.getChildren());
+        System.out.println("second child is " + e2.getChildren());
 
         e1.accept(this);
         e2.accept(this);
@@ -211,14 +211,14 @@ public class CodeGenVisitor implements SimpleVisitor {
         id.setSymbolInfo(si);
         v.addChild(id);
         v.setParent(parent);
-//        System.out.println("the id node is " + id.toString());
-//        System.out.println("the id node SI is " + id.getSymbolInfo());
-//        System.out.println("the var use node is " + v.toString());
-//        System.out.println("the var use SI node is " + v.getSymbolInfo());
+        System.out.println("the id node is " + id.toString());
+        System.out.println("the id node SI is " + id.getSymbolInfo());
+        System.out.println("the var use node is " + v.toString());
+        System.out.println("the var use SI node is " + v.getSymbolInfo());
         parent.setChildren(v);
         parent.setIsIdentifier();
 
-//        System.out.println("finished the binary op " + node + "\n");
+        System.out.println("finished the binary op " + node + "\n");
     }
 
     private String getOperation(NodeType nodeType, ExpressionNode e1) throws Exception {
@@ -325,6 +325,55 @@ public class CodeGenVisitor implements SimpleVisitor {
             throw new Exception(e2 + " not generated");
 
         switch (nodeType) {
+            case EQUAL:
+            case NOT_EQUAL:
+            case GREATER_THAN:
+            case GREATER_THAN_OR_EQUAL:
+            case LESS_THAN:
+            case LESS_THAN_OR_EQUAL:
+                switch (e1.getType()) {
+                    case INT:
+                    case BOOL:
+                    case CHAR:
+                    case LONG:
+                        switch (e2.getType()) {
+                            case INT:
+                            case CHAR:
+                            case BOOL:
+                            case LONG:
+                                return PrimitiveType.INT;
+                            case DOUBLE:
+                            case FLOAT:
+                                return PrimitiveType.FLOAT;
+                            case STRING:
+                            case VOID:
+                                throw new Exception("can't add");
+                            case AUTO:
+                                //todo
+                        }
+                    case FLOAT:
+                    case DOUBLE:
+                        switch (e2.getType()) {
+                            case INT:
+                            case LONG:
+                            case DOUBLE:
+                            case FLOAT:
+                            case CHAR:
+                            case BOOL:
+                                return PrimitiveType.FLOAT;
+                            case STRING:
+                            case VOID:
+                                throw new Exception("can't add");
+                            case AUTO:
+                                //todo
+                        }
+                    case STRING:
+                    case VOID:
+                        throw new Exception("can't add");
+                    case AUTO:
+                        //todo
+                }
+
             case ADDITION:
             case SUBTRACTION:
             case MULTIPLICATION:
@@ -435,7 +484,7 @@ public class CodeGenVisitor implements SimpleVisitor {
                     throw new Exception("can't add");
                 }
         }
-        throw new Exception("can't add");
+        throw new Exception("general can't add");
     }
 
     private void visitUnaryMinusNode(ASTNode node) throws Exception {
@@ -451,7 +500,7 @@ public class CodeGenVisitor implements SimpleVisitor {
       OR if it's a literal, pushes the literal then assigns that val
       OR if it's an ID loads the ID's value and assigns*/
     private void visitAssignNode(ASTNode node) throws Exception {
-//        System.out.println("assign children are " + node.getChildren());
+        System.out.println("assign children are " + node.getChildren());
         //node -> EXPRESSION -> VAR_USE -> ID
         IdentifierNode idNode = (IdentifierNode) node.getChild(0).getChild(0).getChild(0);
 
@@ -556,7 +605,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
 
     private void visitMethodDeclarationNode(ASTNode node) throws Exception {
-//        System.out.println("IN METHOD DCL THE CHILDREN ARE " + node.getChildren());
+        System.out.println("IN METHOD DCL THE CHILDREN ARE " + node.getChildren());
         //type
         TypeNode returnType = (TypeNode) node.getChild(0);
         String returnSig = returnType.getType().getSignature();
@@ -627,12 +676,12 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitVarUse(ASTNode node) throws Exception {
-//        System.out.println("in VAR_USE");
+        System.out.println("in VAR_USE");
         //todo need to understand
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
-//        System.out.println("id node is " + node.getChild(0));
+        System.out.println("id node is " + node.getChild(0));
         ((ExpressionNode) node.getParent()).setIsIdentifier();
-//        System.out.println("SURVIVED!");
+        System.out.println("SURVIVED!");
         SymbolInfo si = idNode.getSymbolInfo();
         try {
             returnGenerated = false;

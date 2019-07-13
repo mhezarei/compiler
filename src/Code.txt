@@ -4,5 +4,24 @@ begin
     int b;
     b = 2;
     int c = 45 + a;
+    c = b - a;
+    c = b * a;
+    c = b / a;
+    c = b % a;
+    c = b & b;
+    c = b | b;
+    c = b ^ b;
+    bool tb = b == a;
+    tb = b <= a;
+    tb = b >= a;
+    tb = b < a;
+    tb = b < a;
+    tb = b != a;
 
+
+    float df = 2.11;
+    double rd = 2.11121;
+
+    double resd = df + tb;
+    ## resd = resd + 'b';
 end
