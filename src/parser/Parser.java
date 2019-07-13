@@ -2387,7 +2387,7 @@ class CUP$Parser$actions {
 		ASTNode v = (ASTNode)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
             RESULT = new ExpressionNode();
-            ASTNode d = new BaseASTNode(NodeType.DECREMENT);
+            ASTNode d = new BaseASTNode(NodeType.PRE_DECREMENT);
             d.addChild(v);
             v.setParent(d);
             RESULT.addChild(d);
@@ -2406,7 +2406,7 @@ class CUP$Parser$actions {
 		ASTNode v = (ASTNode)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		
             RESULT = new ExpressionNode();
-            ASTNode d = new BaseASTNode(NodeType.DECREMENT);
+            ASTNode d = new BaseASTNode(NodeType.POST_DECREMENT);
             d.addChild(v);
             RESULT.addChild(d);
             v.setParent(d);
@@ -2425,7 +2425,7 @@ class CUP$Parser$actions {
 		ASTNode v = (ASTNode)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
             RESULT = new ExpressionNode();
-            ASTNode i = new BaseASTNode(NodeType.INCREMENT);
+            ASTNode i = new BaseASTNode(NodeType.PRE_INCREMENT);
             i.addChild(v);
             RESULT.addChild(i);
             v.setParent(i);
@@ -2444,7 +2444,7 @@ class CUP$Parser$actions {
 		ASTNode v = (ASTNode)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		
             RESULT = new ExpressionNode();
-            ASTNode i = new BaseASTNode(NodeType.INCREMENT);
+            ASTNode i = new BaseASTNode(NodeType.POST_INCREMENT);
             i.addChild(v);
             RESULT.addChild(i);
             v.setParent(i);
