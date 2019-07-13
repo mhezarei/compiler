@@ -24,32 +24,29 @@ public class CodeGenVisitor implements SimpleVisitor {
     @Override
     public void visit(ASTNode node) throws Exception {
         switch (node.getNodeType()) {
+            case DIVISION:
             case ADDITION:
-                visitAdditionNode(node);
+            case SUBTRACTION:
+            case BOOLEAN_AND:
+            case BOOLEAN_OR:
+            case MULTIPLICATION:
+            case ARITHMETIC_AND:
+            case ARITHMETIC_OR:
+            case XOR:
+            case MOD:
+                twoOperandOperation(node);
                 break;
 
             case ASSIGN:
                 visitAssignNode(node);
                 break;
 
-            case BOOLEAN_AND:
-                visitBooleanAndNode(node);
-                break;
-
             case BOOLEAN_NOT:
                 visitBooleanNotNode(node);
                 break;
 
-            case BOOLEAN_OR:
-                visitBooleanOrNode(node);
-                break;
-
             case CLASS:
                 visitClassNode(node);
-                break;
-
-            case DIVISION:
-                visitDivisionNode(node);
                 break;
 
             case EQUAL:
@@ -88,10 +85,6 @@ public class CodeGenVisitor implements SimpleVisitor {
                 visitMethodDeclarationNode(node);
                 break;
 
-            case MULTIPLICATION:
-                visitMultiplicationNode(node);
-                break;
-
             case NOT_EQUAL:
                 visitNotEqualNode(node);
                 break;
@@ -102,10 +95,6 @@ public class CodeGenVisitor implements SimpleVisitor {
 
             case RETURN_STATEMENT:
                 visitReturnStatementNode(node);
-                break;
-
-            case SUBTRACTION:
-                visitSubtractionNode(node);
                 break;
 
             case UNARY_MINUS:
@@ -129,8 +118,45 @@ public class CodeGenVisitor implements SimpleVisitor {
 
             case EXPRESSION_STATEMENT:
                 visitExpressionNode(node);
-
-
+                break;
+            case DECREMENT:
+                //todo;
+                break;
+            case INCREMENT:
+                //todo
+                break;
+            case SIZEOF:
+                //todo
+                break;
+            case ADD_ASSIGN:
+                //todo
+                break;
+            case DIV_ASSIGN:
+                //todo
+                break;
+            case SUB_ASSIGN:
+                //todo
+                break;
+            case MULT_ASSIGN:
+                //todo
+                break;
+            case BITWISE_NEGATIVE:
+                //todo
+                break;
+            case STRUCT_DECLARATION:
+            case CONTINUE_STATEMENT:
+            case FOREACH_STATEMENT:
+            case BREAK_STATEMENT:
+            case STRING_TYPE:
+            case FLOAT_TYPE:
+            case LONG_TYPE:
+            case AUTO_TYPE:
+            case SWITCH_STATEMENT:
+            case CASE_STATEMENT:
+            case PARAMETERS:
+            case VARIABLE_CONST_DECLARATION:
+            case FOR_STATEMENT:
+            case ARGUMENT:
             case BLOCK:
             case BOOLEAN_TYPE:
             case CAST:
@@ -185,7 +211,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         }
     }
 
-    private void visitAdditionNode(ASTNode node) throws Exception {
+    private void twoOperandOperation(ASTNode node) throws Exception {
         ExpressionNode parent = (ExpressionNode) node.getParent();
         ExpressionNode e1 = (ExpressionNode) node.getChild(0);
         ExpressionNode e2 = (ExpressionNode) node.getChild(1);
@@ -193,21 +219,35 @@ public class CodeGenVisitor implements SimpleVisitor {
         e1.accept(this);
         e2.accept(this);
 
+        String op = getOperation(node.getNodeType());
 
         String result = "tmp" + getTemp();
-        PrimitiveType resultType=checkType(e1,e2);
+        PrimitiveType resultType = checkType(e1, e2, node.getNodeType());
+        if (resultType == PrimitiveType.FLOAT || resultType == PrimitiveType.DOUBLE)
+            op = "f" + op;
 
-        stream.println("\t" + result + " = add " + resultType + " " + e1.getResultName() + ", " + e2.getResultName());
+        stream.println("\t%" + result + " = " + op + " " + resultType + " " + e1.getResultName() + ", " + e2.getResultName());
 
         ASTNode v = new BaseASTNode(NodeType.VAR_USE);
         ASTNode id = new IdentifierNode(result);
-        SymbolInfo si=new SymbolInfo(id);
+        SymbolInfo si = new SymbolInfo(id);
         si.setType(resultType);
         id.setSymbolInfo(si);
         v.addChild(id);
         v.setParent(parent);
         parent.setChildren(v);
         parent.setIsIdentifier();
+
+    }
+
+    private String getOperation(NodeType nodeType) throws Exception {
+        switch (nodeType) {
+            case ADDITION:
+                return "add";
+            //todo other operations
+        }
+
+        throw new Exception("operation not detected");
     }
 
     private int getTemp() {
@@ -215,170 +255,145 @@ public class CodeGenVisitor implements SimpleVisitor {
         return 1;
     }
 
-    private PrimitiveType checkType(ExpressionNode e1, ExpressionNode e2) throws Exception {
+    private PrimitiveType checkType(ExpressionNode e1, ExpressionNode e2, NodeType nodeType) throws Exception {
+        //todo reduse complexity
         //todo should cast
         if (!e1.isIdentifier())
             throw new Exception(e1 + " not generated");
         if (!e2.isIdentifier())
             throw new Exception(e2 + " not generated");
 
-        switch (e1.getType()) {
-            case INT:
-                switch (e2.getType()) {
+        switch (nodeType) {
+            case ADDITION:
+            case SUBTRACTION:
+            case MULTIPLICATION:
+            case DIVISION:
+                switch (e1.getType()) {
                     case INT:
-                        return PrimitiveType.INT;
-                    case CHAR:
-                        return PrimitiveType.CHAR;
-                    case LONG:
-                        return PrimitiveType.LONG;
-                    case DOUBLE:
-                        return PrimitiveType.DOUBLE;
-                    case FLOAT:
-                        return PrimitiveType.FLOAT;
+                        switch (e2.getType()) {
+                            case INT:
+                                return PrimitiveType.INT;
+                            case CHAR:
+                                return PrimitiveType.CHAR;
+                            case LONG:
+                                return PrimitiveType.LONG;
+                            case DOUBLE:
+                                return PrimitiveType.DOUBLE;
+                            case FLOAT:
+                                return PrimitiveType.FLOAT;
+                            case BOOL:
+                            case STRING:
+                            case VOID:
+                                throw new Exception("can't add");
+                            case AUTO:
+                                //todo
+                        }
                     case BOOL:
-                    case STRING:
-                    case VOID:
                         throw new Exception("can't add");
-                    case AUTO:
-                        //todo
-                }
-            case BOOL:
-                throw new Exception("can't add");
-            case CHAR:
-                switch (e2.getType()) {
-                    case INT:
-                        return PrimitiveType.CHAR;
                     case CHAR:
-                        return PrimitiveType.CHAR;
-                    case LONG:
-                    case DOUBLE:
-                    case FLOAT:
-                    case BOOL:
-                    case STRING:
-                    case VOID:
-                        throw new Exception("can't add");
-                    case AUTO:
-                        //todo
-                }
+                        switch (e2.getType()) {
+                            case INT:
+                                return PrimitiveType.CHAR;
+                            case CHAR:
+                                return PrimitiveType.CHAR;
+                            case LONG:
+                            case DOUBLE:
+                            case FLOAT:
+                            case BOOL:
+                            case STRING:
+                            case VOID:
+                                throw new Exception("can't add");
+                            case AUTO:
+                                //todo
+                        }
 
-            case LONG:
-                switch (e2.getType()) {
-                    case INT:
-                        return PrimitiveType.LONG;
                     case LONG:
-                        return PrimitiveType.LONG;
-                    case DOUBLE:
-                        return PrimitiveType.DOUBLE;
-                    case FLOAT:
-                        return PrimitiveType.FLOAT;
-                    case BOOL:
-                    case CHAR:
-                    case STRING:
-                    case VOID:
-                        throw new Exception("can't add");
-                    case AUTO:
-                        //todo
-                }
+                        switch (e2.getType()) {
+                            case INT:
+                                return PrimitiveType.LONG;
+                            case LONG:
+                                return PrimitiveType.LONG;
+                            case DOUBLE:
+                                return PrimitiveType.DOUBLE;
+                            case FLOAT:
+                                return PrimitiveType.FLOAT;
+                            case BOOL:
+                            case CHAR:
+                            case STRING:
+                            case VOID:
+                                throw new Exception("can't add");
+                            case AUTO:
+                                //todo
+                        }
 
-            case FLOAT:
-                switch (e2.getType()) {
-                    case INT:
-                        return PrimitiveType.FLOAT;
-                    case LONG:
-                        return PrimitiveType.FLOAT;
-                    case DOUBLE:
-                        return PrimitiveType.DOUBLE;
                     case FLOAT:
-                        return PrimitiveType.FLOAT;
-                    case CHAR:
-                    case BOOL:
-                    case STRING:
-                    case VOID:
-                        throw new Exception("can't add");
-                    case AUTO:
-                        //todo
-                }
-            case DOUBLE:
-                switch (e2.getType()) {
-                    case INT:
-                    case LONG:
+                        switch (e2.getType()) {
+                            case INT:
+                                return PrimitiveType.FLOAT;
+                            case LONG:
+                                return PrimitiveType.FLOAT;
+                            case DOUBLE:
+                                return PrimitiveType.DOUBLE;
+                            case FLOAT:
+                                return PrimitiveType.FLOAT;
+                            case CHAR:
+                            case BOOL:
+                            case STRING:
+                            case VOID:
+                                throw new Exception("can't add");
+                            case AUTO:
+                                //todo
+                        }
                     case DOUBLE:
-                    case FLOAT:
-                        return PrimitiveType.DOUBLE;
-                    case CHAR:
-                    case BOOL:
-                    case STRING:
-                    case VOID:
-                        throw new Exception("can't add");
-                    case AUTO:
-                        //todo
-                }
+                        switch (e2.getType()) {
+                            case INT:
+                            case LONG:
+                            case DOUBLE:
+                            case FLOAT:
+                                return PrimitiveType.DOUBLE;
+                            case CHAR:
+                            case BOOL:
+                            case STRING:
+                            case VOID:
+                                throw new Exception("can't add");
+                            case AUTO:
+                                //todo
+                        }
 
-            case STRING:
-            case VOID:
-                throw new Exception("can't add");
-            case AUTO:
-                //todo
+                    case STRING:
+                    case VOID:
+                        throw new Exception("can't add");
+                    case AUTO:
+                        //todo
+                }
+                //todo other operations
         }
         return PrimitiveType.INT;
     }
 
-    private void visitSubtractionNode(ASTNode node) throws Exception {
-        //todo "sub" code
-        visitAllChildren(node);
-        stream.println("  isub");
-    }
-
-    private void visitDivisionNode(ASTNode node) throws Exception {
-        //todo "div" code
-        visitAllChildren(node);
-        stream.println("  idiv");
-    }
-
-    private void visitMultiplicationNode(ASTNode node) throws Exception {
-        // todo "mult" code
-        visitAllChildren(node);
-        stream.println("  imul");
-    }
-
     private void visitUnaryMinusNode(ASTNode node) throws Exception {
-        //todo "umines" code
-        visitAllChildren(node);
-        stream.println("  ineg");
+
     }
 
     private void visitUnaryPlusNode(ASTNode node) throws Exception {
         visitAllChildren(node);
     }
 
+
     /*Assigns thing at top of stack,
       OR if it's a literal, pushes the literal then assigns that val
       OR if it's an ID loads the ID's value and assigns*/
-
     private void visitAssignNode(ASTNode node) throws Exception {
-        //todo "assign" code
         //node -> EXPRESSION -> VAR_USE -> ID
         IdentifierNode idNode = (IdentifierNode) node.getChild(0).getChild(0).getChild(0);
         SymbolInfo si = idNode.getSymbolInfo();
         if (si == null)
             throw new Exception(idNode.getValue() + " not declared");
-        int lvIndex = si.getLocalVarIndex();
         /* Expression node */
         node.getChild(1).accept(this);
-        stream.println("  istore ");
+        IdentifierNode exprNode = (IdentifierNode) node.getChild(1).getChild(0).getChild(0);
+        stream.println("\t" + idNode + " = " + exprNode);
 
-    }
-
-    private void visitBooleanAndNode(ASTNode node) throws Exception {
-        // TODO "boolAnd" code
-    }
-
-    private void visitBooleanNotNode(ASTNode node) throws Exception {
-        // todo "boolNot" code
-    }///////////
-
-    private void visitBooleanOrNode(ASTNode node) throws Exception {
-        // todo "boolOr" code
     }
 
     private void visitClassNode(ASTNode node) throws Exception {
@@ -400,6 +415,10 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         node.getChild(1).accept(this);
 
+    }
+
+    private void visitBooleanNotNode(ASTNode node) {
+        //todo
     }
 
     private void visitEqualNode(ASTNode node) throws Exception {

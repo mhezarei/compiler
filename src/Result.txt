@@ -1,6 +1,6 @@
 define i32 @fun() {
 entry:
-	tmp1 = add i32 %b, 3
-  istore 
+	%tmp1 = add i32 %b, 3
+	%a = %tmp1
   return
 }
