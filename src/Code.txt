@@ -1,6 +1,6 @@
-function int fun()
+function int fun(int a,int b)
 begin
     float a;
     int b;
-    a = a + 3 + 4 + b;
+    a = 4 + fun();
 end
