@@ -13,7 +13,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     private PrintStream stream;
     private int labelIndex;
     private String className;
-    private Set<Signature> signatures = new HashSet<>();
+    private Set<Signature> signatures=new HashSet<>();
     private boolean returnGenerated;
     private Set<Integer> usedTemps = new HashSet<>();
 
@@ -24,6 +24,10 @@ public class CodeGenVisitor implements SimpleVisitor {
     @Override
     public void visit(ASTNode node) throws Exception {
         switch (node.getNodeType()) {
+	        case ASSIGN:
+		        visitAssignNode(node);
+		        break;
+
             case DIVISION:
             case ADDITION:
             case SUBTRACTION:
@@ -40,15 +44,18 @@ public class CodeGenVisitor implements SimpleVisitor {
             case LESS_THAN_OR_EQUAL:
             case EQUAL:
             case NOT_EQUAL:
-                binaryOperation(node);
-                break;
-
-            case ASSIGN:
-                visitAssignNode(node);
+                visitBinaryOperation(node);
                 break;
 
             case BOOLEAN_NOT:
-                visitBooleanNotNode(node);
+	        case UNARY_PLUS:
+	        case UNARY_MINUS:
+	        case BITWISE_NEGATIVE:
+            case POST_DECREMENT:
+            case POST_INCREMENT:
+            case PRE_DECREMENT:
+            case PRE_INCREMENT:
+                visitUnaryOperation(node);
                 break;
 
             case CLASS:
@@ -63,7 +70,6 @@ public class CodeGenVisitor implements SimpleVisitor {
                 visitLiteralNode(node);
                 break;
 
-
             case METHOD_ACCESS:
                 visitMethodAccessNode(node);
                 break;
@@ -72,54 +78,39 @@ public class CodeGenVisitor implements SimpleVisitor {
                 visitMethodDeclarationNode(node);
                 break;
 
+            case PARAMETER:
+                visitParameterNode(node);
+                break;
+
             case RETURN_STATEMENT:
                 visitReturnStatementNode(node);
                 break;
-
-            case UNARY_MINUS:
-                visitUnaryMinusNode(node);
-                break;
-
-            case UNARY_PLUS:
-                visitUnaryPlusNode(node);
-                break;
-
-            case VAR_USE:
+	        case VAR_USE:
                 visitVarUse(node);
                 break;
 
-            case REPEAT_STATEMENT:
+	        case REPEAT_STATEMENT:
                 visitWhileStatementNode(node);
                 break;
-            case ARGUMENTS:
+	        case ARGUMENTS:
                 visitArgumentNode(node);
                 break;
-
-            case EXPRESSION_STATEMENT:
+	        case EXPRESSION_STATEMENT:
                 visitExpressionNode(node);
                 break;
-            case DECREMENT:
-                //todo;
-                break;
-            case INCREMENT:
+	        case SIZEOF:
                 //todo
                 break;
-            case SIZEOF:
+	        case ADD_ASSIGN:
                 //todo
                 break;
-            case ADD_ASSIGN:
+	        case DIV_ASSIGN:
                 //todo
                 break;
-            case DIV_ASSIGN:
+	        case SUB_ASSIGN:
                 //todo
                 break;
-            case SUB_ASSIGN:
-                //todo
-                break;
-            case MULT_ASSIGN:
-                //todo
-                break;
-            case BITWISE_NEGATIVE:
+	        case MULT_ASSIGN:
                 //todo
                 break;
             case STRUCT_DECLARATION:
@@ -148,13 +139,8 @@ public class CodeGenVisitor implements SimpleVisitor {
             case NULL_LITERAL:
             case INT_TYPE:
             case LOCAL_VAR_DECLARATION:
-            case POST_DECREMENT:
-            case POST_INCREMENT:
-            case PRE_DECREMENT:
-            case PRE_INCREMENT:
             case VARIABLE_DECLARATION:
             case VOID:
-            case PARAMETER:
             default:
                 visitAllChildren(node);
         }
@@ -179,7 +165,11 @@ public class CodeGenVisitor implements SimpleVisitor {
         System.out.println("--FINISHED VAC\n");
     }
 
-    private void binaryOperation(ASTNode node) throws Exception {
+    private void visitUnaryOperation(ASTNode node) {
+
+    }
+
+    private void visitBinaryOperation(ASTNode node) throws Exception {
         ExpressionNode parent = (ExpressionNode) node.getParent();
         System.out.println("node is " + node);
         System.out.println("parent is " + parent);
@@ -195,7 +185,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         PrimitiveType resultType = checkType(e1, e2, node.getNodeType());
         // operands are casted now
-        String op = getOperation(node.getNodeType(), e1);
+        String op = getBinaryOperationCommand(node.getNodeType(), e1);
         String result = "tmp" + getTemp();
 
         stream.println("\t%" + result + " = " + op + " " + resultType + " " + e1.getResultName() + ", " + e2.getResultName());
@@ -217,7 +207,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         System.out.println("finished the binary op " + node + "\n");
     }
 
-    private String getOperation(NodeType nodeType, ExpressionNode e1) throws Exception {
+    private String getBinaryOperationCommand(NodeType nodeType, ExpressionNode e1) throws Exception {
         String result = "";
 
         switch (e1.getType()) {
@@ -667,7 +657,6 @@ public class CodeGenVisitor implements SimpleVisitor {
         stream.print(")");
         return arguments;
     }
-
 
     private void visitReturnStatementNode(ASTNode node) throws Exception {
         // todo "return" code

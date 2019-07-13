@@ -623,7 +623,7 @@ expr ::=
     | DEC variable:v
         {:
             RESULT = new ExpressionNode();
-            ASTNode d = new BaseASTNode(NodeType.DECREMENT);
+            ASTNode d = new BaseASTNode(NodeType.PRE_DECREMENT);
             d.addChild(v);
             v.setParent(d);
             RESULT.addChild(d);
@@ -632,7 +632,7 @@ expr ::=
     | variable:v DEC
         {:
             RESULT = new ExpressionNode();
-            ASTNode d = new BaseASTNode(NodeType.DECREMENT);
+            ASTNode d = new BaseASTNode(NodeType.POST_DECREMENT);
             d.addChild(v);
             RESULT.addChild(d);
             v.setParent(d);
@@ -641,7 +641,7 @@ expr ::=
     | INC variable:v
         {:
             RESULT = new ExpressionNode();
-            ASTNode i = new BaseASTNode(NodeType.INCREMENT);
+            ASTNode i = new BaseASTNode(NodeType.PRE_INCREMENT);
             i.addChild(v);
             RESULT.addChild(i);
             v.setParent(i);
@@ -650,7 +650,7 @@ expr ::=
     | variable:v INC
         {:
             RESULT = new ExpressionNode();
-            ASTNode i = new BaseASTNode(NodeType.INCREMENT);
+            ASTNode i = new BaseASTNode(NodeType.POST_INCREMENT);
             i.addChild(v);
             RESULT.addChild(i);
             v.setParent(i);

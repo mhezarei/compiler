@@ -22,7 +22,7 @@ begin
     float df = 2.11;
     double rd = 2.11121;
 
-    double resd = 2.11%3.11111;
+    double resd = 2*3;
     char ch = 'a';
     string str = "asdasd";
 end
