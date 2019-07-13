@@ -1,7 +1,24 @@
-function int start(int a)
-    begin
-        int a = 1 + 2;
-        int b;
-        a = b + 2;
-        start();
-    end
+function int fun()
+begin
+    int a;
+    int b = 5;
+
+    float c = 2.33;
+    float d;
+    d = 34.5;
+    float e = c;
+    float f;
+    f = b;
+    a = c;
+
+    bool g;
+    bool h = false;
+    bool i;
+    g = true;
+    i = g * 8;
+    g = f + 2;
+    a = 2 + (5 * 2);
+    f = 2 + 4;
+
+    return 0;
+end

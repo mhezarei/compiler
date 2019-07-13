@@ -1,6 +1,3 @@
 implement long (64bit integers)
 
 implement comments
-
-implement prefix and postfix increment and decrement
-

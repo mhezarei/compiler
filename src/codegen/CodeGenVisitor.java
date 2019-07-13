@@ -1,24 +1,20 @@
 package codegen;
 
-
 import ast.*;
 import semantic.SymbolInfo;
 
+import java.io.FileWriter;
+import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.List;
 
-/**
- * An AST visitor which generates Jasmin code.
- */
 public class CodeGenVisitor implements SimpleVisitor {
-    private PrintStream stream;
+    private FileWriter fw;
     private int labelIndex;
     private String className;
-    private ClassNode classNode = new ClassNode();
     private boolean returnGenerated;
 
-    public CodeGenVisitor(PrintStream stream) {
-        this.stream = stream;
+    public CodeGenVisitor(FileWriter fw) {
+        this.fw = fw;
     }
 
     @Override
@@ -46,10 +42,6 @@ public class CodeGenVisitor implements SimpleVisitor {
 
             case BOOLEAN_OR:
                 visitBooleanOrNode(node);
-                break;
-
-            case CLASS:
-                visitClassNode(node);
                 break;
 
             case DIVISION:
@@ -127,35 +119,88 @@ public class CodeGenVisitor implements SimpleVisitor {
             case REPEAT_STATEMENT:
                 visitWhileStatementNode(node);
                 break;
-            case ARGUMENTS:
-                visitArgumentNode(node);
+
+            case CHAR_LITERAL:
+                visitCharLiteralNode(node);
                 break;
 
+            case CHAR_TYPE:
+                visitCharTypeNode(node);
+                break;
+
+            case BOOLEAN_TYPE:
+                visitBooleanTypeNode(node);
+                break;
+
+            case DOUBLE_TYPE:
+                visitDoubleTypeNode(node);
+                break;
+
+            case FLOAT_LITERAL:
+                visitFloatLiteralNode(node);
+                break;
+
+            case IDENTIFIER:
+                visitIDNode(node);
+                break;
+
+            case INT_TYPE:
+                visitIntTypeNode(node);
+                break;
+
+            case NULL_LITERAL:
+                visitNullLiteralNode(node);
+                break;
+
+            case POST_DECREMENT:
+                visitPostDecNode(node);
+                break;
+
+            case POST_INCREMENT:
+                visitPostIncNode(node);
+                break;
+
+            case PRE_DECREMENT:
+                visitPreDecNode(node);
+                break;
+
+            case PRE_INCREMENT:
+                visitPreIncNode(node);
+                break;
+
+            case STRING_LITERAL:
+                visitStringLiteralNode(node);
+                break;
+
+            case VOID:
+                visitVoidNode(node);
+                break;
+
+            case VARIABLE_DECLARATION:
+                break;
+
+            case LOCAL_VAR_DECLARATION:
+                break;
+
+            case ARGUMENTS:
+                break;
 
             case BLOCK:
-            case BOOLEAN_TYPE:
-            case CAST:
-            case CHAR_LITERAL:
-            case CHAR_TYPE:
-            case CLASS_BODY:
-            case START:
+                visitBlockNode(node);
+                break;
+
             case DECLARATIONS:
-            case DOUBLE_TYPE:
+                break;
+
             case EMPTY_STATEMENT:
+                break;
+
             case EXPRESSION_STATEMENT:
+                break;
+
             case FIELD_DECLARATION:
-            case FLOAT_LITERAL:
-            case IDENTIFIER:
-            case INT_TYPE:
-            case LOCAL_VAR_DECLARATION:
-            case NULL_LITERAL:
-            case POST_DECREMENT:
-            case POST_INCREMENT:
-            case PRE_DECREMENT:
-            case PRE_INCREMENT:
-            case STRING_LITERAL:
-            case VARIABLE_DECLARATION:
-            case VOID:
+                break;
+
             default:
                 visitAllChildren(node);
         }
@@ -163,21 +208,19 @@ public class CodeGenVisitor implements SimpleVisitor {
 
 
     ////////////////////  My Helpers  /////////////////////////////
-
     /**
      * Output the code to push this node's resulting value onto the stack
      */
     private int getVarIndexFromIDNode(ASTNode idNode) {
         return ((IdentifierNode) idNode).getSymbolInfo().getLocalVarIndex();
     }
-
     private int getValueFromIntNode(ASTNode intLitNode) {
         return ((IntegerLiteralNode) intLitNode).getValue();
     }
 
-    ////////////////////////////////////////////
-    ////////////////////////////////////////////
 
+    ////////////////////////////////////////////
+    ////////////////////////////////////////////
     private void visitAllChildren(ASTNode node) throws Exception {
         for (ASTNode child : node.getChildren()) {
             child.accept(this);
@@ -185,133 +228,154 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitAdditionNode(ASTNode node) throws Exception {
-        //todo "add" code
+        System.out.println("{{ADDITION}}:");
         visitAllChildren(node);
-        stream.println("  iadd");
 
+        if (node.getChild(0) instanceof FloatLiteralNode && node.getChild(1) instanceof FloatLiteralNode) {
+            fw.write("fadd ");
+        } else if (node.getChild(0) instanceof IntegerLiteralNode && node.getChild(1) instanceof IntegerLiteralNode) {
+            fw.write("add ");
+        }
+
+        fw.write("fadd i32 %tmp, %z");
     }
-
     private void visitSubtractionNode(ASTNode node) throws Exception {
         //todo "sub" code
+        System.out.println("node is " + node);
+        System.out.println("children are" + node.getChildren());
         visitAllChildren(node);
-        stream.println("  isub");
+        System.out.println("  isub");
     }
 
     private void visitDivisionNode(ASTNode node) throws Exception {
         //todo "div" code
+        System.out.println("node is " + node);
+        System.out.println("children are" + node.getChildren());
         visitAllChildren(node);
-        stream.println("  idiv");
+        System.out.println("  idiv");
     }
 
     private void visitMultiplicationNode(ASTNode node) throws Exception {
         // todo "mult" code
+        System.out.println("node is " + node);
+        System.out.println("children are" + node.getChildren());
         visitAllChildren(node);
-        stream.println("  imul");
+        System.out.println("  imul");
     }
 
     private void visitUnaryMinusNode(ASTNode node) throws Exception {
         //todo "umines" code
+        System.out.println("node is " + node);
+        System.out.println("children are" + node.getChildren());
         visitAllChildren(node);
-        stream.println("  ineg");
+        System.out.println("  ineg");
     }
 
     private void visitUnaryPlusNode(ASTNode node) throws Exception {
+        System.out.println("node is " + node);
+        System.out.println("children are" + node.getChildren());
         visitAllChildren(node);
+        System.out.println("  iplus");
     }
+
 
     /*Assigns thing at top of stack,
       OR if it's a literal, pushes the literal then assigns that val
       OR if it's an ID loads the ID's value and assigns*/
-
     private void visitAssignNode(ASTNode node) throws Exception {
+        System.out.println("in assign node");
+        System.out.println("node is " + node);
+        System.out.println("children are " + node.getChildren());
         //todo "assign" code
-        //node -> VAR_USE -> ID
         IdentifierNode idNode = (IdentifierNode) node.getChild(0).getChild(0);
         SymbolInfo si = idNode.getSymbolInfo();
-        try {
-            int lvIndex = si.getLocalVarIndex();
-            /* Expression node */
-            node.getChild(1).accept(this);
-            stream.println("  istore ");
-        } catch (NullPointerException e) {
-            throw new Exception(idNode.getValue() + " not declared");
-        }
+        int lvIndex = si.getLocalVarIndex();
 
+        /* Expression node */
+        node.getChild(1).accept(this);
+        System.out.println("  istore " + lvIndex);
+
+        System.out.println("assign node finished\n");
     }
 
     private void visitBooleanAndNode(ASTNode node) throws Exception {
         // TODO "boolAnd" code
+        System.out.println("node is " + node);
+        System.out.println("children are" + node.getChildren());
+        visitAllChildren(node);
     }
-
     private void visitBooleanNotNode(ASTNode node) throws Exception {
         // todo "boolNot" code
-    }///////////
+        System.out.println("node is " + node);
+        System.out.println("children are" + node.getChildren());
+        visitAllChildren(node);
+    }
 
     private void visitBooleanOrNode(ASTNode node) throws Exception {
         // todo "boolOr" code
-    }
-
-    private void visitClassNode(ASTNode node) throws Exception {
-        //todo "class" code
-        classNode = (ClassNode) node;
-
-        IdentifierNode idNode = (IdentifierNode) node.getChild(0);
-        className = idNode.getValue();
-
-        stream.println(".class public " + className);
-        stream.println(".super java/lang/Object");
-        stream.println("");
-
-        outputDefaultConstructor();
-        outputMainMethod();
-        outputPrintlnMethod();
-
-        returnGenerated = false;
-
-        node.getChild(1).accept(this);
-
+        System.out.println("node is " + node);
+        System.out.println("children are" + node.getChildren());
+        visitAllChildren(node);
     }
 
     private void visitEqualNode(ASTNode node) throws Exception {
         // todo "EQ" code
+        System.out.println("node is " + node);
+        System.out.println("children are" + node.getChildren());
+        visitAllChildren(node);
     }
 
     private void visitGreaterThanNode(ASTNode node) throws Exception {
         // todo "GT" code
+        System.out.println("node is " + node);
+        System.out.println("children are" + node.getChildren());
+        visitAllChildren(node);
     }
 
     private void visitGreaterThanOrEqualNode(ASTNode node) throws Exception {
         // todo "GE" code
+        System.out.println("node is " + node);
+        System.out.println("children are" + node.getChildren());
+        visitAllChildren(node);
     }
 
     private void visitNotEqualNode(ASTNode node) throws Exception {
         // todo "NE" code
+        System.out.println("node is " + node);
+        System.out.println("children are" + node.getChildren());
+        visitAllChildren(node);
     }
 
     private void visitLessThanNode(ASTNode node) throws Exception {
         // todo "LT" code
+        System.out.println("node is " + node);
+        System.out.println("children are" + node.getChildren());
+        visitAllChildren(node);
     }
 
     private void visitLessThanOrEqualNode(ASTNode node) throws Exception {
         // todo "LE" code
+        System.out.println("node is " + node);
+        System.out.println("children are" + node.getChildren());
+        visitAllChildren(node);
     }
 
     private void visitIfStatementNode(ASTNode node) throws Exception {
         //todo "if" code
-        stream.println("; if statement");
+        System.out.println("; if statement");
         node.getChild(0).accept(this); //predicate
-        stream.println("  iconst_0");
+        System.out.println("  iconst_0");
         String endIfLabel = generateLabel();
-        stream.println("ifeq " + endIfLabel);//if predicate false, then skip the "do if true" block
+        System.out.println("ifeq " + endIfLabel);//if predicate false, then skip the "do if true" block
 
 
         node.getChild(0).accept(this); //print the "do if true" block
-        stream.println("  goto " + endIfLabel); //bypass the "do If True" Block
+        System.out.println("  goto " + endIfLabel); //bypass the "do If True" Block
 
         if (node.getChildren().size() == 3) //We have an else statement
         {
             String elseLabel = generateLabel();
-            stream.println(elseLabel); //The else block
+            System.out.println(elseLabel); //The else block
             node.getChild(2).accept(this);
         }
 
@@ -324,78 +388,65 @@ public class CodeGenVisitor implements SimpleVisitor {
     private void visitIntegerLiteralNode(ASTNode node) {
         //todo "Integer literal" code
         int val = getValueFromIntNode(node);
-        stream.println("  ldc " + val);
+        System.out.println("  ldc " + val);
     }
 
     private void visitBooleanLiteralNode(ASTNode node) {
         //todo "boolean literal" code
         BooleanLiteralNode boolNode = (BooleanLiteralNode) node;
         if (boolNode.getValue()) {
-            stream.println("  iconst_1");
+            System.out.println("  iconst_1");
         } else {
-            stream.println("  iconst_0");
+            System.out.println("  iconst_0");
         }
     }
 
     private void visitMethodAccessNode(ASTNode node) throws Exception {
-        //todo need to understand
-        node.getChild(1).accept(this);
-
-        IdentifierNode idNode = (IdentifierNode) node.getChild(0);
-        String methodName = idNode.getValue();
-        String sig = classNode.getMethodSig(methodName);
-//        String sig = methodName;
-        stream.println("  invokestatic " + className + "/" + sig);
-        returnGenerated = false;
+        //todo
     }
 
     private void visitMethodDeclarationNode(ASTNode node) throws Exception {
-        //type
+        System.out.println("in method_dcl");
+        //todo "method dec" code
+        System.out.println("node is " + node);
+        System.out.println("children are " + node.getChildren());
         TypeNode typeNode = (TypeNode) node.getChild(0);
         String returnType = typeNode.getType().getSignature();
-        //identifier
+
         IdentifierNode idNode = (IdentifierNode) node.getChild(1);
         String methodName = idNode.getValue();
 
-        stream.print("define " + returnType + " @" + methodName);
-        //arguments
-        node.getChild(2).accept(this);
-        stream.println(" {");
-        stream.println("entry:");
-        //block
+        System.out.println();
+        System.out.println(";");
+        System.out.println("; method");
+        System.out.println(";");
+
+        System.out.print(".method public static " + methodName + "(");
+        node.getChild(1).accept(this);
+        System.out.println(")" + returnType);
+
+        System.out.println("  .limit locals 10");
+        System.out.println("  .limit stack 10");
+
         node.getChild(3).accept(this);
 
         if (!returnGenerated) {
-            stream.println("  return");
+            System.out.println("  return");
             returnGenerated = true;
         }
 
-        stream.println("}");
-    }
-
-    private void visitArgumentNode(ASTNode node) {
-        stream.print("(");
-        ASTNode[] params = node.getChildren().toArray(new ASTNode[0]);
-        for (int i = 0; i < params.length; i++) {
-            ASTNode paramNode = params[i];
-            //type
-            TypeNode paramTypeNode = (TypeNode) paramNode.getChild(0);
-            stream.print(paramTypeNode.getType().getSignature() + " ");
-            //identifier
-            IdentifierNode paramIDNode = (IdentifierNode) paramNode.getChild(1);
-            stream.print("%" + paramIDNode.getValue());
-            if (i > 0 && i < params.length - 1)
-                stream.print(",");
-        }
-        stream.print(")");
+        System.out.println(".end method");
+        System.out.println("method_dcl finished\n");
     }
 
     private void visitParameterNode(ASTNode node) throws Exception {
+        System.out.println("in param node");
         // todo "parameters" code
         TypeNode typeNode = (TypeNode) node.getChild(1);
         String typeSig = typeNode.getType().getSignature();
-        stream.print(typeSig);
+        System.out.print(typeSig);
         returnGenerated = false;
+        System.out.println("param node finished");
     }
 
     private void visitReturnStatementNode(ASTNode node) throws Exception {
@@ -404,23 +455,19 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         returnGenerated = true;
         if (node.getChildren().size() == 0) {
-            stream.println("  return");
+            System.out.println("  return");
         } else {
-            stream.println("  ireturn");
+            System.out.println("  ireturn");
         }
     }
 
-    private void visitVarUse(ASTNode node) throws Exception {
+    private void visitVarUse(ASTNode node) {
         //todo need to understand
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
         SymbolInfo si = idNode.getSymbolInfo();
-        try {
-            int lvIndex = si.getLocalVarIndex();
-            stream.println("  iload " + lvIndex);
-            returnGenerated = false;
-        } catch (NullPointerException e) {
-            throw new Exception(idNode.getValue() + " not declared");
-        }
+        int lvIndex = si.getLocalVarIndex();
+        System.out.println("  iload " + lvIndex);
+        returnGenerated = false;
     }
 
     private String generateLabel() {
@@ -429,44 +476,112 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     private void outputDefaultConstructor() {
         //todo need to understand
-        stream.println("");
-        stream.println(";");
-        stream.println("; standard constructor");
-        stream.println(";");
-        stream.println(".method public <init>()V");
-        stream.println("  aload_0");
-        stream.println("  invokenonvirtual java/lang/Object/<init>()V");
-        stream.println("  return");
-        stream.println(".end method");
-        stream.println("");
+        System.out.println("");
+        System.out.println(";");
+        System.out.println("; standard constructor");
+        System.out.println(";");
+        System.out.println(".method public <init>()V");
+        System.out.println("  aload_0");
+        System.out.println("  invokenonvirtual java/lang/Object/<init>()V");
+        System.out.println("  return");
+        System.out.println(".end method");
+        System.out.println("");
     }
 
     private void outputMainMethod() {
         //todo "main" code
-        stream.println("");
-        stream.println(";");
-        stream.println("; main method");
-        stream.println(";");
-        stream.println(".method public static main([Ljava/lang/String;)V");
-        stream.println("  invokestatic " + className + "/program()V");
-        stream.println("  return");
-        stream.println(".end method");
-        stream.println("");
+        System.out.println("");
+        System.out.println(";");
+        System.out.println("; main method");
+        System.out.println(";");
+        System.out.println(".method public static main([Ljava/lang/String;)V");
+        System.out.println("  invokestatic " + className + "/program()V");
+        System.out.println("  return");
+        System.out.println(".end method");
+        System.out.println("");
     }
 
     private void outputPrintlnMethod() {
         //todo "println" code
-        stream.println("");
-        stream.println(";");
-        stream.println("; println method");
-        stream.println(";");
-        stream.println(".method public static println(I)V");
-        stream.println("  .limit stack 2");
-        stream.println("  getstatic java/lang/System/out Ljava/io/PrintStream;");
-        stream.println("  iload_0");
-        stream.println("  invokevirtual java/io/PrintStream/println(I)V");
-        stream.println("  return");
-        stream.println(".end method");
-        stream.println("");
+        System.out.println("");
+        System.out.println(";");
+        System.out.println("; println method");
+        System.out.println(";");
+        System.out.println(".method public static println(I)V");
+        System.out.println("  .limit stack 2");
+        System.out.println("  getstatic java/lang/System/out Ljava/io/PrintStream;");
+        System.out.println("  iload_0");
+        System.out.println("  invokevirtual java/io/PrintStream/println(I)V");
+        System.out.println("  return");
+        System.out.println(".end method");
+        System.out.println("");
+    }
+
+    private void visitCharLiteralNode(ASTNode node) throws Exception {
+        System.out.println("node is " + node);
+    }
+
+    private void visitBooleanTypeNode(ASTNode node) throws Exception {
+        System.out.println("node is " + node);
+    }
+
+    private void visitIDNode(ASTNode node) throws Exception {
+        IdentifierNode idNode = (IdentifierNode) node;
+        System.out.println("this ID node is " + idNode.getValue());
+        System.out.println("this ID node SI is " + idNode.getSymbolInfo());
+    }
+
+    private void visitDoubleTypeNode(ASTNode node) throws Exception {
+        System.out.println("node is " + node);
+    }
+
+    private void visitFloatLiteralNode(ASTNode node) throws Exception {
+        System.out.println("node is " + node);
+    }
+
+    private void visitIntTypeNode(ASTNode node) throws Exception {
+        System.out.println("node is " + node);
+    }
+
+    private void visitNullLiteralNode(ASTNode node) throws Exception {
+        System.out.println("node is " + node);
+    }
+
+    private void visitPostDecNode(ASTNode node) throws Exception {
+        System.out.println("node is " + node);
+        visitAllChildren(node);
+    }
+
+    private void visitPostIncNode(ASTNode node) throws Exception {
+        System.out.println("node is " + node);
+        visitAllChildren(node);
+    }
+
+    private void visitPreDecNode(ASTNode node) throws Exception {
+        System.out.println("node is " + node);
+        visitAllChildren(node);
+    }
+
+    private void visitPreIncNode(ASTNode node) throws Exception {
+        System.out.println("node is " + node);
+        visitAllChildren(node);
+    }
+
+    private void visitStringLiteralNode(ASTNode node) throws Exception {
+        System.out.println("node is " + node);
+    }
+
+    private void visitVoidNode(ASTNode node) throws Exception {
+        System.out.println("node is " + node);
+    }
+
+    private void visitCharTypeNode(ASTNode node) throws Exception {
+        System.out.println("node is " + node);
+    }
+
+    private void visitBlockNode(ASTNode node) throws Exception {
+        System.out.println("node is " + node);
+        System.out.println("children are " + node.getChildren());
+        visitAllChildren(node);
     }
 }
