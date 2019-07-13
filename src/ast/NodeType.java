@@ -88,8 +88,6 @@ public enum NodeType {
     ARGUMENT,
     ARGUMENTS,
     CAST,
-    CLASS,
-    CLASS_BODY,
     EMPTY_STATEMENT,
     IDENTIFIER,
     METHOD_ACCESS,

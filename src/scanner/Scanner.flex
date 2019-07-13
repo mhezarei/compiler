@@ -88,13 +88,14 @@ WhiteSpace = {EOL} | [ \t\f]
     "if"                 { return symbol(sym.IF); }
     //"static"             { return symbol(parser.sym.STATIC); }
     //"while"              { return symbol(parser.sym.WHILE); }
+
     // NEW SHIT
     "begin"				 { return symbol(sym.BEGIN); }
     "false"				 { return symbol(sym.FALSE); }
+    "true"				 { return symbol(sym.TRUE); }
     "function"			 { return symbol(sym.FUNCTION); }
     "record"			 { return symbol(sym.RECORD); }
     "string"			 { return symbol(sym.STRING); }
-    "true"				 { return symbol(sym.TRUE); }
     "end"				 { return symbol(sym.END); }
     "null"               { return symbol(sym.NULL); }
     "NULL"               { return symbol(sym.NULL); }
@@ -157,8 +158,7 @@ WhiteSpace = {EOL} | [ \t\f]
     \' { character = new StringBuilder("\'"); yybegin(CHAR); }
 
     // Comment
-    // WHAT THE FUCK SHALL WE DO?
-    //{Comment} { return new Element(yytext(), Type.Comment); }
+    {Comment} {  }
 
     {WhiteSpace} { }
 }

@@ -177,33 +177,27 @@ public class CodeGenVisitor implements SimpleVisitor {
                 visitVoidNode(node);
                 break;
 
-            case VARIABLE_DECLARATION:
-                break;
-
-            case LOCAL_VAR_DECLARATION:
-                break;
-
-            case ARGUMENTS:
-                break;
-
             case BLOCK:
                 visitBlockNode(node);
                 break;
 
             case DECLARATIONS:
-                break;
+
+            case ARGUMENTS:
+
+            case LOCAL_VAR_DECLARATION:
+
+            case VARIABLE_DECLARATION:
 
             case EMPTY_STATEMENT:
-                break;
 
             case EXPRESSION_STATEMENT:
-                break;
 
             case FIELD_DECLARATION:
-                break;
 
             default:
                 visitAllChildren(node);
+                break;
         }
     }
 
@@ -229,7 +223,8 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitAdditionNode(ASTNode node) throws Exception {
-        // add i32 %tmp, %z
+        // add i32 (or i64) %tmp, %z
+        // fadd float (or double) %a, %b
         System.out.println("{{ADDITION}}:");
         visitAllChildren(node);
 
@@ -246,42 +241,38 @@ public class CodeGenVisitor implements SimpleVisitor {
         // get the values.
     }
     private void visitSubtractionNode(ASTNode node) throws Exception {
-        //todo "sub" code
-        System.out.println("node is " + node);
-        System.out.println("children are" + node.getChildren());
+        // sub i32 (or i64) %a, %b
+        // fsub float (or double) %a, %b
+        System.out.println("{{SUBTRACTION}}");
         visitAllChildren(node);
-        System.out.println("  isub");
+
     }
 
     private void visitDivisionNode(ASTNode node) throws Exception {
-        //todo "div" code
-        System.out.println("node is " + node);
-        System.out.println("children are" + node.getChildren());
+        // udiv (or sdiv) i32 (or i64) %a, %b
+        // fdiv float (or double) %a, %b
+        System.out.println("{{DIVISION}}");
         visitAllChildren(node);
-        System.out.println("  idiv");
     }
 
     private void visitMultiplicationNode(ASTNode node) throws Exception {
-        // todo "mult" code
-        System.out.println("node is " + node);
-        System.out.println("children are" + node.getChildren());
+        // mul i32 (or i64) %a, %b
+        // fmul float (or double) %a, %b
+        System.out.println("{{MULTIPLICATION}}");
         visitAllChildren(node);
-        System.out.println("  imul");
     }
 
     private void visitUnaryMinusNode(ASTNode node) throws Exception {
-        //todo "umines" code
-        System.out.println("node is " + node);
-        System.out.println("children are" + node.getChildren());
+        // sub i32 (or i64) 0, %b
+        // fsub float (or double) 0.0, %b
+        System.out.println("{{UMINUS}}");
         visitAllChildren(node);
-        System.out.println("  ineg");
     }
 
     private void visitUnaryPlusNode(ASTNode node) throws Exception {
-        System.out.println("node is " + node);
-        System.out.println("children are" + node.getChildren());
+        System.out.println("{{UPLUS}}");
         visitAllChildren(node);
-        System.out.println("  iplus");
+        // nothing to be done
     }
 
 
@@ -289,31 +280,26 @@ public class CodeGenVisitor implements SimpleVisitor {
       OR if it's a literal, pushes the literal then assigns that val
       OR if it's an ID loads the ID's value and assigns*/
     private void visitAssignNode(ASTNode node) throws Exception {
-        System.out.println("in assign node");
-        System.out.println("node is " + node);
-        System.out.println("children are " + node.getChildren());
-        //todo "assign" code
+        System.out.println("{{ASSIGNMENT}}");
+
         IdentifierNode idNode = (IdentifierNode) node.getChild(0).getChild(0);
         SymbolInfo si = idNode.getSymbolInfo();
         int lvIndex = si.getLocalVarIndex();
 
         /* Expression node */
         node.getChild(1).accept(this);
-        System.out.println("  istore " + lvIndex);
-
-        System.out.println("assign node finished\n");
     }
 
     private void visitBooleanAndNode(ASTNode node) throws Exception {
-        // TODO "boolAnd" code
-        System.out.println("node is " + node);
-        System.out.println("children are" + node.getChildren());
+        // sub i32 (or i64) 0, %b
+        // fsub float (or double) 0.0, %b
+        System.out.println("{{UMINUS}}");
         visitAllChildren(node);
     }
     private void visitBooleanNotNode(ASTNode node) throws Exception {
-        // todo "boolNot" code
-        System.out.println("node is " + node);
-        System.out.println("children are" + node.getChildren());
+        // sub i32 (or i64) 0, %b
+        // fsub float (or double) 0.0, %b
+        System.out.println("{{UMINUS}}");
         visitAllChildren(node);
     }
 

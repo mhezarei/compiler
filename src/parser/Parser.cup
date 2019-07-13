@@ -85,7 +85,6 @@ nonterminal ASTNode identifier;
 nonterminal ASTNode expr_operation;
 nonterminal ASTNode expression_assignment;
 
-
 /* precedence part */
 precedence left COMMA;
 precedence right ASSIGN, ADDASS, SUBASS, MULTASS, DIVASS;

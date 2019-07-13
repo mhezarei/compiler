@@ -1,24 +1,47 @@
 function int fun()
 begin
-    int a;
-    int b = 5;
+    ## var dcl with/and assignments
+    int ai;
+    int bi = 5;
+    float cf = 2.33;
+    float df;
+    float ef = cf;
+    float ff;
+    double td = 2.111;
+    double
+    bool gb;
+    bool hb = false;
+    bool ib = hb;
+    gb = true;
+    df = 34.5;
+    ff = bi;
+    ai = cf;
 
-    float c = 2.33;
-    float d;
-    d = 34.5;
-    float e = c;
-    float f;
-    f = b;
-    a = c;
+    ## operations
+    ai = ai + 5;
+    ai = ai * 5;
+    ai = ai / 5;
+    ai = ai - 5;
+    ai = ai + 8 * 2 + 24 / 2 * ai - 2;
 
-    bool g;
-    bool h = false;
-    bool i;
-    g = true;
-    i = g * 8;
-    g = f + 2;
-    a = 2 + (5 * 2);
-    f = 2 + 4;
+    ## this is comment \n \t \r\n \r \ff \bib  " asdasdasd asd as df" \" \' \\ \\\"
+
+    gb = true;
+    ib = gb * 8;
+    ## qw qe54 857cinaasd
+
+    /#
+    /*
+
+            this is multi-line comment ads fasdginq[oeg 'mslk;vzc,.vc/
+            mx/cb/zxcb/l.\][l/\;[\'" asdasd asd asda"
+                            l]';[\]l;\][l;'=-0=0987654321!@#$%^&*(
+            )_}|{{|{":"?>< ?            :LK/"/bi/v/n/
+          ***// #####/# asdasd#/  m//t/r//\n\t\r\/\\\\/\bib         \
+            ai\"\'
+            *&^*&^*%&^%&*$*&^*&^/asdasdasd/
+        */
+    #/
 
     return 0;
 end
