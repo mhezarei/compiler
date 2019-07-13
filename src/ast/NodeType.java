@@ -37,14 +37,6 @@ public enum NodeType {
     BOOLEAN_NOT,
     BOOLEAN_OR,
 
-    /*Literals*/
-    BOOLEAN_LITERAL,
-    CHAR_LITERAL,
-    INTEGER_LITERAL,
-    NULL_LITERAL,
-    FLOAT_LITERAL,
-    STRING_LITERAL,
-    LONG_LITERAL,
 
     /*Types*/
     BOOLEAN_TYPE,
@@ -85,6 +77,7 @@ public enum NodeType {
     FOR_STATEMENT,
     FOREACH_STATEMENT,
 
+    LITERAL,
     ARGUMENT,
     ARGUMENTS,
     CAST,
@@ -95,5 +88,7 @@ public enum NodeType {
     PARAMETERS,
     BLOCK,
     VAR_USE,
+    CLASS,
+    NULL_LITERAL,
     START
 }

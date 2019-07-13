@@ -1,10 +1,10 @@
 package ast;
 
-public class FloatLiteralNode extends BaseASTNode {
+public class FloatLiteralNode extends Literal {
     private double value;
-    
+
     public FloatLiteralNode(double value) {
-        super(NodeType.FLOAT_LITERAL);
+        super(PrimitiveType.FLOAT);
         this.value = value;
     }
     

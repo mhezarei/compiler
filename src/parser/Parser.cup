@@ -574,7 +574,6 @@ variable ::=
             ASTNode v = new BaseASTNode(NodeType.VAR_USE);
             v.addChild(i);
             RESULT.addChild(v);
-            ((ExpressionNode) RESULT).setIsIdentifier();
         :}
     | identifier:i variable_mid:vm
 //        {: RESULT = new BaseASTNode(NodeType.NOT_EQUAL); :}

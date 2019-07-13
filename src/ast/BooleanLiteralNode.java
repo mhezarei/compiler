@@ -1,11 +1,11 @@
 package ast;
 
 
-public class BooleanLiteralNode extends BaseASTNode {
+public class BooleanLiteralNode extends Literal {
     private boolean value;
     
     public BooleanLiteralNode(boolean value) {
-        super(NodeType.BOOLEAN_LITERAL);
+        super(PrimitiveType.BOOL);
         this.value = value;
     }
     

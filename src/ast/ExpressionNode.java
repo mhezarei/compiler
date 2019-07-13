@@ -3,6 +3,7 @@ package ast;
 public class ExpressionNode extends BaseASTNode {
     private boolean isIdentifier;
     private String resultName;
+    private PrimitiveType type;
 
     public ExpressionNode() {
         super(NodeType.EXPRESSION_STATEMENT);
@@ -13,13 +14,21 @@ public class ExpressionNode extends BaseASTNode {
         return isIdentifier;
     }
 
-    public void setIsIdentifier() {
-        if (getChild(0).getNodeType() == NodeType.VAR_USE)
+    public void setIsIdentifier() throws Exception {
+        if (getChild(0).getNodeType() == NodeType.VAR_USE) {
             //EXPR -> VAR_USE -> ID
-            resultName ="%"+((IdentifierNode) getChild(0).getChild(0)).getValue();
-        else
+            IdentifierNode id = ((IdentifierNode) getChild(0).getChild(0));
+            resultName = "%" + id.getValue();
+            if (id.getSymbolInfo() == null)
+                throw new Exception(id.getValue() + " not declared");
+            type = id.getSymbolInfo().getType();
+        } else {
             //EXPR -> LITERAL
-            resultName=getChild(0).toString();
+            Literal literal = (Literal) getChild(0);
+            resultName = getChild(0).toString();
+            type = literal.getType();
+
+        }
         isIdentifier = true;
     }
 
@@ -29,5 +38,9 @@ public class ExpressionNode extends BaseASTNode {
 
     public void setResultName(String resultName) {
         this.resultName = resultName;
+    }
+
+    public PrimitiveType getType() {
+        return type;
     }
 }

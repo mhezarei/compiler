@@ -6,7 +6,6 @@ import ast.*;
 import semantic.SymbolInfo;
 
 import java.io.PrintStream;
-import java.util.List;
 
 /**
  * An AST visitor which generates Jasmin code.
@@ -35,10 +34,6 @@ public class CodeGenVisitor implements SimpleVisitor {
 
             case BOOLEAN_AND:
                 visitBooleanAndNode(node);
-                break;
-
-            case BOOLEAN_LITERAL:
-                visitBooleanLiteralNode(node);
                 break;
 
             case BOOLEAN_NOT:
@@ -73,8 +68,8 @@ public class CodeGenVisitor implements SimpleVisitor {
                 visitIfStatementNode(node);
                 break;
 
-            case INTEGER_LITERAL:
-                visitIntegerLiteralNode(node);
+            case LITERAL:
+                visitLiteralNode(node);
                 break;
 
             case LESS_THAN:
@@ -139,24 +134,20 @@ public class CodeGenVisitor implements SimpleVisitor {
             case BLOCK:
             case BOOLEAN_TYPE:
             case CAST:
-            case CHAR_LITERAL:
             case CHAR_TYPE:
-            case CLASS_BODY:
             case START:
             case DECLARATIONS:
             case DOUBLE_TYPE:
             case EMPTY_STATEMENT:
             case FIELD_DECLARATION:
-            case FLOAT_LITERAL:
             case IDENTIFIER:
+            case NULL_LITERAL:
             case INT_TYPE:
             case LOCAL_VAR_DECLARATION:
-            case NULL_LITERAL:
             case POST_DECREMENT:
             case POST_INCREMENT:
             case PRE_DECREMENT:
             case PRE_INCREMENT:
-            case STRING_LITERAL:
             case VARIABLE_DECLARATION:
             case VOID:
             default:
@@ -204,11 +195,18 @@ public class CodeGenVisitor implements SimpleVisitor {
 
 
         String result = "tmp" + getTemp();
+        PrimitiveType resultType=checkType(e1,e2);
 
-        stream.println("\t" + result + " = add " + checkType(e1, e2) + " " + e1.getResultName() + ", " + e2.getResultName());
+        stream.println("\t" + result + " = add " + resultType + " " + e1.getResultName() + ", " + e2.getResultName());
 
+        ASTNode v = new BaseASTNode(NodeType.VAR_USE);
         ASTNode id = new IdentifierNode(result);
-        parent.setChildren(id);
+        SymbolInfo si=new SymbolInfo(id);
+        si.setType(resultType);
+        id.setSymbolInfo(si);
+        v.addChild(id);
+        v.setParent(parent);
+        parent.setChildren(v);
         parent.setIsIdentifier();
     }
 
@@ -217,8 +215,111 @@ public class CodeGenVisitor implements SimpleVisitor {
         return 1;
     }
 
-    private PrimitiveType checkType(ExpressionNode e1, ExpressionNode e2) {
-        //todo
+    private PrimitiveType checkType(ExpressionNode e1, ExpressionNode e2) throws Exception {
+        //todo should cast
+        if (!e1.isIdentifier())
+            throw new Exception(e1 + " not generated");
+        if (!e2.isIdentifier())
+            throw new Exception(e2 + " not generated");
+
+        switch (e1.getType()) {
+            case INT:
+                switch (e2.getType()) {
+                    case INT:
+                        return PrimitiveType.INT;
+                    case CHAR:
+                        return PrimitiveType.CHAR;
+                    case LONG:
+                        return PrimitiveType.LONG;
+                    case DOUBLE:
+                        return PrimitiveType.DOUBLE;
+                    case FLOAT:
+                        return PrimitiveType.FLOAT;
+                    case BOOL:
+                    case STRING:
+                    case VOID:
+                        throw new Exception("can't add");
+                    case AUTO:
+                        //todo
+                }
+            case BOOL:
+                throw new Exception("can't add");
+            case CHAR:
+                switch (e2.getType()) {
+                    case INT:
+                        return PrimitiveType.CHAR;
+                    case CHAR:
+                        return PrimitiveType.CHAR;
+                    case LONG:
+                    case DOUBLE:
+                    case FLOAT:
+                    case BOOL:
+                    case STRING:
+                    case VOID:
+                        throw new Exception("can't add");
+                    case AUTO:
+                        //todo
+                }
+
+            case LONG:
+                switch (e2.getType()) {
+                    case INT:
+                        return PrimitiveType.LONG;
+                    case LONG:
+                        return PrimitiveType.LONG;
+                    case DOUBLE:
+                        return PrimitiveType.DOUBLE;
+                    case FLOAT:
+                        return PrimitiveType.FLOAT;
+                    case BOOL:
+                    case CHAR:
+                    case STRING:
+                    case VOID:
+                        throw new Exception("can't add");
+                    case AUTO:
+                        //todo
+                }
+
+            case FLOAT:
+                switch (e2.getType()) {
+                    case INT:
+                        return PrimitiveType.FLOAT;
+                    case LONG:
+                        return PrimitiveType.FLOAT;
+                    case DOUBLE:
+                        return PrimitiveType.DOUBLE;
+                    case FLOAT:
+                        return PrimitiveType.FLOAT;
+                    case CHAR:
+                    case BOOL:
+                    case STRING:
+                    case VOID:
+                        throw new Exception("can't add");
+                    case AUTO:
+                        //todo
+                }
+            case DOUBLE:
+                switch (e2.getType()) {
+                    case INT:
+                    case LONG:
+                    case DOUBLE:
+                    case FLOAT:
+                        return PrimitiveType.DOUBLE;
+                    case CHAR:
+                    case BOOL:
+                    case STRING:
+                    case VOID:
+                        throw new Exception("can't add");
+                    case AUTO:
+                        //todo
+                }
+
+            case STRING:
+            case VOID:
+                throw new Exception("can't add");
+            case AUTO:
+                //todo
+        }
         return PrimitiveType.INT;
     }
 
@@ -259,14 +360,12 @@ public class CodeGenVisitor implements SimpleVisitor {
         //node -> EXPRESSION -> VAR_USE -> ID
         IdentifierNode idNode = (IdentifierNode) node.getChild(0).getChild(0).getChild(0);
         SymbolInfo si = idNode.getSymbolInfo();
-        try {
-            int lvIndex = si.getLocalVarIndex();
-            /* Expression node */
-            node.getChild(1).accept(this);
-            stream.println("  istore ");
-        } catch (NullPointerException e) {
+        if (si == null)
             throw new Exception(idNode.getValue() + " not declared");
-        }
+        int lvIndex = si.getLocalVarIndex();
+        /* Expression node */
+        node.getChild(1).accept(this);
+        stream.println("  istore ");
 
     }
 
@@ -352,7 +451,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         // todo "while" code
     }
 
-    private void visitIntegerLiteralNode(ASTNode node) {
+    private void visitLiteralNode(ASTNode node) throws Exception {
         ((ExpressionNode) node.getParent()).setIsIdentifier();
     }
 
@@ -432,7 +531,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         visitAllChildren(node);
 
         returnGenerated = true;
-        if (node.getChildren().size() == 0) {
+        if (node.getChildren().isEmpty()) {
             stream.println("  return");
         } else {
             stream.println("  ireturn");
@@ -442,6 +541,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     private void visitVarUse(ASTNode node) throws Exception {
         //todo need to understand
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
+        ((ExpressionNode) node.getParent()).setIsIdentifier();
         SymbolInfo si = idNode.getSymbolInfo();
         try {
             int lvIndex = si.getLocalVarIndex();

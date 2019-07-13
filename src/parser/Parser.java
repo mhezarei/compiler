@@ -2402,7 +2402,7 @@ class CUP$Parser$actions {
             ASTNode v = new BaseASTNode(NodeType.VAR_USE);
             v.addChild(i);
             RESULT.addChild(v);
-            ((ExpressionNode) RESULT).setIsIdentifier();
+            v.setParent(RESULT);
         
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("variable",11, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }

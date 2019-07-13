@@ -1,10 +1,10 @@
 package ast;
 
-public class StringLiteralNode extends BaseASTNode {
+public class StringLiteralNode extends Literal {
     private String value;
-    
+
     public StringLiteralNode(String value) {
-        super(NodeType.STRING_LITERAL);
+        super(PrimitiveType.STRING);
         this.value = value;
     }
     
