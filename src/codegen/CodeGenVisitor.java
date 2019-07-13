@@ -2,6 +2,7 @@ package codegen;
 
 import ast.*;
 import semantic.SymbolInfo;
+import typechecker.TypeChecker;
 
 import java.io.FileWriter;
 import java.io.OutputStream;
@@ -228,16 +229,21 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitAdditionNode(ASTNode node) throws Exception {
+        // add i32 %tmp, %z
         System.out.println("{{ADDITION}}:");
         visitAllChildren(node);
 
-        if (node.getChild(0) instanceof FloatLiteralNode && node.getChild(1) instanceof FloatLiteralNode) {
+        TypeChecker tc = new TypeChecker(node.getChild(0), node.getChild(1));
+
+        if (tc.isFloat()) {
             fw.write("fadd ");
-        } else if (node.getChild(0) instanceof IntegerLiteralNode && node.getChild(1) instanceof IntegerLiteralNode) {
+            // recognize float type
+        } else if (tc.isInteger()) {
             fw.write("add ");
+            // recognize integer type
         }
 
-        fw.write("fadd i32 %tmp, %z");
+        // get the values.
     }
     private void visitSubtractionNode(ASTNode node) throws Exception {
         //todo "sub" code
