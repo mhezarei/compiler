@@ -11,17 +11,12 @@ import codegen.SimpleVisitor;
 public class TypeVisitor implements SimpleVisitor {
     private SymbolTable symbolTable = new SymbolTable();
     private PrimitiveType currentType;
-    private ClassNode classNode = new ClassNode();
 
     @Override
     public void visit(ASTNode node) throws Exception {
         switch (node.getNodeType()) {
             case BLOCK:
                 visitBlockNode(node);
-                break;
-
-            case CLASS:
-                visitClassNode(node);
                 break;
 
             case IDENTIFIER:
@@ -56,14 +51,6 @@ public class TypeVisitor implements SimpleVisitor {
     }
 
     private void visitBlockNode(ASTNode node) throws Exception {
-        symbolTable.enterScope();
-        visitAllChildren(node);
-        symbolTable.leaveScope();
-    }
-
-    private void visitClassNode(ASTNode node) throws Exception {
-        classNode = (ClassNode) node;
-
         symbolTable.enterScope();
         visitAllChildren(node);
         symbolTable.leaveScope();
@@ -111,8 +98,6 @@ public class TypeVisitor implements SimpleVisitor {
                 sig.append(",");
         }
         sig.append(")");
-
-        classNode.putMethodSig(methodName, sig.toString());
 
         symbolTable.enterScope();
         visitAllChildren(node);
