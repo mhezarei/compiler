@@ -622,39 +622,67 @@ expr ::=
         :}
     | DEC variable:v
         {:
+            //EXPR (result) -> INC (t) -> EXPR (expr) -> VAR_USE (v)
+
             RESULT = new ExpressionNode();
-            ASTNode d = new BaseASTNode(NodeType.PRE_DECREMENT);
-            d.addChild(v);
-            v.setParent(d);
-            RESULT.addChild(d);
-            d.setParent(RESULT);
+            ASTNode t = new BaseASTNode(NodeType.PRE_INCREMENT);
+            ASTNode expr = new ExpressionNode();
+
+            expr.addChild(v);
+            t.addChild(expr);
+            RESULT.addChild(t);
+
+            t.setParent(RESULT);
+            expr.setParent(t);
+            v.setParent(expr);
         :} %prec PREDEC
     | variable:v DEC
         {:
+            //EXPR (result) -> INC (t) -> EXPR (expr) -> VAR_USE (v)
+
             RESULT = new ExpressionNode();
-            ASTNode d = new BaseASTNode(NodeType.POST_DECREMENT);
-            d.addChild(v);
-            RESULT.addChild(d);
-            v.setParent(d);
-            d.setParent(RESULT);
+            ASTNode t = new BaseASTNode(NodeType.PRE_INCREMENT);
+            ASTNode expr = new ExpressionNode();
+
+            expr.addChild(v);
+            t.addChild(expr);
+            RESULT.addChild(t);
+
+            t.setParent(RESULT);
+            expr.setParent(t);
+            v.setParent(expr);
         :} %prec POSTDEC
     | INC variable:v
         {:
+            //EXPR (result) -> INC (t) -> EXPR (expr) -> VAR_USE (v)
+
             RESULT = new ExpressionNode();
-            ASTNode i = new BaseASTNode(NodeType.PRE_INCREMENT);
-            i.addChild(v);
-            RESULT.addChild(i);
-            v.setParent(i);
-            i.setParent(RESULT);
+            ASTNode t = new BaseASTNode(NodeType.PRE_INCREMENT);
+            ASTNode expr = new ExpressionNode();
+
+            expr.addChild(v);
+            t.addChild(expr);
+            RESULT.addChild(t);
+
+            t.setParent(RESULT);
+            expr.setParent(t);
+            v.setParent(expr);
         :} %prec PREINC
     | variable:v INC
         {:
+            //EXPR (result) -> INC (t) -> EXPR (expr) -> VAR_USE (v)
+
             RESULT = new ExpressionNode();
-            ASTNode i = new BaseASTNode(NodeType.POST_INCREMENT);
-            i.addChild(v);
-            RESULT.addChild(i);
-            v.setParent(i);
-            i.setParent(RESULT);
+            ASTNode t = new BaseASTNode(NodeType.PRE_INCREMENT);
+            ASTNode expr = new ExpressionNode();
+
+            expr.addChild(v);
+            t.addChild(expr);
+            RESULT.addChild(t);
+
+            t.setParent(RESULT);
+            expr.setParent(t);
+            v.setParent(expr);
         :} %prec POSTINC
     | BITNEG expr:e
         {:
