@@ -6,6 +6,8 @@ import ast.*;
 import semantic.SymbolInfo;
 
 import java.io.PrintStream;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * An AST visitor which generates Jasmin code.
@@ -16,6 +18,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     private String className;
     private ClassNode classNode = new ClassNode();
     private boolean returnGenerated;
+    private Set<Integer> usedTemps = new HashSet<>();
 
     public CodeGenVisitor(PrintStream stream) {
         this.stream = stream;
@@ -251,8 +254,13 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private int getTemp() {
-        //todo
-        return 1;
+        int i = 0;
+
+        while (usedTemps.contains(i))
+            i++;
+        usedTemps.add(i);
+
+        return i;
     }
 
     private PrimitiveType checkType(ExpressionNode e1, ExpressionNode e2, NodeType nodeType) throws Exception {
@@ -386,14 +394,18 @@ public class CodeGenVisitor implements SimpleVisitor {
     private void visitAssignNode(ASTNode node) throws Exception {
         //node -> EXPRESSION -> VAR_USE -> ID
         IdentifierNode idNode = (IdentifierNode) node.getChild(0).getChild(0).getChild(0);
+
         SymbolInfo si = idNode.getSymbolInfo();
+
         if (si == null)
             throw new Exception(idNode.getValue() + " not declared");
+
         /* Expression node */
         node.getChild(1).accept(this);
-        IdentifierNode exprNode = (IdentifierNode) node.getChild(1).getChild(0).getChild(0);
-        stream.println("\t" + idNode + " = " + exprNode);
 
+        IdentifierNode exprNode = (IdentifierNode) node.getChild(1).getChild(0).getChild(0);
+
+        stream.println("\t" + idNode + " = " + exprNode);
     }
 
     private void visitClassNode(ASTNode node) throws Exception {
