@@ -31,7 +31,9 @@ entry:
 	%tb = %tmp13
 	%df = 2.11
 	%rd = 2.11121
-	%tmp14 = fadd float %df, %tb
+	%tmp14 = frem float 2.11, 3.11111
 	%resd = %tmp14
+	%ch = a
+	%str = "asdasd"
   return
 }

@@ -689,6 +689,15 @@ expr ::=
             e.setParent(u);
             u.setParent(RESULT);
         :} %prec UPLUS
+    | NOT expr:e
+        {:
+		    RESULT = new ExpressionNode();
+            ASTNode u = new BaseASTNode(NodeType.BOOLEAN_NOT);
+            u.addChild(e);
+            RESULT.addChild(u);
+            e.setParent(u);
+            u.setParent(RESULT);
+        :}
 ;
 
 variable ::=

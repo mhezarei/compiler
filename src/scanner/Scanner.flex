@@ -33,7 +33,7 @@ Digit = [0-9]
 
 Id = ({Alph} | _) ({Alph} | {Digit} | _)*
 
-DecInt = ("-" | "+" | "") ({Digit})+
+DecInt = [-+]? ({Digit})+
 // HEX IS REMOVED
 //HexAlph = [A-Fa-f]
 //Hex = 0 ("x" | "X") ({Digit} | {HexAlph})+ | 0
@@ -193,7 +193,7 @@ WhiteSpace = {EOL} | [ \t\f]
     ("\\\'" | "\\\"" | "\\t" | "\\n" | "\\r" | "\\b" | "\\v" | "\\f" | "\\0" | "\\" | "\\\\" | [^]?) \'  {
 	    character.append(yytext());
 	    yybegin(YYINITIAL);
-	    return symbol(sym.CHARCONST, new String(character.toString()));
+	    return symbol(sym.CHARCONST, new Character(character.toString().charAt(1)));
 	}
 }
 
