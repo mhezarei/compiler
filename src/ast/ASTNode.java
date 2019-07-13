@@ -50,6 +50,7 @@ public interface ASTNode {
      */
     void addChild(ASTNode... nodes);
 
+    void setChildren(ASTNode... nodes);
     /**
      * Returns the list of children.
      */

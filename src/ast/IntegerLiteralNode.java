@@ -14,6 +14,6 @@ public class IntegerLiteralNode extends BaseASTNode {
     
     @Override
     public String toString() {
-        return getNodeType() + " (" + value + ")";
+        return value+"";
     }
 }

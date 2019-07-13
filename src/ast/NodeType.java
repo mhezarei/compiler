@@ -19,7 +19,7 @@ public enum NodeType {
     PRE_DECREMENT,
     UNARY_MINUS,
     UNARY_PLUS,
-    INCREASMENT,
+    INCREMENT,
     DECREMENT,
     BITWISE_NEGATIVE,
     SIZEOF,

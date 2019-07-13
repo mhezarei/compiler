@@ -24,4 +24,8 @@ public enum PrimitiveType {
     public String getSignature() {
         return signature;    
     }
-}
+
+    @Override
+    public String toString() {
+        return signature;
+    }}

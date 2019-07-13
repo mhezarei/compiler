@@ -15,6 +15,6 @@ public class BooleanLiteralNode extends BaseASTNode {
     
     @Override
     public String toString() {
-        return getNodeType() + " (" + value + ")";
+        return value+"";
     }
 }

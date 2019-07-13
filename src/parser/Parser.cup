@@ -507,31 +507,44 @@ expr ::=
     | variable:t
         {: RESULT = t; :}
     | const_val:t
-        {: RESULT = t; :}
+        {:
+            RESULT = new ExpressionNode();
+            RESULT.addChild(t);
+        :}
     | DEC variable:v
         {:
-            RESULT = new BaseASTNode(NodeType.DECREMENT);
-            RESULT.addChild(v);
+            RESULT = new ExpressionNode();
+            ASTNode d = new BaseASTNode(NodeType.DECREMENT);
+            d.addChild(v);
+            RESULT.addChild(d);
         :} %prec PREDEC
     | variable:v DEC
         {:
-            RESULT = new BaseASTNode(NodeType.DECREMENT);
-            RESULT.addChild(v);
+            RESULT = new ExpressionNode();
+            ASTNode d = new BaseASTNode(NodeType.DECREMENT);
+            d.addChild(v);
+            RESULT.addChild(d);
         :} %prec POSTDEC
     | INC variable:v
         {:
-            RESULT = new BaseASTNode(NodeType.INCREASMENT);
-            RESULT.addChild(v);
+            RESULT = new ExpressionNode();
+            ASTNode i = new BaseASTNode(NodeType.INCREMENT);
+            i.addChild(v);
+            RESULT.addChild(i);
         :} %prec PREINC
     | variable:v INC
         {:
-            RESULT = new BaseASTNode(NodeType.INCREASMENT);
-            RESULT.addChild(v);
+            RESULT = new ExpressionNode();
+            ASTNode i = new BaseASTNode(NodeType.INCREMENT);
+            i.addChild(v);
+            RESULT.addChild(i);
         :} %prec POSTINC
     | BITNEG expr:e
         {:
-            RESULT = new BaseASTNode(NodeType.BITWISE_NEGATIVE);
-            RESULT.addChild(e);
+            RESULT = new ExpressionNode();
+            ASTNode b = new BaseASTNode(NodeType.BITWISE_NEGATIVE);
+            b.addChild(e);
+            RESULT.addChild(b);
         :}
     | SIZEOF LPAREN type:t RPAREN
         {:
@@ -540,21 +553,28 @@ expr ::=
         :} %prec SIZEOF
     | MINUS expr:e
         {:
-            RESULT = new BaseASTNode(NodeType.UNARY_MINUS);
-            RESULT.addChild(e);
+            RESULT = new ExpressionNode();
+            ASTNode u = new BaseASTNode(NodeType.UNARY_MINUS);
+            u.addChild(e);
+            RESULT.addChild(u);
         :} %prec UMINUS
     | ADD expr:e
         {:
-            RESULT = new BaseASTNode(NodeType.UNARY_PLUS);
-            RESULT.addChild(e);
+            RESULT = new ExpressionNode();
+            ASTNode u = new BaseASTNode(NodeType.UNARY_PLUS);
+            u.addChild(e);
+            RESULT.addChild(u);
         :} %prec UPLUS
 ;
 
 variable ::=
     identifier:i
         {:
-            RESULT = new BaseASTNode(NodeType.VAR_USE);
-            RESULT.addChild(i);
+            RESULT = new ExpressionNode();
+            ASTNode v = new BaseASTNode(NodeType.VAR_USE);
+            v.addChild(i);
+            RESULT.addChild(v);
+            ((ExpressionNode) RESULT).setIsIdentifier();
         :}
     | identifier:i variable_mid:vm
 //        {: RESULT = new BaseASTNode(NodeType.NOT_EQUAL); :}
@@ -574,103 +594,137 @@ variable_mid ::=
 expr_operation ::=
     expr:e1 ADD expr:e2
         {:
-            RESULT = new BaseASTNode(NodeType.ADDITION);
-            RESULT.addChild(e1);
-            RESULT.addChild(e2);
+            RESULT = new ExpressionNode();
+            ASTNode t = new BaseASTNode(NodeType.ADDITION);
+            t.addChild(e1);
+            t.addChild(e2);
+            RESULT.addChild(t);
         :}
     | expr:e1 MINUS expr:e2
         {:
-            RESULT = new BaseASTNode(NodeType.SUBTRACTION);
-            RESULT.addChild(e1);
-            RESULT.addChild(e2);
+            RESULT = new ExpressionNode();
+            ASTNode t = new BaseASTNode(NodeType.SUBTRACTION);
+            t.addChild(e1);
+            t.addChild(e2);
+            RESULT.addChild(t);
         :}
     | expr:e1 PROD expr:e2
         {:
-            RESULT = new BaseASTNode(NodeType.MULTIPLICATION);
-            RESULT.addChild(e1);
-            RESULT.addChild(e2);
+            ASTNode t = new BaseASTNode(NodeType.MULTIPLICATION);
+            RESULT = new ExpressionNode();
+            t.addChild(e1);
+            t.addChild(e2);
+            RESULT.addChild(t);
         :}
     | expr:e1 DIV expr:e2
         {:
-            RESULT = new BaseASTNode(NodeType.DIVISION);
-            RESULT.addChild(e1);
-            RESULT.addChild(e2);
+            ASTNode t = new BaseASTNode(NodeType.DIVISION);
+            RESULT = new ExpressionNode();
+            t.addChild(e1);
+            t.addChild(e2);
+            RESULT.addChild(t);
         :}
     | expr:e1 MOD expr:e2
         {:
-            RESULT = new BaseASTNode(NodeType.MOD);
-            RESULT.addChild(e1);
-            RESULT.addChild(e2);
+            ASTNode t = new BaseASTNode(NodeType.MOD);
+            RESULT = new ExpressionNode();
+            t.addChild(e1);
+            t.addChild(e2);
+            RESULT.addChild(t);
         :}
     | expr:e1 ARITHAND expr:e2
         {:
-            RESULT = new BaseASTNode(NodeType.ARITHMETIC_AND);
-            RESULT.addChild(e1);
-            RESULT.addChild(e2);
+            ASTNode t = new BaseASTNode(NodeType.ARITHMETIC_AND);
+            RESULT = new ExpressionNode();
+            t.addChild(e1);
+            t.addChild(e2);
+            RESULT.addChild(t);
         :}
     | expr:e1 ARITHOR expr:e2
         {:
-            RESULT = new BaseASTNode(NodeType.ARITHMETIC_OR);
-            RESULT.addChild(e1);
-            RESULT.addChild(e2);
+            ASTNode t = new BaseASTNode(NodeType.ARITHMETIC_OR);
+            RESULT = new ExpressionNode();
+            t.addChild(e1);
+            t.addChild(e2);
+            RESULT.addChild(t);
         :}
     | expr:e1 XOR expr:e2
         {:
-            RESULT = new BaseASTNode(NodeType.XOR);
-            RESULT.addChild(e1);
-            RESULT.addChild(e2);
+            ASTNode t = new BaseASTNode(NodeType.XOR);
+            RESULT = new ExpressionNode();
+            t.addChild(e1);
+            t.addChild(e2);
+            RESULT.addChild(t);
         :}
     | expr:e1 EQ expr:e2
         {:
-            RESULT = new BaseASTNode(NodeType.EQUAL);
-            RESULT.addChild(e1);
-            RESULT.addChild(e2);
+            ASTNode t = new BaseASTNode(NodeType.EQUAL);
+            RESULT = new ExpressionNode();
+            t.addChild(e1);
+            t.addChild(e2);
+            RESULT.addChild(t);
         :}
     | expr:e1 NOTEQ expr:e2
         {:
-            RESULT = new BaseASTNode(NodeType.NOT_EQUAL);
-            RESULT.addChild(e1);
-            RESULT.addChild(e2);
+            ASTNode t = new BaseASTNode(NodeType.NOT_EQUAL);
+            RESULT = new ExpressionNode();
+            t.addChild(e1);
+            t.addChild(e2);
+            RESULT.addChild(t);
         :}
     | expr:e1 GREQ expr:e2
         {:
-            RESULT = new BaseASTNode(NodeType.GREATER_THAN_OR_EQUAL);
-            RESULT.addChild(e1);
-            RESULT.addChild(e2);
+            ASTNode t = new BaseASTNode(NodeType.GREATER_THAN_OR_EQUAL);
+            RESULT = new ExpressionNode();
+            t.addChild(e1);
+            t.addChild(e2);
+            RESULT.addChild(t);
         :}
     | expr:e1 LESSEQ expr:e2
         {:
-            RESULT = new BaseASTNode(NodeType.LESS_THAN_OR_EQUAL);
-            RESULT.addChild(e1);
-            RESULT.addChild(e2);
+            ASTNode t = new BaseASTNode(NodeType.LESS_THAN_OR_EQUAL);
+            RESULT = new ExpressionNode();
+            t.addChild(e1);
+            t.addChild(e2);
+            RESULT.addChild(t);
         :}
     | expr:e1 GR expr:e2
         {:
-            RESULT = new BaseASTNode(NodeType.GREATER_THAN);
-            RESULT.addChild(e1);
-            RESULT.addChild(e2);
+            ASTNode t = new BaseASTNode(NodeType.GREATER_THAN);
+            RESULT = new ExpressionNode();
+            t.addChild(e1);
+            t.addChild(e2);
+            RESULT.addChild(t);
         :}
     | expr:e1 LESS expr:e2
         {:
-            RESULT = new BaseASTNode(NodeType.LESS_THAN);
-            RESULT.addChild(e1);
-            RESULT.addChild(e2);
+            ASTNode t = new BaseASTNode(NodeType.LESS_THAN);
+            RESULT = new ExpressionNode();
+            t.addChild(e1);
+            t.addChild(e2);
+            RESULT.addChild(t);
         :}
     | expr:e1 NOT expr:e2
         {:
-            RESULT = new BaseASTNode(NodeType.BOOLEAN_NOT);
-            RESULT.addChild(e1);
-            RESULT.addChild(e2);
+            ASTNode t = new BaseASTNode(NodeType.BOOLEAN_NOT);
+            RESULT = new ExpressionNode();
+            t.addChild(e1);
+            t.addChild(e2);
+            RESULT.addChild(t);
         :}
     | expr:e1 LOGICAND expr:e2
         {:
-            RESULT = new BaseASTNode(NodeType.BOOLEAN_AND);
-            RESULT.addChild(e1);
-            RESULT.addChild(e2);
+            ASTNode t = new BaseASTNode(NodeType.BOOLEAN_AND);
+            RESULT = new ExpressionNode();
+            t.addChild(e1);
+            t.addChild(e2);
+            RESULT.addChild(t);
         :}
     | expr:e1 LOGICOR expr:e2
         {:
-            RESULT = new BaseASTNode(NodeType.BOOLEAN_OR);
-            RESULT.addChild(e1);
-            RESULT.addChild(e2);
+            ASTNode t = new BaseASTNode(NodeType.BOOLEAN_OR);
+            RESULT = new ExpressionNode();
+            t.addChild(e1);
+            t.addChild(e2);
+            RESULT.addChild(t);
         :};

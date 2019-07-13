@@ -1,0 +1,8 @@
+define i32 @fun() {
+entry:
+	tmp1 = add i32 1, 2
+	tmp1 = add i32 %tmp1, %a
+	tmp1 = add i32 %tmp1, 3
+  istore 
+  ireturn
+}

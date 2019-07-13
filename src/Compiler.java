@@ -10,7 +10,7 @@ import java.io.*;
 
 public class Compiler {
     public static void main(String[] args) throws Exception {
-        String source="src/Code.txt";
+        String source = "src/Code.txt";
 
         Compiler compiler = new Compiler(source);
         compiler.run();
@@ -27,11 +27,12 @@ public class Compiler {
     }
 
     private void processFile() throws Exception {
-        FileWriter fw = new FileWriter("src/Result.txt", true);
+        PrintStream stream=new PrintStream(new FileOutputStream("src/Result.txt"));
+//        PrintStream stream = System.out;
         Program cu = parse();
         performSemanticAnalysis(cu);
         performLocalVarMapping(cu);
-        generateCode(cu, fw);
+        generateCode(cu, stream);
     }
 
     private Program parse() throws Exception {
@@ -58,7 +59,7 @@ public class Compiler {
         System.out.println("LVM done\n");
     }
 
-    private void generateCode(Program cu, FileWriter fw) throws Exception {
+    private void generateCode(Program cu, PrintStream fw) throws Exception {
         System.out.println("in code gen");
         cu.accept(new CodeGenVisitor(fw));
         fw.close();

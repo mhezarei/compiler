@@ -14,12 +14,6 @@ public class IdentifierNode extends BaseASTNode {
     
     @Override
     public String toString() {
-        String str = getNodeType() + " (" + value + ")";
-
-        if (symbolInfo != null) {
-            str += " (" + symbolInfo.toString() + ")";
-        }
-
-        return str;
+        return "%"+value;
     }
 }

@@ -3,7 +3,9 @@ package ast;
 
 import codegen.SimpleVisitor;
 import semantic.SymbolInfo;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,23 +13,23 @@ import java.util.List;
  * Base node type of AST
  */
 public class BaseASTNode implements ASTNode {
-    private ArrayList<ASTNode> children = new ArrayList<>();
+    private List<ASTNode> children = new ArrayList<>();
     private ASTNode parent;
     private NodeType nodeType;
     SymbolInfo symbolInfo;
-    
+
     public BaseASTNode(NodeType nodeType) {
         this.nodeType = nodeType;
     }
-    
+
     public NodeType getNodeType() {
         return nodeType;
     }
-    
+
     public void setSymbolInfo(SymbolInfo si) {
         this.symbolInfo = si;
     }
-    
+
     public SymbolInfo getSymbolInfo() {
         return symbolInfo;
     }
@@ -35,11 +37,11 @@ public class BaseASTNode implements ASTNode {
     @Override
     public String toString() {
         String str = nodeType.toString();
-        
+
         if (symbolInfo != null) {
             str += " (" + symbolInfo.toString() + ")";
         }
-        
+
         return str;
     }
 
@@ -66,6 +68,11 @@ public class BaseASTNode implements ASTNode {
     @Override
     public void addChild(ASTNode... nodes) {
         Collections.addAll(children, nodes);
+    }
+
+    @Override
+    public void setChildren(ASTNode... nodes) {
+        children = Arrays.asList(nodes);
     }
 
     @Override

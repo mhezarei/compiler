@@ -63,6 +63,11 @@
             <set />
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/src/Result.txt">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/src/Scanner.flex">
           <value>
             <set />
@@ -113,6 +118,26 @@
             <set />
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/src/ast/ExpressionNode.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/ast/FloatLiteralNode.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/ast/IdentifierNode.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/ast/IntegerLiteralNode.java">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/src/ast/LongLiteralNode.java">
           <value>
             <set />
@@ -129,6 +154,11 @@
           </value>
         </entry>
         <entry key="$PROJECT_DIR$/src/ast/Program.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/ast/StringLiteralNode.java">
           <value>
             <set />
           </value>
