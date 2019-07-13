@@ -13,7 +13,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     private PrintStream stream;
     private int labelIndex;
     private String className;
-    private Set<Signature> signatures=new HashSet<>();
+    private Set<Signature> signatures = new HashSet<>();
     private boolean returnGenerated;
     private Set<Integer> usedTemps = new HashSet<>();
 
@@ -70,11 +70,6 @@ public class CodeGenVisitor implements SimpleVisitor {
 
             case METHOD_DECLARATION:
                 visitMethodDeclarationNode(node);
-                break;
-
-
-            case PARAMETER:
-                visitParameterNode(node);
                 break;
 
             case RETURN_STATEMENT:
@@ -159,6 +154,7 @@ public class CodeGenVisitor implements SimpleVisitor {
             case PRE_INCREMENT:
             case VARIABLE_DECLARATION:
             case VOID:
+            case PARAMETER:
             default:
                 visitAllChildren(node);
         }
@@ -514,8 +510,8 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         ASTNode exprNode = node.getChild(1).getChild(0);
 
-        if(exprNode.getNodeType()==NodeType.VAR_USE)
-            exprNode=exprNode.getChild(0);
+        if (exprNode.getNodeType() == NodeType.VAR_USE)
+            exprNode = exprNode.getChild(0);
 
         stream.println("\t" + idNode + " = " + exprNode);
     }
@@ -573,6 +569,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     private void visitLiteralNode(ASTNode node) throws Exception {
         ((ExpressionNode) node.getParent()).setIsIdentifier();
     }
+
     private void visitMethodAccessNode(ASTNode node) throws Exception {
         //Check the signature
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
@@ -584,23 +581,33 @@ public class CodeGenVisitor implements SimpleVisitor {
         //Expression
         node.getChild(1).accept(this);
 
-        stream.print("\tcall " + returnType + " @" + methodName + "(");
-        stream.println(")");
-        if (node.getParent() != null) //is an expr
+        String result = "tmp" + getTemp();
 
-
-        {
+        stream.print("\t"+result+" = call " + returnType + " @" + methodName);
+        visitParameterNode(node.getChild(1));
+        if (node.getParent() != null) {
+            //it is an expr
             node.getChild(1).accept(this);
         }
 
         returnGenerated = false;
     }
 
-    private List<Signature.Argument> visitParameterNode(ASTNode node) throws Exception {
-        //PARAMETER -> EXPR
-        node.getChild(0).accept(this);
+    private void visitParameterNode(ASTNode node) throws Exception {
+        //todo check type of parameter with signature
+        stream.print("(");
+        ASTNode[] params = node.getChildren().toArray(new ASTNode[0]);
+        for (int i = 0; i < params.length; i++) {
+            if (i > 0)
+                stream.print(",");
+            ASTNode paramNode = params[i];
+            ASTNode paramValue=paramNode.getChild(0).getChild(0);
+            if(paramValue.getNodeType()==NodeType.VAR_USE)
+                paramNode=paramValue.getChild(0);
+            stream.print(paramNode);
+        }
+        stream.println(")");
         returnGenerated = false;
-        return null;
     }
 
 
@@ -660,7 +667,6 @@ public class CodeGenVisitor implements SimpleVisitor {
         stream.print(")");
         return arguments;
     }
-
 
 
     private void visitReturnStatementNode(ASTNode node) throws Exception {
