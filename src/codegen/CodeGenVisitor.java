@@ -1,17 +1,11 @@
-
 package codegen;
-
 
 import ast.*;
 import semantic.SymbolInfo;
-
 import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * An AST visitor which generates Jasmin code.
- */
 public class CodeGenVisitor implements SimpleVisitor {
     private PrintStream stream;
     private int labelIndex;
@@ -146,7 +140,6 @@ public class CodeGenVisitor implements SimpleVisitor {
             case ARGUMENT:
             case BLOCK:
             case BOOLEAN_TYPE:
-            case CAST:
             case CHAR_TYPE:
             case START:
             case DECLARATIONS:
@@ -168,23 +161,9 @@ public class CodeGenVisitor implements SimpleVisitor {
         }
     }
 
-
-    ////////////////////  My Helpers  /////////////////////////////
-
-    /**
-     * Output the code to push this node's resulting value onto the stack
-     */
-    private int getVarIndexFromIDNode(ASTNode idNode) {
-        return ((IdentifierNode) idNode).getSymbolInfo().getLocalVarIndex();
-    }
-
-    private int getValueFromIntNode(ASTNode intLitNode) {
-        return ((IntegerLiteralNode) intLitNode).getValue();
-    }
-
-
     private void visitExpressionNode(ASTNode node) throws Exception {
         ExpressionNode expressionNode = (ExpressionNode) node;
+
         if (!expressionNode.isIdentifier()) {
             ASTNode child = node.getChild(0);
             child.setParent(node);
@@ -223,7 +202,6 @@ public class CodeGenVisitor implements SimpleVisitor {
         v.setParent(parent);
         parent.setChildren(v);
         parent.setIsIdentifier();
-
     }
 
     private String getOperation(NodeType nodeType, ExpressionNode e1) throws Exception {
@@ -291,7 +269,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private PrimitiveType checkType(ExpressionNode e1, ExpressionNode e2, NodeType nodeType) throws Exception {
-        //todo reduse complexity
+        //todo reduce complexity
         //todo should cast
         if (!e1.isIdentifier())
             throw new Exception(e1 + " not generated");
@@ -302,77 +280,71 @@ public class CodeGenVisitor implements SimpleVisitor {
             case ADDITION:
             case SUBTRACTION:
             case MULTIPLICATION:
+            case MOD:
             case DIVISION:
                 switch (e1.getType()) {
                     case INT:
+                    case BOOL:
                         switch (e2.getType()) {
                             case INT:
-                                return PrimitiveType.INT;
                             case CHAR:
-                                return PrimitiveType.CHAR;
+                            case BOOL:
+                                return PrimitiveType.INT;
                             case LONG:
                                 return PrimitiveType.LONG;
                             case DOUBLE:
                                 return PrimitiveType.DOUBLE;
                             case FLOAT:
                                 return PrimitiveType.FLOAT;
-                            case BOOL:
                             case STRING:
                             case VOID:
                                 throw new Exception("can't add");
                             case AUTO:
                                 //todo
                         }
-                    case BOOL:
-                        throw new Exception("can't add");
                     case CHAR:
                         switch (e2.getType()) {
                             case INT:
-                                return PrimitiveType.CHAR;
+                            case BOOL:
                             case CHAR:
-                                return PrimitiveType.CHAR;
+                                return PrimitiveType.INT;
                             case LONG:
+                                return PrimitiveType.LONG;
                             case DOUBLE:
                             case FLOAT:
-                            case BOOL:
                             case STRING:
                             case VOID:
                                 throw new Exception("can't add");
                             case AUTO:
                                 //todo
                         }
-
                     case LONG:
                         switch (e2.getType()) {
                             case INT:
-                                return PrimitiveType.LONG;
                             case LONG:
+	                        case BOOL:
+                            case CHAR:
                                 return PrimitiveType.LONG;
                             case DOUBLE:
                                 return PrimitiveType.DOUBLE;
                             case FLOAT:
                                 return PrimitiveType.FLOAT;
-                            case BOOL:
-                            case CHAR:
                             case STRING:
                             case VOID:
                                 throw new Exception("can't add");
                             case AUTO:
                                 //todo
                         }
-
                     case FLOAT:
                         switch (e2.getType()) {
                             case INT:
-                                return PrimitiveType.FLOAT;
                             case LONG:
+	                        case BOOL:
+                            case FLOAT:
+	                        case CHAR:
                                 return PrimitiveType.FLOAT;
                             case DOUBLE:
                                 return PrimitiveType.DOUBLE;
-                            case FLOAT:
-                                return PrimitiveType.FLOAT;
-                            case CHAR:
-                            case BOOL:
                             case STRING:
                             case VOID:
                                 throw new Exception("can't add");
@@ -385,25 +357,38 @@ public class CodeGenVisitor implements SimpleVisitor {
                             case LONG:
                             case DOUBLE:
                             case FLOAT:
+	                        case CHAR:
+	                        case BOOL:
                                 return PrimitiveType.DOUBLE;
-                            case CHAR:
-                            case BOOL:
                             case STRING:
                             case VOID:
                                 throw new Exception("can't add");
                             case AUTO:
                                 //todo
                         }
-
                     case STRING:
                     case VOID:
                         throw new Exception("can't add");
                     case AUTO:
                         //todo
                 }
-                //todo other operations
+
+            case ARITHMETIC_AND:
+            case ARITHMETIC_OR:
+            case XOR:
+                if ((e1.getType() == PrimitiveType.INT || e1.getType() == PrimitiveType.LONG) &&
+		                (e2.getType() == PrimitiveType.INT || e2.getType() == PrimitiveType.LONG)) {
+	                if (e1.getType() == PrimitiveType.INT && e2.getType() == PrimitiveType.INT) {
+		                return PrimitiveType.INT;
+	                } else {
+		                return PrimitiveType.LONG;
+	                }
+                } else {
+                    throw new Exception("can't add");
+                }
         }
-        return PrimitiveType.INT;
+
+        return null;
     }
 
     private void visitUnaryMinusNode(ASTNode node) throws Exception {

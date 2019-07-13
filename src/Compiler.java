@@ -28,7 +28,7 @@ public class Compiler {
     }
 
     private void processFile() throws Exception {
-        PrintStream stream=new PrintStream(new FileOutputStream("src/Result.txt"));
+        PrintStream stream = new PrintStream(new FileOutputStream("src/Result.txt"));
 //        PrintStream stream = System.out;
         Program cu = parse();
         performSemanticAnalysis(cu);
@@ -60,10 +60,10 @@ public class Compiler {
         System.out.println("LVM done\n");
     }
 
-    private void generateCode(Program cu, PrintStream fw) throws Exception {
+    private void generateCode(Program cu, PrintStream stream) throws Exception {
         System.out.println("in code gen");
-        cu.accept(new CodeGenVisitor(fw));
-        fw.close();
+        cu.accept(new CodeGenVisitor(stream));
+        stream.close();
         System.out.println("CG done\n");
     }
 }

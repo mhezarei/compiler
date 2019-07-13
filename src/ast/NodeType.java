@@ -37,7 +37,6 @@ public enum NodeType {
     BOOLEAN_NOT,
     BOOLEAN_OR,
 
-
     /*Types*/
     BOOLEAN_TYPE,
     DOUBLE_TYPE,
@@ -80,7 +79,6 @@ public enum NodeType {
     LITERAL,
     ARGUMENT,
     ARGUMENTS,
-    CAST,
     EMPTY_STATEMENT,
     IDENTIFIER,
     METHOD_ACCESS,
