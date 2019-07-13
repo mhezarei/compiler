@@ -190,6 +190,17 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         stream.println("\t%" + result + " = " + op + " " + resultType + " " + e1.getResultName() + ", " + e2.getResultName());
 
+
+        reduceExpressionNode(result, parent, resultType);
+
+        /*System.out.println("the id node is " + id.toString());
+        System.out.println("the id node SI is " + id.getSymbolInfo());
+        System.out.println("the var use node is " + v.toString());
+        System.out.println("the var use SI node is " + v.getSymbolInfo());*/
+        System.out.println("finished the binary op " + node + "\n");
+    }
+
+    private void reduceExpressionNode(String result, ExpressionNode parent,PrimitiveType resultType) throws Exception {
         ASTNode v = new BaseASTNode(NodeType.VAR_USE);
         ASTNode id = new IdentifierNode(result);
         SymbolInfo si = new SymbolInfo(id);
@@ -197,14 +208,8 @@ public class CodeGenVisitor implements SimpleVisitor {
         id.setSymbolInfo(si);
         v.addChild(id);
         v.setParent(parent);
-        System.out.println("the id node is " + id.toString());
-        System.out.println("the id node SI is " + id.getSymbolInfo());
-        System.out.println("the var use node is " + v.toString());
-        System.out.println("the var use SI node is " + v.getSymbolInfo());
         parent.setChildren(v);
         parent.setIsIdentifier();
-
-        System.out.println("finished the binary op " + node + "\n");
     }
 
     private String getBinaryOperationCommand(NodeType nodeType, ExpressionNode e1) throws Exception {
@@ -564,8 +569,10 @@ public class CodeGenVisitor implements SimpleVisitor {
         //Check the signature
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
         String methodName = idNode.getValue();
+
         //todo must detect left hand side of assign
         TypeNode returnType = new TypeNode(NodeType.VOID, PrimitiveType.VOID);
+        //todo must check parameters
         Signature newSig = new Signature(returnType, methodName);
 
         //Expression
@@ -573,7 +580,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         String result = "tmp" + getTemp();
 
-        stream.print("\t"+result+" = call " + returnType + " @" + methodName);
+        stream.print("\t%"+result+" = call " + returnType + " @" + methodName);
         visitParameterNode(node.getChild(1));
         if (node.getParent() != null) {
             //it is an expr
@@ -581,6 +588,10 @@ public class CodeGenVisitor implements SimpleVisitor {
         }
 
         returnGenerated = false;
+
+        ExpressionNode parent = (ExpressionNode) node.getParent();
+
+        reduceExpressionNode(result, parent, returnType.getType());
     }
 
     private void visitParameterNode(ASTNode node) throws Exception {
