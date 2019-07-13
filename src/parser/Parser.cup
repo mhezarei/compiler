@@ -502,13 +502,17 @@ expr ::=
         {: RESULT = t; :}
     | LPAREN expr:t RPAREN
         {: RESULT = t; :}
-    | method_call:t
-        {: RESULT = t; :}
     | variable:t
         {: RESULT = t; :}
     | const_val:t
         {:
             RESULT = new ExpressionNode();
+            RESULT.addChild(t);
+        :}
+    | method_call:t
+        {:
+            RESULT = new ExpressionNode();
+            t.setParent(RESULT);
             RESULT.addChild(t);
         :}
     | DEC variable:v

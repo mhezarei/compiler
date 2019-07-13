@@ -93,9 +93,6 @@ public class CodeGenVisitor implements SimpleVisitor {
             case REPEAT_STATEMENT:
                 visitWhileStatementNode(node);
                 break;
-            case ARGUMENTS:
-                visitArgumentNode(node);
-                break;
 
             case EXPRESSION_STATEMENT:
                 visitExpressionNode(node);
@@ -124,6 +121,9 @@ public class CodeGenVisitor implements SimpleVisitor {
             case BITWISE_NEGATIVE:
                 //todo
                 break;
+            case ARGUMENT:
+            case ARGUMENTS:
+                break;
             case STRUCT_DECLARATION:
             case CONTINUE_STATEMENT:
             case FOREACH_STATEMENT:
@@ -137,7 +137,6 @@ public class CodeGenVisitor implements SimpleVisitor {
             case PARAMETERS:
             case VARIABLE_CONST_DECLARATION:
             case FOR_STATEMENT:
-            case ARGUMENT:
             case BLOCK:
             case BOOLEAN_TYPE:
             case CHAR_TYPE:
@@ -475,28 +474,45 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitMethodAccessNode(ASTNode node) throws Exception {
-        //todo need to understand
-        node.getChild(1).accept(this);
-
+        //Check the signature
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
         String methodName = idNode.getValue();
         String sig = classNode.getMethodSig(methodName);
-//        String sig = methodName;
+
+        if(sig==null)
+            throw new Exception(methodName + " not declared");
+
+        String returnType=sig.split("\\s")[0];
+        String[] params=sig.split("[(]")[1].split(",");
+
+        if(node.getParent()!=null) //is an expr
+
+
+        {
+            node.getChild(1).accept(this);
+        }
+
         stream.println("  invokestatic " + className + "/" + sig);
         returnGenerated = false;
     }
 
     private void visitMethodDeclarationNode(ASTNode node) throws Exception {
         //type
-        TypeNode typeNode = (TypeNode) node.getChild(0);
-        String returnType = typeNode.getType().getSignature();
+        TypeNode returnType = (TypeNode) node.getChild(0);
+        String returnSig = returnType.getType().getSignature();
         //identifier
         IdentifierNode idNode = (IdentifierNode) node.getChild(1);
         String methodName = idNode.getValue();
 
-        stream.print("define " + returnType + " @" + methodName);
+        StringBuilder signatureBuilder=new StringBuilder();
+        stream.print("define ");
+        signatureBuilder.append(returnSig).append(" @").append(methodName);
         //arguments
-        node.getChild(2).accept(this);
+        signatureBuilder.append(visitArgumentNode(node.getChild(2)));
+        stream.print(signatureBuilder);
+
+        classNode.putMethodSig(methodName,signatureBuilder.toString());
+
         stream.println(" {");
         stream.println("entry:");
         //block
@@ -510,21 +526,23 @@ public class CodeGenVisitor implements SimpleVisitor {
         stream.println("}");
     }
 
-    private void visitArgumentNode(ASTNode node) {
-        stream.print("(");
+    private String visitArgumentNode(ASTNode node) {
+        StringBuilder builder=new StringBuilder("(");
         ASTNode[] params = node.getChildren().toArray(new ASTNode[0]);
         for (int i = 0; i < params.length; i++) {
+            if (i > 0)
+                builder.append(",");
+
             ASTNode paramNode = params[i];
             //type
             TypeNode paramTypeNode = (TypeNode) paramNode.getChild(0);
-            stream.print(paramTypeNode.getType().getSignature() + " ");
+            builder.append(paramTypeNode.getType().getSignature()).append(" ");
             //identifier
             IdentifierNode paramIDNode = (IdentifierNode) paramNode.getChild(1);
-            stream.print("%" + paramIDNode.getValue());
-            if (i > 0 && i < params.length - 1)
-                stream.print(",");
+            builder.append("%").append(paramIDNode.getValue());
         }
-        stream.print(")");
+        builder.append(")");
+        return builder.toString();
     }
 
     private void visitParameterNode(ASTNode node) {
