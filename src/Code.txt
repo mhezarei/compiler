@@ -3,6 +3,6 @@ begin
     float a;
     int b;
     b = 2;
-    int c = 45 + a ;
+    int c = 45 + a;
 
 end

@@ -130,26 +130,30 @@ const_val ::=
 program ::=
     program2:t
         {:
-           Program p = new Program();
-           p.addChild(t);
-           setRoot(p);
+			Program p = new Program();
+			p.addChild(t);
+			t.setParent(p);
+			setRoot(p);
         :};
 
 program2 ::=
     program2:p var_dcl:t
         {:
-           RESULT = p;
-           RESULT.addChild(t);
+			RESULT = p;
+			RESULT.addChild(t);
+			t.setParent(RESULT);
         :}
     | program2:p func_extern:t
         {:
-           RESULT = p;
-           RESULT.addChild(t);
+			RESULT = p;
+			RESULT.addChild(t);
+			t.setParent(RESULT);
         :}
     | program2:p struct_dec:t
         {:
-           RESULT = p;
-           RESULT.addChild(t);
+			RESULT = p;
+			RESULT.addChild(t);
+			t.setParent(RESULT);
         :}
     | var_dcl:t
         {: RESULT = t; :}
@@ -167,43 +171,64 @@ func_extern ::=
 func_dcl ::=
     FUNCTION type:t identifier:i LPAREN arguments:a RPAREN SEMICOLON
         {:
-           RESULT = new BaseASTNode(NodeType.METHOD_DECLARATION);
-           ASTNode b = new BaseASTNode(NodeType.BLOCK);
-           RESULT.addChild(t, i, a, b);
+			RESULT = new BaseASTNode(NodeType.METHOD_DECLARATION);
+			ASTNode b = new BaseASTNode(NodeType.BLOCK);
+			RESULT.addChild(t, i, a, b);
+			t.setParent(RESULT);
+			i.setParent(RESULT);
+			a.setParent(RESULT);
+			b.setParent(RESULT);
         :}
     | FUNCTION type:t identifier:i LPAREN RPAREN SEMICOLON
         {:
-           RESULT = new BaseASTNode(NodeType.METHOD_DECLARATION);
-           ASTNode b = new BaseASTNode(NodeType.BLOCK);
-           ASTNode a = new BaseASTNode(NodeType.ARGUMENTS);
-           RESULT.addChild(t, i, a, b);
+			RESULT = new BaseASTNode(NodeType.METHOD_DECLARATION);
+			ASTNode b = new BaseASTNode(NodeType.BLOCK);
+			ASTNode a = new BaseASTNode(NodeType.ARGUMENTS);
+			RESULT.addChild(t, i, a, b);
+			t.setParent(RESULT);
+			i.setParent(RESULT);
+			a.setParent(RESULT);
+			b.setParent(RESULT);
         :}
     | FUNCTION type:t identifier:i LPAREN arguments:a RPAREN block:b
         {:
-           RESULT = new BaseASTNode(NodeType.METHOD_DECLARATION);
-           RESULT.addChild(t, i, a, b);
+			RESULT = new BaseASTNode(NodeType.METHOD_DECLARATION);
+			RESULT.addChild(t, i, a, b);
+			t.setParent(RESULT);
+			i.setParent(RESULT);
+			a.setParent(RESULT);
+			b.setParent(RESULT);
         :}
     | FUNCTION type:t identifier:i LPAREN RPAREN block:b
         {:
-           RESULT = new BaseASTNode(NodeType.METHOD_DECLARATION);
-           ASTNode a = new BaseASTNode(NodeType.ARGUMENTS);
-           RESULT.addChild(t, i, a, b);
+			RESULT = new BaseASTNode(NodeType.METHOD_DECLARATION);
+			ASTNode a = new BaseASTNode(NodeType.ARGUMENTS);
+			RESULT.addChild(t, i, a, b);
+			t.setParent(RESULT);
+            i.setParent(RESULT);
+            a.setParent(RESULT);
+            b.setParent(RESULT);
         :};
 
 extern_dcl ::=
     EXTERN type:t identifier:i
         {:
-            RESULT = new BaseASTNode(NodeType.VARIABLE_DECLARATION);
-            RESULT.addChild(t, i);
+			RESULT = new BaseASTNode(NodeType.VARIABLE_DECLARATION);
+			RESULT.addChild(t, i);
+			t.setParent(RESULT);
+			i.setParent(RESULT);
         :};
 
 arguments ::=
     type:t identifier:i
         {:
-            RESULT = new BaseASTNode(NodeType.ARGUMENTS);
-            ASTNode a = new BaseASTNode(NodeType.ARGUMENT);
-            a.addChild(t, i);
-            RESULT.addChild(a);
+			RESULT = new BaseASTNode(NodeType.ARGUMENTS);
+			ASTNode a = new BaseASTNode(NodeType.ARGUMENT);
+			a.addChild(t, i);
+			t.setParent(a);
+			i.setParent(a);
+			RESULT.addChild(a);
+			a.setParent(RESULT);
         :}
     | type:t identifier:i arguments_middle:am
 //        {:
@@ -214,10 +239,13 @@ arguments ::=
 //        :}
     | arguments:as COMMA type:t identifier:i
         {:
-            RESULT = as;
-            ASTNode a = new BaseASTNode(NodeType.ARGUMENT);
-            a.addChild(t, i);
-            RESULT.addChild(a);
+			RESULT = as;
+			ASTNode a = new BaseASTNode(NodeType.ARGUMENT);
+			a.addChild(t, i);
+			t.setParent(a);
+			i.setParent(a);
+			RESULT.addChild(a);
+			a.setParent(RESULT);
         :}
     | arguments:a COMMA type:t identifier:i arguments_middle:am
 //        {:
@@ -258,48 +286,64 @@ type ::=
 struct_dec ::=
     RECORD identifier:i BEGIN struct_dec_middle:sdm END RECORD
         {:
-            RESULT = new BaseASTNode(NodeType.STRUCT_DECLARATION);
-            RESULT.addChild(i, sdm);
+			RESULT = new BaseASTNode(NodeType.STRUCT_DECLARATION);
+			RESULT.addChild(i, sdm);
+			i.setParent(RESULT);
+			sdm.setParent(RESULT);
         :};
 
 struct_dec_middle ::=
     var_dcl:v
-        {: RESULT = v; :}
+		{: RESULT = v; :}
     | struct_dec_middle:s var_dcl:vd
         {:
-            RESULT = s;
-            RESULT.addChild(vd);
+			RESULT = s;
+			RESULT.addChild(vd);
+			vd.setParent(RESULT);
         :};
 
 var_dcl ::=
     type:t var_dcl_cnt:vdc var_dcl_end:vde SEMICOLON
         {:
-            RESULT =  new BaseASTNode(NodeType.VARIABLE_DECLARATION);
-            RESULT.addChild(t, vdc, vde);
+			RESULT =  new BaseASTNode(NodeType.VARIABLE_DECLARATION);
+			RESULT.addChild(t, vdc, vde);
+			t.setParent(RESULT);
+			vdc.setParent(RESULT);
+			vde.setParent(RESULT);
         :}
     | CONST type:t var_dcl_cnt:vdc var_dcl_end:vde SEMICOLON
         {:
-            RESULT =  new BaseASTNode(NodeType.VARIABLE_CONST_DECLARATION);
-            RESULT.addChild(t, vdc, vde);
+			RESULT =  new BaseASTNode(NodeType.VARIABLE_CONST_DECLARATION);
+			RESULT.addChild(t, vdc, vde);
+			t.setParent(RESULT);
+			vdc.setParent(RESULT);
+			vde.setParent(RESULT);
         :}
 	| type:t var_dcl_cnt:vdc SEMICOLON
         {:
-            RESULT =  new BaseASTNode(NodeType.VARIABLE_DECLARATION);
-            ASTNode vde = new BaseASTNode(NodeType.VARIABLE_DECLARATION);
-            RESULT.addChild(t, vdc, vde);
+			RESULT =  new BaseASTNode(NodeType.VARIABLE_DECLARATION);
+			ASTNode vde = new BaseASTNode(NodeType.VARIABLE_DECLARATION);
+			RESULT.addChild(t, vdc, vde);
+			t.setParent(RESULT);
+			vdc.setParent(RESULT);
+			vde.setParent(RESULT);
         :}
 	| CONST type:t var_dcl_cnt:vdc SEMICOLON
         {:
             RESULT =  new BaseASTNode(NodeType.VARIABLE_CONST_DECLARATION);
             ASTNode vde = new BaseASTNode(NodeType.VARIABLE_CONST_DECLARATION);
             RESULT.addChild(t, vdc, vde);
+            t.setParent(RESULT);
+            vdc.setParent(RESULT);
+            vde.setParent(RESULT);
         :};
 
 var_dcl_end ::=
     var_dcl_end:vde COMMA var_dcl_cnt:vdc
         {:
-            RESULT = vde;
-            RESULT.addChild(vdc);
+			RESULT = vde;
+			RESULT.addChild(vdc);
+			vdc.setParent(RESULT);
         :}
     | COMMA var_dcl_cnt:vdc
         {: RESULT = vdc; :};
@@ -315,8 +359,12 @@ var_dcl_cnt ::=
             ASTNode expr = new ExpressionNode();
             ASTNode v = new BaseASTNode(NodeType.VAR_USE);
             expr.addChild(v);
+            v.setParent(expr);
             v.addChild(i);
+            i.setParent(v);
             RESULT.addChild(expr,e);
+            e.setParent(RESULT);
+            expr.setParent(RESULT);
         :};
 
 block ::=
@@ -328,23 +376,27 @@ block ::=
 block_mid ::=
     block_mid:b var_dcl:vd
         {:
-            RESULT = b;
-            RESULT.addChild(vd);
+			RESULT = b;
+			RESULT.addChild(vd);
+			vd.setParent(RESULT);
         :}
     | block_mid:b statement:s
         {:
-            RESULT = b;
-            RESULT.addChild(s);
+			RESULT = b;
+			RESULT.addChild(s);
+			s.setParent(RESULT);
         :}
     | var_dcl:vd
         {:
-            RESULT = new BaseASTNode(NodeType.BLOCK);
-            RESULT.addChild(vd);
+			RESULT = new BaseASTNode(NodeType.BLOCK);
+			RESULT.addChild(vd);
+			vd.setParent(RESULT);
         :}
     | statement:s
         {:
-            RESULT = new BaseASTNode(NodeType.BLOCK);
-            RESULT.addChild(s);
+			RESULT = new BaseASTNode(NodeType.BLOCK);
+			RESULT.addChild(s);
+			s.setParent(RESULT);
         :};
 
 statement ::=
@@ -358,8 +410,9 @@ statement ::=
         {: RESULT = t; :}
     | RETURN expr:e SEMICOLON
         {:
-            RESULT = new BaseASTNode(NodeType.RETURN_STATEMENT);
-            RESULT.addChild(e);
+			RESULT = new BaseASTNode(NodeType.RETURN_STATEMENT);
+			RESULT.addChild(e);
+			e.setParent(RESULT);
         :}
     | RETURN SEMICOLON
         {: RESULT = new BaseASTNode(NodeType.RETURN_STATEMENT); :}
@@ -371,28 +424,38 @@ statement ::=
 assignment ::=
     variable:v ASSIGN expr:e
         {:
-            RESULT = new BaseASTNode(NodeType.ASSIGN);
-            RESULT.addChild(v,e);
+			RESULT = new BaseASTNode(NodeType.ASSIGN);
+			RESULT.addChild(v,e);
+			v.setParent(RESULT);
+			e.setParent(RESULT);
         :}
     | variable:v ADDASS expr:e
         {:
-            RESULT = new BaseASTNode(NodeType.ADD_ASSIGN);
-            RESULT.addChild(v,e);
+			RESULT = new BaseASTNode(NodeType.ADD_ASSIGN);
+			RESULT.addChild(v,e);
+			e.setParent(RESULT);
+			v.setParent(RESULT);
         :}
     | variable:v SUBASS expr:e
         {:
-            RESULT = new BaseASTNode(NodeType.SUB_ASSIGN);
-            RESULT.addChild(v,e);
+			RESULT = new BaseASTNode(NodeType.SUB_ASSIGN);
+			RESULT.addChild(v,e);
+			e.setParent(RESULT);
+			v.setParent(RESULT);
         :}
     | variable:v MULTASS expr:e
         {:
-            RESULT = new BaseASTNode(NodeType.MULT_ASSIGN);
-            RESULT.addChild(v,e);
+			RESULT = new BaseASTNode(NodeType.MULT_ASSIGN);
+			RESULT.addChild(v,e);
+			e.setParent(RESULT);
+			v.setParent(RESULT);
         :}
     | variable:v DIVASS expr:e
         {:
-            RESULT = new BaseASTNode(NodeType.DIV_ASSIGN);
-            RESULT.addChild(v,e);
+			RESULT = new BaseASTNode(NodeType.DIV_ASSIGN);
+			RESULT.addChild(v,e);
+			e.setParent(RESULT);
+			v.setParent(RESULT);
         :};
 
 method_call ::=
@@ -400,12 +463,16 @@ method_call ::=
         {:
             RESULT = new BaseASTNode(NodeType.METHOD_ACCESS);
             RESULT.addChild(i, ps);
+            i.setParent(RESULT);
+            ps.setParent(RESULT);
         :} %prec FPAREN
     | identifier:i LPAREN RPAREN
         {:
             RESULT = new BaseASTNode(NodeType.METHOD_ACCESS);
             ASTNode ps = new BaseASTNode(NodeType.PARAMETERS);
             RESULT.addChild(i, ps);
+            i.setParent(RESULT);
+            ps.setParent(RESULT);
         :} %prec FPAREN;
 
 parameters ::=
@@ -414,14 +481,18 @@ parameters ::=
             RESULT = new BaseASTNode(NodeType.PARAMETERS);
             ASTNode p = new BaseASTNode(NodeType.PARAMETER);
             p.addChild(e);
+            e.setParent(p);
             RESULT.addChild(p);
+            p.setParent(RESULT);
         :}
     | parameters:ps COMMA expr:e
         {:
             RESULT = ps;
             ASTNode p = new BaseASTNode(NodeType.PARAMETER);
             p.addChild(e);
+            e.setParent(p);
             RESULT.addChild(p);
+            p.setParent(RESULT);
         :};
 
 cond_stmt ::=
@@ -429,22 +500,33 @@ cond_stmt ::=
         {:
             RESULT = new BaseASTNode(NodeType.IF_STATEMENT);
             RESULT.addChild(e, b);
+            e.setParent(RESULT);
+            b.setParent(RESULT);
         :}
     | IF LPAREN expr:e RPAREN block:b_if ELSE block:b_else
         {:
             RESULT = new BaseASTNode(NodeType.IF_STATEMENT);
             RESULT.addChild(e, b_if, b_else);
+            e.setParent(RESULT);
+            b_if.setParent(RESULT);
+            b_else.setParent(RESULT);
         :}
     | SWITCH LPAREN identifier:i RPAREN OF COLON BEGIN DEFAULT COLON block:b END
         {:
             RESULT = new BaseASTNode(NodeType.SWITCH_STATEMENT);
             ASTNode s = new BaseASTNode(NodeType.CASE_STATEMENT);
             RESULT.addChild(i, s, b);
+            i.setParent(RESULT);
+            s.setParent(RESULT);
+            b.setParent(RESULT);
         :}
     | SWITCH LPAREN identifier:i RPAREN OF COLON BEGIN cond_stmt_mid:s DEFAULT COLON block:b END
         {:
             RESULT = new BaseASTNode(NodeType.SWITCH_STATEMENT);
             RESULT.addChild(i, s, b);
+            i.setParent(RESULT);
+            s.setParent(RESULT);
+            b.setParent(RESULT);
         :};
 
 cond_stmt_mid ::=
@@ -452,11 +534,13 @@ cond_stmt_mid ::=
         {:
             RESULT = new BaseASTNode(NodeType.CASE_STATEMENT);
             RESULT.addChild(b);
+            b.setParent(RESULT);
         :}
     | cond_stmt_mid:s CASE INTCONST COLON block:b
         {:
             RESULT = s;
             RESULT.addChild(b);
+            b.setParent(RESULT);
         :};
 
 loop_stmt ::=
@@ -464,18 +548,27 @@ loop_stmt ::=
         {:
             RESULT = new BaseASTNode(NodeType.FOR_STATEMENT);
             RESULT.addChild(i, be, ea);
+            i.setParent(RESULT);
+            be.setParent(RESULT);
+            ea.setParent(RESULT);
         :}
     | FOR LPAREN SEMICOLON expr:be SEMICOLON expression_assignment:ea RPAREN block:b
         {:
             RESULT = new BaseASTNode(NodeType.FOR_STATEMENT);
             ASTNode i = new BaseASTNode(NodeType.ASSIGN);
             RESULT.addChild(i, be, ea);
+            i.setParent(RESULT);
+            be.setParent(RESULT);
+            ea.setParent(RESULT);
         :}
     | FOR LPAREN assignment:i SEMICOLON expr:be SEMICOLON RPAREN block
         {:
             RESULT = new BaseASTNode(NodeType.FOR_STATEMENT);
             ASTNode ea = new BaseASTNode(NodeType.ASSIGN);
             RESULT.addChild(i, be, ea);
+            i.setParent(RESULT);
+            be.setParent(RESULT);
+            ea.setParent(RESULT);
         :}
     | FOR LPAREN SEMICOLON expr:be SEMICOLON RPAREN block:b
         {:
@@ -483,16 +576,23 @@ loop_stmt ::=
             ASTNode ea = new BaseASTNode(NodeType.ASSIGN);
             ASTNode i = new BaseASTNode(NodeType.ASSIGN);
             RESULT.addChild(i, be, ea);
+            i.setParent(RESULT);
+            be.setParent(RESULT);
+            ea.setParent(RESULT);
         :}
 	| REPEAT block:b UNTIL LPAREN expr:be RPAREN SEMICOLON
 	    {:
 	        RESULT = new BaseASTNode(NodeType.REPEAT_STATEMENT);
 	        RESULT.addChild(b, be);
+	        b.setParent(RESULT);
+	        be.setParent(RESULT);
 	    :}
 	| FOREACH LPAREN identifier:r IN identifier:i RPAREN block:b
 	    {:
 	        RESULT = new BaseASTNode(NodeType.FOREACH_STATEMENT);
 	        RESULT.addChild(r, i);
+	        i.setParent(RESULT);
+	        r.setParent(RESULT);
 	    :};
 
 expression_assignment ::=
@@ -512,19 +612,22 @@ expr ::=
         {:
             RESULT = new ExpressionNode();
             RESULT.addChild(t);
+            t.setParent(RESULT);
         :}
     | method_call:t
         {:
             RESULT = new ExpressionNode();
-            t.setParent(RESULT);
             RESULT.addChild(t);
+            t.setParent(RESULT);
         :}
     | DEC variable:v
         {:
             RESULT = new ExpressionNode();
             ASTNode d = new BaseASTNode(NodeType.DECREMENT);
             d.addChild(v);
+            v.setParent(d);
             RESULT.addChild(d);
+            d.setParent(RESULT);
         :} %prec PREDEC
     | variable:v DEC
         {:
@@ -532,6 +635,8 @@ expr ::=
             ASTNode d = new BaseASTNode(NodeType.DECREMENT);
             d.addChild(v);
             RESULT.addChild(d);
+            v.setParent(d);
+            d.setParent(RESULT);
         :} %prec POSTDEC
     | INC variable:v
         {:
@@ -539,6 +644,8 @@ expr ::=
             ASTNode i = new BaseASTNode(NodeType.INCREMENT);
             i.addChild(v);
             RESULT.addChild(i);
+            v.setParent(i);
+            i.setParent(RESULT);
         :} %prec PREINC
     | variable:v INC
         {:
@@ -546,6 +653,8 @@ expr ::=
             ASTNode i = new BaseASTNode(NodeType.INCREMENT);
             i.addChild(v);
             RESULT.addChild(i);
+            v.setParent(i);
+            i.setParent(RESULT);
         :} %prec POSTINC
     | BITNEG expr:e
         {:
@@ -553,11 +662,14 @@ expr ::=
             ASTNode b = new BaseASTNode(NodeType.BITWISE_NEGATIVE);
             b.addChild(e);
             RESULT.addChild(b);
+            e.setParent(b);
+            b.setParent(RESULT);
         :}
     | SIZEOF LPAREN type:t RPAREN
         {:
             RESULT = new BaseASTNode(NodeType.SIZEOF);
             RESULT.addChild(t);
+            t.setParent(RESULT);
         :} %prec SIZEOF
     | MINUS expr:e
         {:
@@ -565,6 +677,8 @@ expr ::=
             ASTNode u = new BaseASTNode(NodeType.UNARY_MINUS);
             u.addChild(e);
             RESULT.addChild(u);
+            e.setParent(u);
+            u.setParent(RESULT);
         :} %prec UMINUS
     | ADD expr:e
         {:
@@ -572,6 +686,8 @@ expr ::=
             ASTNode u = new BaseASTNode(NodeType.UNARY_PLUS);
             u.addChild(e);
             RESULT.addChild(u);
+            e.setParent(u);
+            u.setParent(RESULT);
         :} %prec UPLUS
 ;
 
@@ -582,6 +698,8 @@ variable ::=
             ASTNode v = new BaseASTNode(NodeType.VAR_USE);
             v.addChild(i);
             RESULT.addChild(v);
+            i.setParent(v);
+            v.setParent(RESULT);
         :}
     | identifier:i variable_mid:vm
 //        {: RESULT = new BaseASTNode(NodeType.NOT_EQUAL); :}
@@ -606,6 +724,9 @@ expr_operation ::=
             t.addChild(e1);
             t.addChild(e2);
             RESULT.addChild(t);
+            e1.setParent(t);
+            e2.setParent(t);
+            t.setParent(RESULT);
         :}
     | expr:e1 MINUS expr:e2
         {:
@@ -614,6 +735,9 @@ expr_operation ::=
             t.addChild(e1);
             t.addChild(e2);
             RESULT.addChild(t);
+            e1.setParent(t);
+            e2.setParent(t);
+            t.setParent(RESULT);
         :}
     | expr:e1 PROD expr:e2
         {:
@@ -622,6 +746,9 @@ expr_operation ::=
             t.addChild(e1);
             t.addChild(e2);
             RESULT.addChild(t);
+            e1.setParent(t);
+            e2.setParent(t);
+            t.setParent(RESULT);
         :}
     | expr:e1 DIV expr:e2
         {:
@@ -630,6 +757,9 @@ expr_operation ::=
             t.addChild(e1);
             t.addChild(e2);
             RESULT.addChild(t);
+            e1.setParent(t);
+            e2.setParent(t);
+            t.setParent(RESULT);
         :}
     | expr:e1 MOD expr:e2
         {:
@@ -638,6 +768,9 @@ expr_operation ::=
             t.addChild(e1);
             t.addChild(e2);
             RESULT.addChild(t);
+            e1.setParent(t);
+            e2.setParent(t);
+            t.setParent(RESULT);
         :}
     | expr:e1 ARITHAND expr:e2
         {:
@@ -646,6 +779,9 @@ expr_operation ::=
             t.addChild(e1);
             t.addChild(e2);
             RESULT.addChild(t);
+            e1.setParent(t);
+            e2.setParent(t);
+            t.setParent(RESULT);
         :}
     | expr:e1 ARITHOR expr:e2
         {:
@@ -654,6 +790,9 @@ expr_operation ::=
             t.addChild(e1);
             t.addChild(e2);
             RESULT.addChild(t);
+            e1.setParent(t);
+            e2.setParent(t);
+            t.setParent(RESULT);
         :}
     | expr:e1 XOR expr:e2
         {:
@@ -662,6 +801,9 @@ expr_operation ::=
             t.addChild(e1);
             t.addChild(e2);
             RESULT.addChild(t);
+            e1.setParent(t);
+            e2.setParent(t);
+            t.setParent(RESULT);
         :}
     | expr:e1 EQ expr:e2
         {:
@@ -670,6 +812,9 @@ expr_operation ::=
             t.addChild(e1);
             t.addChild(e2);
             RESULT.addChild(t);
+            e1.setParent(t);
+            e2.setParent(t);
+            t.setParent(RESULT);
         :}
     | expr:e1 NOTEQ expr:e2
         {:
@@ -678,6 +823,9 @@ expr_operation ::=
             t.addChild(e1);
             t.addChild(e2);
             RESULT.addChild(t);
+            e1.setParent(t);
+            e2.setParent(t);
+            t.setParent(RESULT);
         :}
     | expr:e1 GREQ expr:e2
         {:
@@ -686,6 +834,9 @@ expr_operation ::=
             t.addChild(e1);
             t.addChild(e2);
             RESULT.addChild(t);
+            e1.setParent(t);
+            e2.setParent(t);
+            t.setParent(RESULT);
         :}
     | expr:e1 LESSEQ expr:e2
         {:
@@ -694,6 +845,9 @@ expr_operation ::=
             t.addChild(e1);
             t.addChild(e2);
             RESULT.addChild(t);
+            e1.setParent(t);
+            e2.setParent(t);
+            t.setParent(RESULT);
         :}
     | expr:e1 GR expr:e2
         {:
@@ -702,6 +856,9 @@ expr_operation ::=
             t.addChild(e1);
             t.addChild(e2);
             RESULT.addChild(t);
+            e1.setParent(t);
+            e2.setParent(t);
+            t.setParent(RESULT);
         :}
     | expr:e1 LESS expr:e2
         {:
@@ -710,6 +867,9 @@ expr_operation ::=
             t.addChild(e1);
             t.addChild(e2);
             RESULT.addChild(t);
+            e1.setParent(t);
+            e2.setParent(t);
+            t.setParent(RESULT);
         :}
     | expr:e1 NOT expr:e2
         {:
@@ -718,6 +878,9 @@ expr_operation ::=
             t.addChild(e1);
             t.addChild(e2);
             RESULT.addChild(t);
+            e1.setParent(t);
+            e2.setParent(t);
+            t.setParent(RESULT);
         :}
     | expr:e1 LOGICAND expr:e2
         {:
@@ -726,6 +889,9 @@ expr_operation ::=
             t.addChild(e1);
             t.addChild(e2);
             RESULT.addChild(t);
+            e1.setParent(t);
+            e2.setParent(t);
+            t.setParent(RESULT);
         :}
     | expr:e1 LOGICOR expr:e2
         {:
@@ -734,4 +900,7 @@ expr_operation ::=
             t.addChild(e1);
             t.addChild(e2);
             RESULT.addChild(t);
+            e1.setParent(t);
+            e2.setParent(t);
+            t.setParent(RESULT);
         :};
