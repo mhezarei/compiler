@@ -132,10 +132,16 @@ public class TypeVisitor implements SimpleVisitor {
         if (!isPrimitive && typeID.getSymbolInfo() == null)
             throw new Exception(typeID.getValue() + " not declared");
 
-        IdentifierNode idNode = (IdentifierNode) node.getChild(1);
+        IdentifierNode idNode;
+        if(node.getChild(1)instanceof IdentifierNode)
+            //DEC -> ID
+            idNode=(IdentifierNode) node.getChild(1);
+        else
+            //DEC -> ASSIGN -> EXPR -> VAR_USE -> ID
+            idNode=(IdentifierNode) node.getChild(1).getChild(0).getChild(0).getChild(0);
         String id = idNode.getValue();
 
-        SymbolInfo si = new SymbolInfo(node);
+        SymbolInfo si = new SymbolInfo(idNode);
         si.setType(typePrimitive.getType());
         idNode.setSymbolInfo(si);
 

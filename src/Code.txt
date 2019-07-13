@@ -1,6 +1,8 @@
-function int fun(int a,int b)
+function int fun()
 begin
     float a;
     int b;
-    fun(4+a);
+    b = 2;
+    int c = 45 + a ;
+
 end

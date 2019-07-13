@@ -1588,8 +1588,12 @@ class CUP$Parser$actions {
 		int eright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
 		ASTNode e = (ASTNode)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
 		
-            RESULT = i;
-            RESULT.addChild(e);
+            RESULT = new BaseASTNode(NodeType.ASSIGN);
+            ASTNode expr = new ExpressionNode();
+            ASTNode v = new BaseASTNode(NodeType.VAR_USE);
+            expr.addChild(v);
+            v.addChild(i);
+            RESULT.addChild(expr,e);
         
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("var_dcl_cnt",10, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }

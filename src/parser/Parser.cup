@@ -311,8 +311,12 @@ var_dcl_cnt ::=
         :}
     | identifier:i ASSIGN expr:e
         {:
-            RESULT = i;
-            RESULT.addChild(e);
+            RESULT = new BaseASTNode(NodeType.ASSIGN);
+            ASTNode expr = new ExpressionNode();
+            ASTNode v = new BaseASTNode(NodeType.VAR_USE);
+            expr.addChild(v);
+            v.addChild(i);
+            RESULT.addChild(expr,e);
         :};
 
 block ::=

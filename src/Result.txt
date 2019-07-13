@@ -1,5 +1,7 @@
-define i32 @fun(i32 %a,i32 %b) {
+define i32 @fun() {
 entry:
-  invokestatic null/i32 @fun(i32 %a,i32 %b)
+	%b = 2
+	%tmp0 = add float 45, %a
+	%c = %tmp0
   return
 }

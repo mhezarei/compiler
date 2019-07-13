@@ -447,7 +447,10 @@ public class CodeGenVisitor implements SimpleVisitor {
         /* Expression node */
         node.getChild(1).accept(this);
 
-        IdentifierNode exprNode = (IdentifierNode) node.getChild(1).getChild(0).getChild(0);
+        ASTNode exprNode = node.getChild(1).getChild(0);
+
+        if(exprNode.getNodeType()==NodeType.VAR_USE)
+            exprNode=exprNode.getChild(0);
 
         stream.println("\t" + idNode + " = " + exprNode);
     }
@@ -612,7 +615,6 @@ public class CodeGenVisitor implements SimpleVisitor {
         ((ExpressionNode) node.getParent()).setIsIdentifier();
         SymbolInfo si = idNode.getSymbolInfo();
         try {
-            int lvIndex = si.getLocalVarIndex();
             returnGenerated = false;
         } catch (NullPointerException e) {
             throw new Exception(idNode.getValue() + " not declared");
