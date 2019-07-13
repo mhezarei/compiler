@@ -1,6 +1,5 @@
 define i32 @fun(i32 %a,i32 %b) {
 entry:
-	%tmp0 = add float 4, %a
-	call VOID @fun()
+  invokestatic null/i32 @fun(i32 %a,i32 %b)
   return
 }
