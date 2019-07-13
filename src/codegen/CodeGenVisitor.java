@@ -322,7 +322,7 @@ public class CodeGenVisitor implements SimpleVisitor {
                         switch (e2.getType()) {
                             case INT:
                             case LONG:
-	                        case BOOL:
+                            case BOOL:
                             case CHAR:
                                 return PrimitiveType.LONG;
                             case DOUBLE:
@@ -339,9 +339,9 @@ public class CodeGenVisitor implements SimpleVisitor {
                         switch (e2.getType()) {
                             case INT:
                             case LONG:
-	                        case BOOL:
+                            case BOOL:
                             case FLOAT:
-	                        case CHAR:
+                            case CHAR:
                                 return PrimitiveType.FLOAT;
                             case DOUBLE:
                                 return PrimitiveType.DOUBLE;
@@ -357,8 +357,8 @@ public class CodeGenVisitor implements SimpleVisitor {
                             case LONG:
                             case DOUBLE:
                             case FLOAT:
-	                        case CHAR:
-	                        case BOOL:
+                            case CHAR:
+                            case BOOL:
                                 return PrimitiveType.DOUBLE;
                             case STRING:
                             case VOID:
@@ -377,12 +377,12 @@ public class CodeGenVisitor implements SimpleVisitor {
             case ARITHMETIC_OR:
             case XOR:
                 if ((e1.getType() == PrimitiveType.INT || e1.getType() == PrimitiveType.LONG) &&
-		                (e2.getType() == PrimitiveType.INT || e2.getType() == PrimitiveType.LONG)) {
-	                if (e1.getType() == PrimitiveType.INT && e2.getType() == PrimitiveType.INT) {
-		                return PrimitiveType.INT;
-	                } else {
-		                return PrimitiveType.LONG;
-	                }
+                        (e2.getType() == PrimitiveType.INT || e2.getType() == PrimitiveType.LONG)) {
+                    if (e1.getType() == PrimitiveType.INT && e2.getType() == PrimitiveType.INT) {
+                        return PrimitiveType.INT;
+                    } else {
+                        return PrimitiveType.LONG;
+                    }
                 } else {
                     throw new Exception("can't add");
                 }
