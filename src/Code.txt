@@ -2,9 +2,12 @@ function int fun(int a,float b)
 begin
     float c,f;
     int d;
+    f = sizeof(int);
     d = fun(1 * 2 + b, 12 % 3);
     return 2 + 2;
 end
+
+function int fun(float y);
 
 function int main()
 begin

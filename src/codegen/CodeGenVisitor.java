@@ -962,9 +962,8 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         String result=""+getTemp();
 
-//        stream.print("\t%"+result+" = load "+id.getSymbolInfo().getType()+);
+        stream.println("\t%"+result+" = load "+id.getSymbolInfo().getType()+"* "+id+", align "+alignNum());
 
-        //todo laod
         System.out.println("in VAR_USE");
         System.out.println("id node is " + node.getChild(0));
         //this var is not in this scope
@@ -973,6 +972,8 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         ((ExpressionNode) node.getParent()).setIsIdentifier();
         System.out.println("SURVIVED!");
+
+        reduceExpressionNode(result, (ExpressionNode) node.getParent(),id.getSymbolInfo().getType());
     }
 
     private String generateLabel() {
