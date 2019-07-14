@@ -807,6 +807,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitForNode(ASTNode node) throws Exception {
+        // BIG TODO SCOPE
         String loopLabel = generateLabel();
         String mainLoopLabel = generateLabel();
         String outLabel = generateLabel();
