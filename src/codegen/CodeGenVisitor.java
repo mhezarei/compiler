@@ -102,6 +102,10 @@ public class CodeGenVisitor implements SimpleVisitor {
             case MULT_ASSIGN:
                 //todo
                 break;
+
+            case VARIABLE_DECLARATION:
+                visitVariableDeclaration(node);
+                break;
             case STRUCT_DECLARATION:
             case CONTINUE_STATEMENT:
             case FOREACH_STATEMENT:
@@ -128,7 +132,6 @@ public class CodeGenVisitor implements SimpleVisitor {
             case NULL_LITERAL:
             case INT_TYPE:
             case LOCAL_VAR_DECLARATION:
-            case VARIABLE_DECLARATION:
             case VOID:
             default:
                 visitAllChildren(node);
@@ -155,7 +158,17 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitVariableDeclaration(ASTNode node) {
-        //todo alloca
+        TypeNode type= (TypeNode) node.getChild(0);
+        for (int i = 1; i < node.getChildren().size(); i++) {
+            IdentifierNode id = (IdentifierNode) node.getChild(i);
+            stream.println("\t%"+id.getValue()+" = alloca "+type.getType()+", align "+alignNum());
+        }
+    }
+
+    private String alignNum() {
+        //todo must set
+        //need to understand
+        return "4";
     }
 
     private void visitUnaryOperation(ASTNode node) throws Exception {
@@ -817,12 +830,12 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         if (node.getChildren().isEmpty()) {
             //return; must be void
-            if(returnType!=PrimitiveType.VOID)
+            if (returnType != PrimitiveType.VOID)
                 throw new Exception("return type is wrong");
-        }else {
-            if(returnType==PrimitiveType.VOID)
+        } else {
+            if (returnType == PrimitiveType.VOID)
                 throw new Exception("return type is wrong");
-            ExpressionNode returnExpr=((ExpressionNode)node.getChild(0));
+            ExpressionNode returnExpr = ((ExpressionNode) node.getChild(0));
             try {
                 canCast(returnType, returnExpr.getType());
                 stream.print(" " + returnExpr.getResultName());

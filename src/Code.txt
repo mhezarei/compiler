@@ -1,7 +1,7 @@
 function int fun(int a,float b)
 begin
-    float c;
-    int d;
+    float c,f;
+    int d,a;
     a = fun(1 * 2 + b, 12 % 3);
     return 2 + 2;
 end

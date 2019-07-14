@@ -318,20 +318,16 @@ var_dcl ::=
 	| type:t var_dcl_cnt:vdc SEMICOLON
         {:
 			RESULT =  new BaseASTNode(NodeType.VARIABLE_DECLARATION);
-			ASTNode vde = new BaseASTNode(NodeType.VARIABLE_DECLARATION);
-			RESULT.addChild(t, vdc, vde);
+			RESULT.addChild(t, vdc);
 			t.setParent(RESULT);
 			vdc.setParent(RESULT);
-			vde.setParent(RESULT);
         :}
 	| CONST type:t var_dcl_cnt:vdc SEMICOLON
         {:
             RESULT =  new BaseASTNode(NodeType.VARIABLE_CONST_DECLARATION);
-            ASTNode vde = new BaseASTNode(NodeType.VARIABLE_CONST_DECLARATION);
-            RESULT.addChild(t, vdc, vde);
+            RESULT.addChild(t, vdc);
             t.setParent(RESULT);
             vdc.setParent(RESULT);
-            vde.setParent(RESULT);
         :};
 
 var_dcl_end ::=
