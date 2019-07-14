@@ -205,7 +205,6 @@ public class CodeGenVisitor implements SimpleVisitor {
         if (!isPrimitive && typeID.getSymbolInfo() == null)
             throw new Exception(typeID.getValue() + " not declared");
 
-        boolean[] isAssign=new boolean[node.getChildren().size()];
         for (int i = 1; i < node.getChildren().size(); i++) {
             IdentifierNode idNode;
             if (node.getChild(i) instanceof IdentifierNode) {
@@ -216,8 +215,6 @@ public class CodeGenVisitor implements SimpleVisitor {
                 idNode = (IdentifierNode) node.getChild(i).getChild(0).getChild(0).getChild(0);
 
                 node.getChild(i).getChild(1).accept(this);
-
-                isAssign[i]=true;
             }
             String id = idNode.getValue();
 
@@ -229,18 +226,23 @@ public class CodeGenVisitor implements SimpleVisitor {
                 throw new Exception(id + " declared before");
 
             symbolTable.put(id, si);
-
-            for (int i1 = 0; i1 < isAssign.length; i1++) {
-                
-            }
         }
         if (node.getNodeType() == NodeType.VARIABLE_DECLARATION) {
             TypeNode type = (TypeNode) node.getChild(0);
             for (int i = 1; i < node.getChildren().size(); i++) {
-                if(!(node.getChild(i) instanceof IdentifierNode))
-                    continue;
-                IdentifierNode id = (IdentifierNode) node.getChild(i);
+                IdentifierNode id;
+                if ((node.getChild(i) instanceof IdentifierNode))
+                    id = (IdentifierNode) node.getChild(i);
+                else
+                    id = (IdentifierNode) node.getChild(i).getChild(0).getChild(0).getChild(0);
+
                 stream.println("\t%" + id.getValue() + " = alloca " + type.getType() + ", align " + alignNum());
+
+                if (!(node.getChild(i) instanceof IdentifierNode)) {
+                    ExpressionNode rightSide= (ExpressionNode) node.getChild(i).getChild(1);
+                    PrimitiveType castType=canCast(id.getSymbolInfo().getType(), rightSide.getType());
+                    stream.println("\tstore " + castType + " " + rightSide.getResultName() + ", " + castType + "* " + id + ", align " + alignNum());
+                }
             }
         }
     }
@@ -978,7 +980,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         String result = "" + getTemp();
 
-        stream.println("\t%" + result + " = load " + id.getSymbolInfo().getType() + "* " + id + ", align " + alignNum());
+        stream.println("\t%" + result + " = load "+id.getSymbolInfo().getType()+", " + id.getSymbolInfo().getType() + "* " + id + ", align " + alignNum());
 
         //this var is not in this scope
         if (symbolTable.get(id.getValue()) == null)

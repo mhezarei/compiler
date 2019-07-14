@@ -213,6 +213,21 @@
             <set />
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/src/llvm-testfiles/Code.txt">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/llvm-testfiles/test1.cpp">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/llvm-testfiles/test1.ll">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/src/parser/Parser.cup">
           <value>
             <set />
