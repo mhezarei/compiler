@@ -204,14 +204,20 @@ public class CodeGenVisitor implements SimpleVisitor {
         if (!isPrimitive && typeID.getSymbolInfo() == null)
             throw new Exception(typeID.getValue() + " not declared");
 
+        boolean[] isAssign=new boolean[node.getChildren().size()];
         for (int i = 1; i < node.getChildren().size(); i++) {
             IdentifierNode idNode;
-            if (node.getChild(i) instanceof IdentifierNode)
+            if (node.getChild(i) instanceof IdentifierNode) {
                 //DEC -> ID
                 idNode = (IdentifierNode) node.getChild(i);
-            else
+            } else {
                 //DEC -> ASSIGN -> EXPR -> VAR_USE -> ID
                 idNode = (IdentifierNode) node.getChild(i).getChild(0).getChild(0).getChild(0);
+
+                node.getChild(i).getChild(1).accept(this);
+
+                isAssign[i]=true;
+            }
             String id = idNode.getValue();
 
             SymbolInfo si = new SymbolInfo(idNode);
@@ -222,6 +228,10 @@ public class CodeGenVisitor implements SimpleVisitor {
                 throw new Exception(id + " declared before");
 
             symbolTable.put(id, si);
+
+            for (int i1 = 0; i1 < isAssign.length; i1++) {
+                
+            }
         }
         if (node.getNodeType() == NodeType.VARIABLE_DECLARATION) {
             TypeNode type = (TypeNode) node.getChild(0);
@@ -722,7 +732,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         ExpressionNode rightSide = (ExpressionNode) node.getChild(1);
 
         stream.println("\tstore " + rightSide.getType() + " " + rightSide.getResultName() + ", " + leftSide.getType() + "* " + idNode + ", align " + alignNum());
-
+        //todo store
 
         System.out.println("assign children are " + node.getChildren());
 

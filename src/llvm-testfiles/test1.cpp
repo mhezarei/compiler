@@ -1,16 +1,7 @@
-#include <stdio.h>
-
 int main()
 {
-	int e;
-    int j = 2;
-
-    e += j;
-    e -= j;
-    e /= j;
-    e *= j;
-
-
-
-	return 0;
+	float c,f=0;
+    int d;
+    d = 1 * c + f;
+    return 2 + 2;
 }
