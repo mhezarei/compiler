@@ -55,9 +55,9 @@ public class CodeGenVisitor implements SimpleVisitor {
                 visitUnaryOperation(node);
                 break;
 
-            case CLASS:
-                visitClassNode(node);
-                break;
+//            case CLASS:
+//                visitClassNode(node);
+//                break;
 
             case IF_STATEMENT:
                 visitIfStatementNode(node);
@@ -305,7 +305,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
 
     private PrimitiveType checkBinaryOpType(PrimitiveType e1, PrimitiveType e2, NodeType nodeType) throws Exception {
-        // todo reduce complexity
+        //todo auto
         switch (nodeType) {
             case BOOLEAN_AND:
             case BOOLEAN_OR:
@@ -333,7 +333,6 @@ public class CodeGenVisitor implements SimpleVisitor {
                             case VOID:
                                 throw new Exception("can't add");
                             case AUTO:
-                                //todo
                         }
                     case FLOAT:
                     case DOUBLE:
@@ -349,13 +348,11 @@ public class CodeGenVisitor implements SimpleVisitor {
                             case VOID:
                                 throw new Exception("can't add");
                             case AUTO:
-                                //todo
                         }
                     case STRING:
                     case VOID:
                         throw new Exception("can't add");
                     case AUTO:
-                        //todo
                 }
 
             case ADDITION:
@@ -381,7 +378,6 @@ public class CodeGenVisitor implements SimpleVisitor {
                             case VOID:
                                 throw new Exception("can't add");
                             case AUTO:
-                                //todo
                         }
                     case CHAR:
                         switch (e2) {
@@ -397,7 +393,6 @@ public class CodeGenVisitor implements SimpleVisitor {
                             case VOID:
                                 throw new Exception("can't add");
                             case AUTO:
-                                //todo
                         }
                     case LONG:
                         switch (e2) {
@@ -414,7 +409,6 @@ public class CodeGenVisitor implements SimpleVisitor {
                             case VOID:
                                 throw new Exception("can't add");
                             case AUTO:
-                                //todo
                         }
                     case FLOAT:
                         switch (e2) {
@@ -430,7 +424,6 @@ public class CodeGenVisitor implements SimpleVisitor {
                             case VOID:
                                 throw new Exception("can't add");
                             case AUTO:
-                                //todo
                         }
                     case DOUBLE:
                         switch (e2) {
@@ -445,13 +438,11 @@ public class CodeGenVisitor implements SimpleVisitor {
                             case VOID:
                                 throw new Exception("can't add");
                             case AUTO:
-                                //todo
                         }
                     case STRING:
                     case VOID:
                         throw new Exception("can't add");
                     case AUTO:
-                        //todo
                 }
                 break;
 
@@ -603,14 +594,6 @@ public class CodeGenVisitor implements SimpleVisitor {
         throw new Exception("can't cast");
     }
 
-    private void visitUnaryMinusNode(ASTNode node) throws Exception {
-        //todo
-    }
-
-    private void visitUnaryPlusNode(ASTNode node) throws Exception {
-        visitAllChildren(node);
-    }
-
 
     /*Assigns thing at top of stack,
       OR if it's a literal, pushes the literal then assigns that val
@@ -636,8 +619,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         stream.println("\t" + idNode + " = " + exprNode);
     }
 
-    private void visitClassNode(ASTNode node) throws Exception {
-        //todo "class" code
+    /*private void visitClassNode(ASTNode node) throws Exception {
 //        classNode = (ClassNode) node;
 
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
@@ -655,11 +637,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         node.getChild(1).accept(this);
 
-    }
-
-    private void visitBooleanNotNode(ASTNode node) {
-        //todo
-    }
+    }*/
 
     private void visitIfStatementNode(ASTNode node) throws Exception {
         //todo "if" code
@@ -843,7 +821,6 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     private void visitVarUse(ASTNode node) throws Exception {
         System.out.println("in VAR_USE");
-        //todo need to understand
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
         System.out.println("id node is " + node.getChild(0));
         ((ExpressionNode) node.getParent()).setIsIdentifier();

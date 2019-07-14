@@ -1,35 +1,6 @@
-function int fun()
+function int fun(int a,float b)
 begin
     float a;
     int b;
-    b = 2;
-    int c = 45 + a;
-    c = b - a;
-    c=b*a;
-    c = b / a;
-    c = b % a;
-    c = b & b;
-    c = b | b;
-    c = b ^ b;
-    bool tb = b == a;
-    tb = b <= a;
-    tb = b >= a;
-    tb = b < a;
-    tb = b < a;
-    tb = b != a;
-    tb = 3 and b;
-
-    b = c + -a;
-    b = c * --a;
-    b = c / ++a;
-    b = c % a--;
-    b = c | a++;
-    b = c & ~a;
-
-    float df = 2.11;
-    double rd = 2.11121;
-
-    double resd = 2 * 3;
-    char ch = 'a';
-    string str = "asdasd";
+    a = fun(1 * 2 + b, 12 % 3);
 end
