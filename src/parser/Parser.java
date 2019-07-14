@@ -2483,9 +2483,14 @@ class CUP$Parser$actions {
 		int tright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
 		ASTNode t = (ASTNode)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		
-            RESULT = new BaseASTNode(NodeType.SIZEOF);
-            RESULT.addChild(t);
-            t.setParent(RESULT);
+            // expr (RESULT) -> sizeof (s) -> type (t)
+
+            RESULT = new ExpressionNode();
+            s = new BaseASTNode(NodeType.SIZEOF);
+            RESULT.addChild(s);
+            s.setParent(RESULT);
+            s.addChild(t);
+            t.setParent(s);
         
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("expr",12, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }

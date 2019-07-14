@@ -2,6 +2,7 @@ package codegen;
 
 import ast.*;
 
+import javax.xml.soap.Node;
 import java.io.PrintStream;
 import java.util.*;
 
@@ -89,20 +90,16 @@ public class CodeGenVisitor implements SimpleVisitor {
             case EXPRESSION_STATEMENT:
                 visitExpressionNode(node);
                 break;
+
             case SIZEOF:
-                //todo
+                visitSizeOfNode(node);
                 break;
+
             case ADD_ASSIGN:
-                //todo
-                break;
             case DIV_ASSIGN:
-                //todo
-                break;
             case SUB_ASSIGN:
-                //todo
-                break;
             case MULT_ASSIGN:
-                //todo
+                visitOpAssNode(node);
                 break;
 
             case ARGUMENT:
@@ -146,6 +143,10 @@ public class CodeGenVisitor implements SimpleVisitor {
             default:
                 visitAllChildren(node);
         }
+    }
+
+    private void visitOpAssNode(ASTNode node) {
+
     }
 
     private void visitExpressionNode(ASTNode node) throws Exception {
@@ -347,6 +348,46 @@ public class CodeGenVisitor implements SimpleVisitor {
         v.setParent(parent);
         parent.setChildren(v);
         parent.setIsIdentifier();
+    }
+
+    private void visitSizeOfNode(ASTNode node) throws Exception {
+        ExpressionNode parent = (ExpressionNode) node.getParent();
+        NodeType nt = null;
+
+        node.getChild(0).accept(this);
+
+        int val = 0;
+        if (node.getChild(0) instanceof IdentifierNode) {
+            // todo
+        } else if (node.getChild(0) instanceof TypeNode) {
+            nt = (node.getChild(0)).getNodeType();
+        }
+
+        switch (nt) {
+            case BOOLEAN_TYPE:
+            case CHAR_TYPE:
+            case VOID:
+                val = 1;
+                break;
+            case INT_TYPE:
+            case FLOAT_TYPE:
+                val = 4;
+                break;
+            case LONG_TYPE:
+            case DOUBLE_TYPE:
+                val = 8;
+                break;
+            case STRING_TYPE:
+            case AUTO_TYPE:
+                throw new Exception("bad types for sizeof");
+            default:
+                throw new IllegalStateException("Unexpected value: " + nt);
+        }
+
+        // todo correct if it's wrong
+        IntegerLiteralNode iln = new IntegerLiteralNode(val);
+        iln.setParent(parent);
+        parent.setChildren(iln);
     }
 
     private void visitBinaryOperation(ASTNode node) throws Exception {

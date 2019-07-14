@@ -692,9 +692,14 @@ expr ::=
         :}
     | SIZEOF LPAREN type:t RPAREN
         {:
-            RESULT = new BaseASTNode(NodeType.SIZEOF);
-            RESULT.addChild(t);
-            t.setParent(RESULT);
+            // expr (RESULT) -> sizeof (s) -> type (t)
+
+            RESULT = new ExpressionNode();
+            s = new BaseASTNode(NodeType.SIZEOF);
+            RESULT.addChild(s);
+            s.setParent(RESULT);
+            s.addChild(t);
+            t.setParent(s);
         :} %prec SIZEOF
     | MINUS expr:e
         {:
@@ -722,7 +727,7 @@ expr ::=
             RESULT.addChild(u);
             e.setParent(u);
             u.setParent(RESULT);
-        :}
+        :} %prec NOT
 ;
 
 variable ::=
