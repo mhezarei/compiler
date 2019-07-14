@@ -721,7 +721,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         ExpressionNode leftSide = (ExpressionNode) node.getChild(0);
         ExpressionNode rightSide = (ExpressionNode) node.getChild(1);
 
-        stream.println("\tstore " + rightSide.getType() + " " + rightSide.getResultName() + ", " + leftSide.getType() + " " + idNode + ", align " + alignNum());
+        stream.println("\tstore " + rightSide.getType() + " " + rightSide.getResultName() + ", " + leftSide.getType() + "* " + idNode + ", align " + alignNum());
 
 
         System.out.println("assign children are " + node.getChildren());
@@ -972,7 +972,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         String result = "" + getTemp();
 
-        stream.println("\t%" + result + " = load " + id.getSymbolInfo().getType() + " " + id + ", align " + alignNum());
+        stream.println("\t%" + result + " = load " + id.getSymbolInfo().getType() + "* " + id + ", align " + alignNum());
 
         System.out.println("in VAR_USE");
         System.out.println("id node is " + node.getChild(0));
