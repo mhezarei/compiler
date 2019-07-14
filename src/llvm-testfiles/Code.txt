@@ -1,15 +1,15 @@
+
 function int main(int a, float b)
 begin
-    /# bool q = 2 > 3;
+    bool q = 2 > 3;
     q = 2 == 3;
 
-    fun(a, b);
 
     if (q == true)
     begin
         int t = 2 * 121;
         int w = 2 * 121;
-        int jsa = 2 * 121;
+        int j = 2 * 121;
         int i = 2 * 121;
         int o = 2 * 121;
         int z = 2 * 121;
@@ -18,52 +18,17 @@ begin
     end
     else
     begin
+        int t;
 	    t = 2 * 121;
         return 4;
         return 5;
     end
 
-    t = 2 - 3;
-
-	int j = 2;
+##    t = 2 - 3;##should error
 
     for (a = 3; a < 12; a += 2)
     begin
         b += 2;
-        b += 4;
-    end
-
-    repeat
-    begin
-        j += 2;
-        j += 2;
-        j += 2;
-    end
-    until (2 < 3); #/
-
-    int t = 1 + 2;
-
-    switch (t) of:
-    begin
-        case 5:
-        begin
-            t += 2;
-        end
-
-        case 6:
-        begin
-            t += 2;
-        end
-
-        case 10:
-        begin
-            t += 2;
-        end
-
-        default:
-        begin
-            t += 2;
-        end
     end
 
     return 2;
@@ -72,3 +37,7 @@ begin
     return 2;
 end
 
+function int fun(int ss, float bda, bool qw)
+begin
+	return ss + bda;
+end

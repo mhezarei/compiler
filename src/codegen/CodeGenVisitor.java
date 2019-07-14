@@ -6,12 +6,12 @@ import java.io.PrintStream;
 import java.util.*;
 
 public class CodeGenVisitor implements SimpleVisitor {
-    private  int tempIndex;
+    private int tempIndex;
     private PrintStream stream;
     private int labelIndex;
     static Map<String, HashSet<Signature>> signatures = new HashMap<>();
     private SymbolTable symbolTable = new SymbolTable();
-    private boolean inMethodBlock;
+    private int blockIndex;
 
     public CodeGenVisitor(PrintStream stream) {
         this.stream = stream;
@@ -81,9 +81,13 @@ public class CodeGenVisitor implements SimpleVisitor {
                 break;
 
             case FOR_STATEMENT:
+                visitForNode(node);
+                break;
             case FOREACH_STATEMENT:
+                visitForEachNode(node);
+                break;
             case REPEAT_STATEMENT:
-                visitLoopNode(node);
+                visitRepeatNode(node);
                 break;
 
             case ARGUMENTS:
@@ -149,7 +153,6 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitSwitchNode(ASTNode node) throws Exception {
-        // BIG TODO SCOPE
         String defaultLabel = generateLabel();
         String[] labels = new String[node.getChild(1).getChildren().size()];
 
@@ -209,18 +212,22 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitBlockNode(ASTNode node) throws Exception {
-        if (!inMethodBlock) {
-            symbolTable.enterScopeType();
+        if (node.getParent().getNodeType() != NodeType.METHOD_DECLARATION) {
+            symbolTable.enterScopeType(getBlock());
             visitAllChildren(node);
-            symbolTable.leaveScopeType();
+            symbolTable.leaveScopeType(blockIndex-1+"");
         } else
             visitAllChildren(node);
+    }
+
+    private String getBlock() {
+        return "" + blockIndex++;
     }
 
     private void visitIdentifierNode(ASTNode node) {
         IdentifierNode idNode = (IdentifierNode) node;
         String id = idNode.getValue();
-        SymbolInfo si = symbolTable.get(id);
+        SymbolInfo si = (SymbolInfo) symbolTable.get(id);
         node.setSymbolInfo(si);
     }
 
@@ -277,8 +284,8 @@ public class CodeGenVisitor implements SimpleVisitor {
                 stream.println("\t%" + id.getValue() + " = alloca " + type.getType() + ", align " + type.getType().getAlign());
 
                 if (!(node.getChild(i) instanceof IdentifierNode)) {
-                    ExpressionNode rightSide= (ExpressionNode) node.getChild(i).getChild(1);
-                    ExpressionNode cast= cast(id.getSymbolInfo().getType(), rightSide);
+                    ExpressionNode rightSide = (ExpressionNode) node.getChild(i).getChild(1);
+                    ExpressionNode cast = cast(id.getSymbolInfo().getType(), rightSide);
                     stream.println("\tstore " + cast.getType() + " " + cast.getResultName() + ", " + cast.getType() + "* " + id + ", align " + type.getType().getAlign());
                 }
             }
@@ -672,13 +679,13 @@ public class CodeGenVisitor implements SimpleVisitor {
         throw new Exception("general can't do " + nodeType);
     }
 
-    private  int getTemp() {
+    private int getTemp() {
         return tempIndex++;
     }
 
-     ExpressionNode cast(PrimitiveType type1, ExpressionNode e2) throws Exception {
-        PrimitiveType type2=e2.getType();
-        PrimitiveType type=null;
+    ExpressionNode cast(PrimitiveType type1, ExpressionNode e2) throws Exception {
+        PrimitiveType type2 = e2.getType();
+        PrimitiveType type = null;
         if (type1 == type2)
             return e2;
 
@@ -688,10 +695,10 @@ public class CodeGenVisitor implements SimpleVisitor {
                     case FLOAT:
                     case DOUBLE:
                     case BOOL:
-                        type= type2;
+                        type = type2;
                         break;
                     case CHAR:
-                        type= type1;
+                        type = type1;
                     case AUTO:
                     case VOID:
                     case STRING:
@@ -703,7 +710,7 @@ public class CodeGenVisitor implements SimpleVisitor {
             case FLOAT:
             case BOOL:
             case VOID:
-                type= type1;
+                type = type1;
                 break;
             case CHAR:
                 if (type2 == PrimitiveType.INT) {
@@ -716,13 +723,13 @@ public class CodeGenVisitor implements SimpleVisitor {
                 throw new Exception("can't cast");
         }
 
-        String result = ""+getTemp();
+        String result = "" + getTemp();
 
-        stream.println("\t%"+result+" = sitofp "+type2+" "+e2.getResultName()+" to "+type1);
+        stream.println("\t%" + result + " = sitofp " + type2 + " " + e2.getResultName() + " to " + type1);
 
-        ExpressionNode parent=new ExpressionNode();
+        ExpressionNode parent = new ExpressionNode();
 
-        reduceExpressionNode(result,parent, type);
+        reduceExpressionNode(result, parent, type);
 
         return parent;
     }
@@ -775,7 +782,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         ExpressionNode leftSide = (ExpressionNode) node.getChild(0);
         ExpressionNode rightSide = (ExpressionNode) node.getChild(1);
 
-        ExpressionNode resultOfCast=cast(leftSide.getType(), rightSide);
+        ExpressionNode resultOfCast = cast(leftSide.getType(), rightSide);
 
         stream.println("\tstore " + resultOfCast.getType() + " " + rightSide.getResultName() + ", " + resultOfCast.getType() + "* " + resultOfCast.getResultName() + ", align " + resultOfCast.getType().getAlign());
 
@@ -811,17 +818,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     }*/
 
-    private void visitLoopNode(ASTNode node) throws Exception {
-        // todo FOREACH
-        if (node.getNodeType() == NodeType.FOR_STATEMENT) {
-            visitForNode(node);
-        } else if (node.getNodeType() == NodeType.REPEAT_STATEMENT) {
-            visitRepeatNode(node);
-        }
-    }
-
     private void visitRepeatNode(ASTNode node) throws Exception {
-        // BIG TODO SCOPE
         String loopLabel = generateLabel();
         String outLabel = generateLabel();
 
@@ -836,7 +833,6 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitIfStatementNode(ASTNode node) throws Exception {
-        // BIG TODO NEED TO FIX SCOPE PROBLEMS
         String ifType;
         if (node.getChildren().size() == 2) ifType = "if";
         else ifType = (node.getChildren().size() == 3) ? "if_else" : "invalid";
@@ -860,7 +856,6 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitForNode(ASTNode node) throws Exception {
-        // BIG TODO SCOPE
         String loopLabel = generateLabel();
         String mainLoopLabel = generateLabel();
         String outLabel = generateLabel();
@@ -955,8 +950,8 @@ public class CodeGenVisitor implements SimpleVisitor {
             }
 
 
-        boolean isExpr=false;
-        ExpressionNode parent=null;
+        boolean isExpr = false;
+        ExpressionNode parent = null;
         stream.print("\t");
         if (node.getParent().getNodeType() == NodeType.EXPRESSION_STATEMENT) {
             //it is an expression
@@ -966,13 +961,13 @@ public class CodeGenVisitor implements SimpleVisitor {
             reduceExpressionNode(result, parent, returnType);
 
             stream.print("%" + result + " = ");
-            isExpr=true;
+            isExpr = true;
         }
         //print call instruction
         stream.print("call " + returnType + " @" + methodName);
         visitParameterNode(node.getChild(1), argumentList);
 
-        if(isExpr)
+        if (isExpr)
             cast(leftHandType, parent);
     }
 
@@ -995,6 +990,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         stream.println(")");
     }
 
+
     private void visitMethodDeclarationNode(ASTNode node) throws Exception {
         //type
         TypeNode returnType = (TypeNode) node.getChild(0);
@@ -1007,15 +1003,12 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         stream.print(returnSig + " @" + methodName);
 
-        symbolTable.enterScopeType();
-        inMethodBlock = true;
         visitArgumentNode(node.getChild(2));
 
         stream.println(" {");
         stream.println("entry:");
         //block
         node.getChild(3).accept(this);
-        symbolTable.leaveScopeType();
         stream.println("}");
     }
 
@@ -1060,7 +1053,6 @@ public class CodeGenVisitor implements SimpleVisitor {
             if (returnType == PrimitiveType.VOID)
                 throw new Exception("return type is wrong");
             ExpressionNode returnExpr = ((ExpressionNode) node.getChild(0));
-            ExpressionNode newExpr=new ExpressionNode();
             try {
                 cast(returnType, returnExpr);
                 stream.print(" " + returnExpr.getResultName());
@@ -1073,13 +1065,18 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitVarUse(ASTNode node) throws Exception {
+        if(((IdentifierNode) node.getChild(0)).getValue().equals("b"))
+            System.out.println("***");
         visitAllChildren(node);
 
         IdentifierNode id = (IdentifierNode) node.getChild(0);
 
         String result = "" + getTemp();
 
-        stream.println("\t%" + result + " = load "+id.getSymbolInfo().getType()+", " + id.getSymbolInfo().getType() + "* " + id + ", align " + id.getSymbolInfo().getType().getAlign());
+        if (id.getSymbolInfo() == null)
+            throw new Exception(id.getValue() + " not declared");
+
+        stream.println("\t%" + result + " = load " + id.getSymbolInfo().getType() + ", " + id.getSymbolInfo().getType() + "* " + id + ", align " + id.getSymbolInfo().getType().getAlign());
 
         //this var is not in this scope
         if (symbolTable.get(id.getValue()) == null)

@@ -6,16 +6,28 @@ import java.util.HashMap;
 /**
  * A simple symbol table implementation.
  */
-class SymbolTable {
-    private ArrayList<HashMap<String, SymbolInfo>> scopes = new ArrayList<>();
-    private HashMap<String, SymbolInfo> currentScope = new HashMap<>();
+class SymbolTable implements Symbol {
+    private ArrayList<HashMap<String, Symbol>> scopes = new ArrayList<>();
+    private HashMap<String, Symbol> currentScope = new HashMap<>();
 
-    void enterScopeType() {
-        currentScope = new HashMap<>();
+    void enterScopeType(String id) {
+        if (currentScope != null) {
+            scopes.add(currentScope);
+            SymbolTable newScope = new SymbolTable();
+            currentScope.put(id, newScope);
+            currentScope = newScope.currentScope;
+        } else
+            currentScope = new HashMap<>();
     }
 
-    void leaveScopeType() {
-        scopes.add(currentScope);
+    void leaveScopeType(String id) {
+        scopes.remove(currentScope);
+
+        currentScope = scopes.get(scopes.size()-1);
+
+        scopes.remove(currentScope);
+
+        currentScope.remove(id);
     }
 
     void put(String id, SymbolInfo si) throws Exception {
@@ -26,12 +38,16 @@ class SymbolTable {
         currentScope.put(id, si);
     }
 
-    SymbolInfo get(String id) {
+    Symbol get(String id) {
+        for (HashMap<String, Symbol> scope : scopes) {
+            if(scope.get(id)!=null)
+                return scope.get(id);
+        }
         return currentScope.get(id);
     }
 
     boolean contains(String id) {
-        for (HashMap<String, SymbolInfo> scope : scopes)
+        for (HashMap<String, Symbol> scope : scopes)
             if (scope.containsKey(id))
                 return true;
         return false;

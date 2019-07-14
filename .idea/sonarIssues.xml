@@ -198,6 +198,11 @@
             <set />
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/src/codegen/Symbol.java">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/src/codegen/SymbolInfo.java">
           <value>
             <set />

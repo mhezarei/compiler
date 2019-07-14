@@ -6,7 +6,7 @@ import ast.PrimitiveType;
 /**
  * Descriptor of identifiers
  */
-public class SymbolInfo {
+public class SymbolInfo implements Symbol{
     private ASTNode node;
     private PrimitiveType type;
     private int localVarIndex = -1;
