@@ -63,14 +63,17 @@ public class Signature {
         return args;
     }
 
-    private boolean checkArguments(Signature signature) {
+    public boolean checkArguments(Signature signature) {
         Argument[] args1 = args.toArray(new Argument[0]);
         Argument[] args2 = signature.args.toArray(new Argument[0]);
-        if(args1.length!=args2.length)
+        if (args1.length != args2.length)
             return false;
         for (int i = 0; i < args1.length; i++)
-            if(args1[i].getType() != args2[i].getType())
+            try {
+                CodeGenVisitor.canCast(args1[i].getType(),args2[i].getType());
+            } catch (Exception e) {
                 return false;
+            }
 
         return true;
     }

@@ -76,7 +76,6 @@ public class CodeGenVisitor implements SimpleVisitor {
                 break;
 
             case PARAMETER:
-                visitParameterNode(node);
                 break;
 
             case RETURN_STATEMENT:
@@ -258,8 +257,6 @@ public class CodeGenVisitor implements SimpleVisitor {
         }
 
 
-
-
         return command;
     }
 
@@ -307,8 +304,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
 
-
-    private  PrimitiveType checkBinaryOpType(PrimitiveType e1, PrimitiveType e2, NodeType nodeType) throws Exception {
+    private PrimitiveType checkBinaryOpType(PrimitiveType e1, PrimitiveType e2, NodeType nodeType) throws Exception {
         // todo reduce complexity
         switch (nodeType) {
             case BOOLEAN_AND:
@@ -486,7 +482,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         return i;
     }
 
-        private String getBinaryOperationCommand(NodeType nodeType, PrimitiveType pt) throws Exception {
+    private String getBinaryOperationCommand(NodeType nodeType, PrimitiveType pt) throws Exception {
         String result = "";
 
         switch (pt) {
@@ -572,7 +568,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         throw new Exception("No operation found!");
     }
 
-    private PrimitiveType canCast(PrimitiveType type1, PrimitiveType type2) throws Exception {
+    static PrimitiveType canCast(PrimitiveType type1, PrimitiveType type2) throws Exception {
         if (type1 == type2)
             return type1;
 
@@ -699,8 +695,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         IdentifierNode idNode = (IdentifierNode) node.getChild(0);
         String methodName = idNode.getValue();
 
-        //todo must detect left hand side of assign
-
+        //if there is not a method with this name
         if (!signatures.containsKey(methodName))
             throw new Exception(methodName + " not declared");
 
@@ -710,35 +705,45 @@ public class CodeGenVisitor implements SimpleVisitor {
         PrimitiveType leftHandType = leftHandExpr.getType();
         PrimitiveType returnType = signatures.get(methodName).stream().findAny().get().getReturnType();
 
+        //if return type of the method is not match with the signature
         try {
             canCast(leftHandType, returnType);
         } catch (Exception e) {
             throw new Exception("return type is not correct");
         }
-        Set<Signature> signatureList = signatures.get(methodName);
+
+        Set<Signature> signatureSet = signatures.get(methodName);
 
         Signature newSig = new Signature(returnType, methodName);
-        List<Argument> argumentSet = new ArrayList<>();
-
+        List<Argument> argumentList = new ArrayList<>();
 
         List<ASTNode> parameters = node.getChild(1).getChildren();
         for (ASTNode child : parameters)
             child.getChild(0).accept(this);
+
         //all of parameters accepted, now we can count them
         for (ASTNode parameter : parameters) {
             ExpressionNode expr = (ExpressionNode) parameter.getChild(0);
-            argumentSet.add(new Argument(expr.getType(), ""));
+            argumentList.add(new Argument(expr.getType(), ""));
         }
-        newSig.addArgs(argumentSet);
+        newSig.addArgs(argumentList);
 
-        if (!signatureList.contains(newSig))
+        //if parameters are not match
+        if (!signatureSet.contains(newSig))
             throw new Exception(methodName + " with this signature not declared");
 
+        //now get parameter list of the declared sinature
+        for (Signature signature : signatureSet)
+            if (signature.checkArguments(newSig)) {
+                argumentList = signature.getArgs();
+                break;
+            }
 
         String result = "tmp" + getTemp();
 
+        //print call instruction
         stream.print("\t%" + result + " = call " + returnType + " @" + methodName);
-        visitParameterNode(node.getChild(1));
+        visitParameterNode(node.getChild(1), argumentList);
         returnGenerated = false;
 
         ExpressionNode parent = (ExpressionNode) node.getParent();
@@ -746,15 +751,16 @@ public class CodeGenVisitor implements SimpleVisitor {
         reduceExpressionNode(result, parent, returnType);
     }
 
-    private void visitParameterNode(ASTNode node) {
+    private void visitParameterNode(ASTNode node, List<Argument> argumentList) {
         stream.print("(");
         ASTNode[] params = node.getChildren().toArray(new ASTNode[0]);
+        Argument[] arguments=argumentList.toArray(new Argument[0]);
         for (int i = 0; i < params.length; i++) {
             if (i > 0)
                 stream.print(",");
             ASTNode paramNode = params[i];
             ExpressionNode expr = (ExpressionNode) paramNode.getChild(0);
-            stream.print(expr.getType() + " ");
+            stream.print(arguments[i].getType() + " ");
             ASTNode paramValue = expr.getChild(0);
             if (paramValue.getNodeType() == NodeType.VAR_USE)
                 //this an id
