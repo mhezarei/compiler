@@ -563,33 +563,55 @@ cond_stmt ::=
     | SWITCH LPAREN identifier:i RPAREN OF COLON BEGIN DEFAULT COLON block:b END
         {:
             RESULT = new BaseASTNode(NodeType.SWITCH_STATEMENT);
+            ExpressionNode expr = new ExpressionNode();
+            ASTNode var = new BaseASTNode(NodeType.VAR_USE);
+            expr.addChild(var);
+            var.setParent(expr);
+            var.addChild(i);
+            i.setParent(var);
             ASTNode s = new BaseASTNode(NodeType.CASE_STATEMENT);
-            RESULT.addChild(i, s, b);
-            i.setParent(RESULT);
+            RESULT.addChild(expr, s, b);
+            expr.setParent(RESULT);
             s.setParent(RESULT);
             b.setParent(RESULT);
         :}
     | SWITCH LPAREN identifier:i RPAREN OF COLON BEGIN cond_stmt_mid:s DEFAULT COLON block:b END
         {:
             RESULT = new BaseASTNode(NodeType.SWITCH_STATEMENT);
-            RESULT.addChild(i, s, b);
-            i.setParent(RESULT);
+            ExpressionNode expr = new ExpressionNode();
+            ASTNode var = new BaseASTNode(NodeType.VAR_USE);
+            expr.addChild(var);
+            var.setParent(expr);
+            var.addChild(i);
+            i.setParent(var);
+            RESULT.addChild(expr, s, b);
+            expr.setParent(RESULT);
             s.setParent(RESULT);
             b.setParent(RESULT);
         :};
 
 cond_stmt_mid ::=
-    CASE INTCONST COLON block:b
+    CASE INTCONST:i COLON block:b
         {:
             RESULT = new BaseASTNode(NodeType.CASE_STATEMENT);
-            RESULT.addChild(b);
-            b.setParent(RESULT);
+            ASTNode cs = new BaseASTNode(NodeType.CASE_STATEMENT);
+            IntegerLiteralNode intNode = new IntegerLiteralNode(i);
+            RESULT.addChild(cs);
+            cs.setParent(RESULT);
+            cs.addChild(b, intNode);
+            b.setParent(cs);
+            intNode.setParent(cs);
         :}
-    | cond_stmt_mid:s CASE INTCONST COLON block:b
+    | cond_stmt_mid:s CASE INTCONST:i COLON block:b
         {:
             RESULT = s;
-            RESULT.addChild(b);
-            b.setParent(RESULT);
+            ASTNode cs = new BaseASTNode(NodeType.CASE_STATEMENT);
+            IntegerLiteralNode intNode = new IntegerLiteralNode(i);
+            RESULT.addChild(cs);
+            cs.setParent(RESULT);
+            cs.addChild(b, intNode);
+            b.setParent(cs);
+            intNode.setParent(cs);
         :};
 
 loop_stmt ::=

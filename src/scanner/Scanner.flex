@@ -63,32 +63,22 @@ WhiteSpace = {EOL} | [ \t\f]
     "int"                { return symbol(sym.INT); }
     //"struct"             { return symbol(parser.sym.STRUCT); }
     "float"              { return symbol(sym.FLOAT); }
-    //"short"              { return symbol(parser.sym.SHORT); }
-    //"unsigned"           { return symbol(parser.sym.BOOL); }
     "else"               { return symbol(sym.ELSE); }
     "long"               { return symbol(sym.LONG); }
     "switch"             { return symbol(sym.SWITCH); }
     "continue"           { return symbol(sym.CONTINUE); }
     "for"                { return symbol(sym.FOR); }
-    //"signed"             { return symbol(parser.sym.BOOL); }
     "void"               { return symbol(sym.VOID); }
     "case"               { return symbol(sym.CASE); }
-    //"enum"               { return symbol(parser.sym.BOOL); }
-    //"register"           { return symbol(parser.sym.BOOL); }
-    //"typedef"            { return symbol(parser.sym.BOOL); }
     "default"            { return symbol(sym.DEFAULT); }
-    //"goto"               { return symbol(parser.sym.BOOL); }
     "sizeof"             { return symbol(sym.SIZEOF); }
-    //"volatile"           { return symbol(parser.sym.BOOL); }
     "char"               { return symbol(sym.CHAR); }
     "extern"             { return symbol(sym.EXTERN); }
     "return"             { return symbol(sym.RETURN); }
-    //"union"              { return symbol(parser.sym.BOOL); }
-    //"do"                 { return symbol(parser.sym.BOOL); }
     "if"                 { return symbol(sym.IF); }
-    //"static"             { return symbol(parser.sym.STATIC); }
     "repeat"             { return symbol(sym.REPEAT); }
     "until"              { return symbol(sym.UNTIL); }
+    "of"                 { return symbol(sym.OF); }
 
     // NEW SHIT
     "begin"				 { return symbol(sym.BEGIN); }

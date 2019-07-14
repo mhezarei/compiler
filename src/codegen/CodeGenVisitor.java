@@ -118,6 +118,10 @@ public class CodeGenVisitor implements SimpleVisitor {
                 visitIdentifierNode(node);
                 break;
 
+            case SWITCH_STATEMENT:
+                visitSwitchNode(node);
+                break;
+
             case STRUCT_DECLARATION:
             case CONTINUE_STATEMENT:
             case BREAK_STATEMENT:
@@ -125,7 +129,6 @@ public class CodeGenVisitor implements SimpleVisitor {
             case FLOAT_TYPE:
             case LONG_TYPE:
             case AUTO_TYPE:
-            case SWITCH_STATEMENT:
             case CASE_STATEMENT:
             case PARAMETERS:
             case VARIABLE_CONST_DECLARATION:
@@ -143,6 +146,39 @@ public class CodeGenVisitor implements SimpleVisitor {
             default:
                 visitAllChildren(node);
         }
+    }
+
+    private void visitSwitchNode(ASTNode node) throws Exception {
+        // BIG TODO SCOPE
+        String defaultLabel = generateLabel();
+        String[] labels = new String[node.getChild(1).getChildren().size()];
+
+        node.getChild(0).accept(this);
+
+        String result = ((IdentifierNode) node.getChild(0).getChild(0).getChild(0)).getValue();
+
+        PrimitiveType type = (node.getChild(0).getChild(0).getChild(0)).getSymbolInfo().getType();
+
+        stream.println("\tswitch " + type + " %" + result + ", label %" + defaultLabel + " [");
+
+        int i = 0;
+        for (ASTNode block : node.getChild(1).getChildren()) {
+            labels[i] = generateLabel();
+            stream.println("\t\ti32 " + ((IntegerLiteralNode) block.getChild(1)).getValue() + ", label %" + labels[i]);
+            i++;
+        }
+
+        stream.println("\t]");
+
+        i = 0;
+        for (ASTNode block : node.getChild(1).getChildren()) {
+            stream.println(labels[i] + ":");
+            block.getChild(0).accept(this);
+            i++;
+        }
+
+        stream.println(defaultLabel + ":");
+        node.getChild(2).accept(this);
     }
 
     private void visitForEachNode(ASTNode node) {
@@ -776,7 +812,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     }*/
 
     private void visitLoopNode(ASTNode node) throws Exception {
-        // todo loop
+        // todo FOREACH
         if (node.getNodeType() == NodeType.FOR_STATEMENT) {
             visitForNode(node);
         } else if (node.getNodeType() == NodeType.REPEAT_STATEMENT) {
@@ -958,7 +994,6 @@ public class CodeGenVisitor implements SimpleVisitor {
         }
         stream.println(")");
     }
-
 
     private void visitMethodDeclarationNode(ASTNode node) throws Exception {
         //type

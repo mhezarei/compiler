@@ -1,6 +1,6 @@
 function int main(int a, float b)
 begin
-    bool q = 2 > 3;
+    /# bool q = 2 > 3;
     q = 2 == 3;
 
     fun(a, b);
@@ -39,7 +39,32 @@ begin
         j += 2;
         j += 2;
     end
-    until (2 < 3);
+    until (2 < 3); #/
+
+    int t = 1 + 2;
+
+    switch (t) of:
+    begin
+        case 5:
+        begin
+            t += 2;
+        end
+
+        case 6:
+        begin
+            t += 2;
+        end
+
+        case 10:
+        begin
+            t += 2;
+        end
+
+        default:
+        begin
+            t += 2;
+        end
+    end
 
     return 2;
     return 2;
