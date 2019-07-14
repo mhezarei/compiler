@@ -1,5 +1,6 @@
 package codegen;
 
+import ast.ExpressionNode;
 import ast.PrimitiveType;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class Signature {
         args.addAll(arguments);
     }
 
-    public PrimitiveType getReturnType() {
+    PrimitiveType getReturnType() {
         return returnType;
     }
 
@@ -59,18 +60,20 @@ public class Signature {
         return name;
     }
 
-    public List<Argument> getArgs() {
+    List<Argument> getArgs() {
         return args;
     }
 
-    public boolean checkArguments(Signature signature) {
+    boolean checkArguments(Signature signature) {
         Argument[] args1 = args.toArray(new Argument[0]);
         Argument[] args2 = signature.args.toArray(new Argument[0]);
         if (args1.length != args2.length)
             return false;
         for (int i = 0; i < args1.length; i++)
             try {
-                CodeGenVisitor.canCast(args1[i].getType(),args2[i].getType());
+                ExpressionNode e=new ExpressionNode();
+                e.setType(args2[i].getType());
+                CodeGenVisitor.cast(args1[i].getType(),e);
             } catch (Exception e) {
                 return false;
             }

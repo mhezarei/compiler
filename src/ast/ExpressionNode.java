@@ -40,11 +40,11 @@ public class ExpressionNode extends BaseASTNode {
         return resultName;
     }
 
-    public void setResultName(String resultName) {
-        this.resultName = resultName;
-    }
-
     public PrimitiveType getType() {
         return type;
+    }
+
+    public void setType(PrimitiveType type) {
+        this.type = type;
     }
 }

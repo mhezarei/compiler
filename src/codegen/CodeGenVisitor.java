@@ -2,15 +2,14 @@ package codegen;
 
 import ast.*;
 
-import javax.xml.soap.Node;
 import java.io.PrintStream;
 import java.util.*;
 
 public class CodeGenVisitor implements SimpleVisitor {
+    private  int tempIndex;
     private PrintStream stream;
     private int labelIndex;
     static Map<String, HashSet<Signature>> signatures = new HashMap<>();
-    private Set<Integer> usedTemps = new HashSet<>();
     private SymbolTable symbolTable = new SymbolTable();
     private boolean inMethodBlock;
 
@@ -240,8 +239,9 @@ public class CodeGenVisitor implements SimpleVisitor {
 
                 if (!(node.getChild(i) instanceof IdentifierNode)) {
                     ExpressionNode rightSide= (ExpressionNode) node.getChild(i).getChild(1);
-                    PrimitiveType castType=canCast(id.getSymbolInfo().getType(), rightSide.getType());
-                    stream.println("\tstore " + castType + " " + rightSide.getResultName() + ", " + castType + "* " + id + ", align " + alignNum());
+                    //todo fix after cast fix
+//                    PrimitiveType castType= cast(id.getSymbolInfo().getType(), rightSide);
+//                    stream.println("\tstore " + castType + " " + rightSide.getResultName() + ", " + castType + "* " + id + ", align " + alignNum());
                 }
             }
         }
@@ -352,12 +352,24 @@ public class CodeGenVisitor implements SimpleVisitor {
         return command;
     }
 
+    private void reduceExpressionNode(String result, ExpressionNode parent, PrimitiveType resultType) throws Exception {
+        ASTNode v = new BaseASTNode(NodeType.VAR_USE);
+        ASTNode id = new IdentifierNode(result);
+        SymbolInfo si = new SymbolInfo(id);
+        si.setType(resultType);
+        id.setSymbolInfo(si);
+        v.addChild(id);
+        v.setParent(parent);
+        parent.setChildren(v);
+        parent.setIsIdentifier();
+    }
+
     private void visitBinaryOperation(ASTNode node) throws Exception {
         ExpressionNode parent = (ExpressionNode) node.getParent();
-//        System.out.println("node is " + node);
-//        System.out.println("parent is " + parent);
-//        System.out.println("G parent is " + parent.getParent());
-//        System.out.println("parent child is " + parent.getChildren());
+        System.out.println("node is " + node);
+        System.out.println("parent is " + parent);
+        System.out.println("G parent is " + parent.getParent());
+        System.out.println("parent child is " + parent.getChildren());
         ExpressionNode e1 = (ExpressionNode) node.getChild(0);
 //        System.out.println("first child is " + e1.getChildren());
         ExpressionNode e2 = (ExpressionNode) node.getChild(1);
@@ -628,21 +640,15 @@ public class CodeGenVisitor implements SimpleVisitor {
         throw new Exception("general can't do " + nodeType);
     }
 
-    private void reduceExpressionNode(String result, ExpressionNode parent, PrimitiveType resultType) throws Exception {
-        ASTNode v = new BaseASTNode(NodeType.VAR_USE);
-        ASTNode id = new IdentifierNode(result);
-        SymbolInfo si = new SymbolInfo(id);
-        si.setType(resultType);
-        id.setSymbolInfo(si);
-        v.addChild(id);
-        v.setParent(parent);
-        parent.setChildren(v);
-        parent.setIsIdentifier();
+    private  int getTemp() {
+        return tempIndex++;
     }
 
-    static PrimitiveType canCast(PrimitiveType type1, PrimitiveType type2) throws Exception {
+     ExpressionNode cast(PrimitiveType type1, ExpressionNode e2) throws Exception {
+        PrimitiveType type2=e2.getType();
+        PrimitiveType type=null;
         if (type1 == type2)
-            return type1;
+            return e2;
 
         switch (type1) {
             case INT:
@@ -650,29 +656,43 @@ public class CodeGenVisitor implements SimpleVisitor {
                     case FLOAT:
                     case DOUBLE:
                     case BOOL:
-                        return type2;
+                        type= type2;
+                        break;
                     case CHAR:
-                        return type1;
+                        type= type1;
                     case AUTO:
                     case VOID:
                     case STRING:
                     case LONG:
                         throw new Exception("can't cast");
                 }
+                break;
             case DOUBLE:
             case FLOAT:
             case BOOL:
             case VOID:
-                return type1;
+                type= type1;
+                break;
             case CHAR:
-                if (type2 == PrimitiveType.INT)
-                    return type2;
+                if (type2 == PrimitiveType.INT) {
+                    type = type2;
+                    break;
+                }
             case STRING:
             case AUTO:
             case LONG:
                 throw new Exception("can't cast");
         }
-        throw new Exception("can't cast");
+
+        String result = ""+getTemp();
+
+//        stream.print("\t%"+result+" = sitofp "+);
+
+        ExpressionNode parent=new ExpressionNode();
+
+        reduceExpressionNode(result,parent, type);
+
+        return parent;
     }
 
     private void visitSizeOfNode(ASTNode node) throws Exception {
@@ -751,7 +771,6 @@ public class CodeGenVisitor implements SimpleVisitor {
         ExpressionNode rightSide = (ExpressionNode) node.getChild(1);
 
         stream.println("\tstore " + rightSide.getType() + " " + rightSide.getResultName() + ", " + leftSide.getType() + "* " + idNode + ", align " + alignNum());
-        //todo store
 
         System.out.println("assign children are " + node.getChildren());
 
@@ -827,13 +846,6 @@ public class CodeGenVisitor implements SimpleVisitor {
             //if there is not a method with this name
             throw new Exception(methodName + "() not declared");
 
-        //if return type of the method is not match with the signature
-        try {
-            canCast(leftHandType, returnType);
-        } catch (Exception e) {
-            throw new Exception("return type is not correct");
-        }
-
         Set<Signature> signatureSet = signatures.get(methodName);
 
         Signature newSig = new Signature(returnType, methodName);
@@ -854,7 +866,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         if (!signatureSet.contains(newSig))
             throw new Exception(methodName + "() with this signature not declared");
 
-        //now get parameter list of the declared sinature
+        //now get parameter list of the declared signature
         for (Signature signature : signatureSet)
             if (signature.checkArguments(newSig)) {
                 argumentList = signature.getArgs();
@@ -862,19 +874,25 @@ public class CodeGenVisitor implements SimpleVisitor {
             }
 
 
+        boolean isExpr=false;
+        ExpressionNode parent=null;
         stream.print("\t");
         if (node.getParent().getNodeType() == NodeType.EXPRESSION_STATEMENT) {
             //it is an expression
             String result = "" + getTemp();
 
-            ExpressionNode parent = (ExpressionNode) node.getParent();
+            parent = (ExpressionNode) node.getParent();
             reduceExpressionNode(result, parent, returnType);
 
             stream.print("%" + result + " = ");
+            isExpr=true;
         }
         //print call instruction
         stream.print("call " + returnType + " @" + methodName);
         visitParameterNode(node.getChild(1), argumentList);
+
+        if(isExpr)
+            cast(leftHandType, parent);
     }
 
     private void visitParameterNode(ASTNode node, List<Argument> argumentList) {
@@ -962,8 +980,9 @@ public class CodeGenVisitor implements SimpleVisitor {
             if (returnType == PrimitiveType.VOID)
                 throw new Exception("return type is wrong");
             ExpressionNode returnExpr = ((ExpressionNode) node.getChild(0));
+            ExpressionNode newExpr=new ExpressionNode();
             try {
-                canCast(returnType, returnExpr.getType());
+                cast(returnType, returnExpr);
                 stream.print(" " + returnExpr.getResultName());
             } catch (Exception e) {
                 throw new Exception("return type is wrong");
@@ -992,7 +1011,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private String generateLabel() {
-        return "label" + ++labelIndex;
+        return "label" + (++labelIndex);
     }
 
     private void outputMainMethod() {
@@ -1021,15 +1040,5 @@ public class CodeGenVisitor implements SimpleVisitor {
         stream.println("  return");
         stream.println(".end method");
         stream.println("");
-    }
-
-    private int getTemp() {
-        int i = 0;
-
-        while (usedTemps.contains(i))
-            i++;
-        usedTemps.add(i);
-
-        return i;
     }
 }
