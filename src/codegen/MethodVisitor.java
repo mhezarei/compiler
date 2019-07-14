@@ -36,9 +36,6 @@ public class MethodVisitor implements SimpleVisitor {
     }
 
 
-
-
-
     private void visitMethodDeclarationNode(ASTNode node) throws Exception {
         TypeNode returnType = (TypeNode) node.getChild(0);
         IdentifierNode idNode = (IdentifierNode) node.getChild(1);
@@ -54,11 +51,12 @@ public class MethodVisitor implements SimpleVisitor {
             } else {
 
                 HashSet<Signature> signatures = CodeGenVisitor.signatures.get(methodName);
+                Optional<Signature> aSig = signatures.stream().findAny();
                 if (signatures.contains(signature))
                     throw new Exception(methodName + "() with this signature declared before");
-                if (signatures.stream().findAny().get().getReturnType() != returnType.getType())
+                if (aSig.isPresent() && (aSig.get().getReturnType() != returnType.getType()))
                     throw new Exception(methodName + "() can't be declare by this return type");
-                CodeGenVisitor.signatures.get(methodName).add(signature);
+                signatures.add(signature);
             }
         else {
             HashSet<Signature> set = new HashSet<>();

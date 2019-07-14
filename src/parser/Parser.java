@@ -2486,7 +2486,7 @@ class CUP$Parser$actions {
             // expr (RESULT) -> sizeof (s) -> type (t)
 
             RESULT = new ExpressionNode();
-            s = new BaseASTNode(NodeType.SIZEOF);
+            ASTNode s = new BaseASTNode(NodeType.SIZEOF);
             RESULT.addChild(s);
             s.setParent(RESULT);
             s.addChild(t);

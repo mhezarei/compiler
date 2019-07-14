@@ -304,7 +304,7 @@ var_dcl ::=
 			RESULT =  new BaseASTNode(NodeType.VARIABLE_DECLARATION);
 			RESULT.addChild(t, vdc, vde);
 			t.setParent(RESULT);
-			vdc.setPasieorent(RESULT);
+			vdc.setParent(RESULT);
 			vde.setParent(RESULT);
         :}
     | CONST type:t var_dcl_cnt:vdc var_dcl_end:vde SEMICOLON
@@ -695,7 +695,7 @@ expr ::=
             // expr (RESULT) -> sizeof (s) -> type (t)
 
             RESULT = new ExpressionNode();
-            s = new BaseASTNode(NodeType.SIZEOF);
+            ASTNode s = new BaseASTNode(NodeType.SIZEOF);
             RESULT.addChild(s);
             s.setParent(RESULT);
             s.addChild(t);

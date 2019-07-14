@@ -2,7 +2,6 @@ package codegen;
 
 import ast.*;
 
-import javax.xml.soap.Node;
 import java.io.PrintStream;
 import java.util.*;
 
@@ -351,40 +350,35 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitSizeOfNode(ASTNode node) throws Exception {
-        ExpressionNode parent = (ExpressionNode) node.getParent();
-        NodeType nt = null;
+        ExpressionNode parent= (ExpressionNode) node.getParent();
+        PrimitiveType type=((TypeNode)node.getChild(0)).getType();
 
         node.getChild(0).accept(this);
 
-        int val = 0;
-        if (node.getChild(0) instanceof IdentifierNode) {
-            // todo
-        } else if (node.getChild(0) instanceof TypeNode) {
-            nt = (node.getChild(0)).getNodeType();
-        }
+        int val;
 
-        switch (nt) {
-            case BOOLEAN_TYPE:
-            case CHAR_TYPE:
+        switch (type) {
+            case BOOL:
+            case CHAR:
             case VOID:
                 val = 1;
                 break;
-            case INT_TYPE:
-            case FLOAT_TYPE:
+            case INT:
+            case FLOAT:
                 val = 4;
                 break;
-            case LONG_TYPE:
-            case DOUBLE_TYPE:
+            case LONG:
+            case DOUBLE:
                 val = 8;
                 break;
-            case STRING_TYPE:
-            case AUTO_TYPE:
+            case STRING:
+            case AUTO:
                 throw new Exception("bad types for sizeof");
             default:
-                throw new IllegalStateException("Unexpected value: " + nt);
+                throw new IllegalStateException("Unexpected value: " + type);
         }
 
-        // todo correct if it's wrong
+        //reduce
         IntegerLiteralNode iln = new IntegerLiteralNode(val);
         iln.setParent(parent);
         parent.setChildren(iln);
@@ -965,13 +959,15 @@ public class CodeGenVisitor implements SimpleVisitor {
         visitAllChildren(node);
 
         IdentifierNode id = (IdentifierNode) node.getChild(0);
+
+        String result=""+getTemp();
+
+//        stream.print("\t%"+result+" = load "+id.getSymbolInfo().getType()+);
+
         //todo laod
         System.out.println("in VAR_USE");
         System.out.println("id node is " + node.getChild(0));
         //this var is not in this scope
-        if (id.getValue().equals("a")) {
-            System.out.println("***");
-        }
         if (symbolTable.get(id.getValue()) == null)
             throw new Exception(id.getValue() + " is not in this scope");
 
