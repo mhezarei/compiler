@@ -90,6 +90,6 @@ public class Signature {
 
     @Override
     public int hashCode() {
-        return Objects.hash(returnType, name, args);
+        return Objects.hash(returnType, name, args.size());
     }
 }

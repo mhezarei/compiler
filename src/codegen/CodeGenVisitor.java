@@ -9,7 +9,7 @@ import java.util.*;
 public class CodeGenVisitor implements SimpleVisitor {
     private PrintStream stream;
     private int labelIndex;
-    static Map<String, Set<Signature>> signatures = new HashMap<>();
+    static Map<String, HashSet<Signature>> signatures = new HashMap<>();
     private boolean returnGenerated;
     private Set<Integer> usedTemps = new HashSet<>();
 
@@ -674,7 +674,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         //if there is not a method with this name
         if (!signatures.containsKey(methodName))
-            throw new Exception(methodName + " not declared");
+            throw new Exception(methodName + "() not declared");
 
         PrimitiveType leftHandType;
 
@@ -713,7 +713,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         //if parameters are not match
         if (!signatureSet.contains(newSig))
-            throw new Exception(methodName + " with this signature not declared");
+            throw new Exception(methodName + "() with this signature not declared");
 
         //now get parameter list of the declared sinature
         for (Signature signature : signatureSet)

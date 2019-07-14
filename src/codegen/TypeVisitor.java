@@ -57,17 +57,23 @@ public class TypeVisitor implements SimpleVisitor {
         Signature signature = new Signature(returnType.getType(), methodName);
         signature.addArgs(visitArgumentNode(node.getChild(2)));
 
-        if(CodeGenVisitor.signatures.containsKey(methodName))
-            if(methodName.equals("main")){
-                throw new Exception("main declared before");}
-            else{
+        if (CodeGenVisitor.signatures.containsKey(methodName))
+            if (methodName.equals("main")) {
+                throw new Exception("main() declared before");
+            } else {
 
-                Set<Signature> signatures = CodeGenVisitor.signatures.get(methodName);
+                HashSet<Signature> signatures = CodeGenVisitor.signatures.get(methodName);
                 if (signatures.contains(signature))
-                    throw new Exception(methodName + " with this signature declared before");
-                signatures.add(signature);
+                    throw new Exception(methodName + "() with this signature declared before");
+                if (signatures.stream().findAny().get().getReturnType() != returnType.getType())
+                    throw new Exception(methodName + "() can't be declare by this return type");
+                CodeGenVisitor.signatures.get(methodName).add(signature);
             }
-        CodeGenVisitor.signatures.put(methodName, Collections.singleton(signature));
+        else {
+            HashSet<Signature> set = new HashSet<>();
+            set.add(signature);
+            CodeGenVisitor.signatures.put(methodName, set);
+        }
 
         visitAllChildren(node);
     }
@@ -106,12 +112,12 @@ public class TypeVisitor implements SimpleVisitor {
             throw new Exception(typeID.getValue() + " not declared");
 
         IdentifierNode idNode;
-        if(node.getChild(1)instanceof IdentifierNode)
+        if (node.getChild(1) instanceof IdentifierNode)
             //DEC -> ID
-            idNode=(IdentifierNode) node.getChild(1);
+            idNode = (IdentifierNode) node.getChild(1);
         else
             //DEC -> ASSIGN -> EXPR -> VAR_USE -> ID
-            idNode=(IdentifierNode) node.getChild(1).getChild(0).getChild(0).getChild(0);
+            idNode = (IdentifierNode) node.getChild(1).getChild(0).getChild(0).getChild(0);
         String id = idNode.getValue();
 
         SymbolInfo si = new SymbolInfo(idNode);

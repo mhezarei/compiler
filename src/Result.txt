@@ -12,3 +12,5 @@ entry:
 	call i32 @fun(i32 %a,float %b)
   return
 }
+declare i32 @fun() {
+entry:
