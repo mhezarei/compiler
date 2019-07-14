@@ -1,10 +1,7 @@
 package codegen;
 
 
-import ast.ASTNode;
-import ast.IdentifierNode;
-import ast.PrimitiveType;
-import ast.TypeNode;
+import ast.*;
 
 import java.util.*;
 
@@ -13,8 +10,8 @@ import java.util.*;
  * to Class nodes.
  */
 public class TypeVisitor implements SimpleVisitor {
-    private PrimitiveType currentType;
     private SymbolTable symbolTable = new SymbolTable();
+    private boolean inMethodBlock;
 
     @Override
     public void visit(ASTNode node) throws Exception {
@@ -48,9 +45,12 @@ public class TypeVisitor implements SimpleVisitor {
     }
 
     private void visitBlockNode(ASTNode node) throws Exception {
-        symbolTable.enterScope();
-        visitAllChildren(node);
-        symbolTable.leaveScope();
+        if(!inMethodBlock) {
+            symbolTable.enterScope();
+            visitAllChildren(node);
+            symbolTable.leaveScope();
+        }else
+            visitAllChildren(node);
     }
 
     private void visitIdentifierNode(ASTNode node) {
@@ -66,6 +66,7 @@ public class TypeVisitor implements SimpleVisitor {
         String methodName = idNode.getValue();
 
         symbolTable.enterScope();
+        inMethodBlock=true;
         Signature signature = new Signature(returnType.getType(), methodName);
         signature.addArgs(visitArgumentNode(node.getChild(2)));
 
@@ -124,24 +125,27 @@ public class TypeVisitor implements SimpleVisitor {
         if (!isPrimitive && typeID.getSymbolInfo() == null)
             throw new Exception(typeID.getValue() + " not declared");
 
-        IdentifierNode idNode;
-        if (node.getChild(1) instanceof IdentifierNode)
-            //DEC -> ID
-            idNode = (IdentifierNode) node.getChild(1);
-        else
-            //DEC -> ASSIGN -> EXPR -> VAR_USE -> ID
-            idNode = (IdentifierNode) node.getChild(1).getChild(0).getChild(0).getChild(0);
-        String id = idNode.getValue();
+        for (int i = 1; i < node.getChildren().size(); i++) {
+            IdentifierNode idNode;
+            if (node.getChild(i) instanceof IdentifierNode)
+                //DEC -> ID
+                idNode = (IdentifierNode) node.getChild(i);
+            else
+                //DEC -> ASSIGN -> EXPR -> VAR_USE -> ID
+                idNode = (IdentifierNode) node.getChild(i).getChild(0).getChild(0).getChild(0);
+            String id = idNode.getValue();
 
-        SymbolInfo si = new SymbolInfo(idNode);
-        si.setType(typePrimitive.getType());
-        idNode.setSymbolInfo(si);
+            SymbolInfo si = new SymbolInfo(idNode);
+            si.setType(typePrimitive.getType());
+            idNode.setSymbolInfo(si);
 
-        if (symbolTable.get(id)!=null)
-            throw new Exception(id + " declared before");
+            if(id.equals("d"))
+                System.out.println("**");
+            if (symbolTable.contains(id))
+                throw new Exception(id + " declared before");
 
-        symbolTable.put(id, si);
-
+            symbolTable.put(id, si);
+        }
         visitAllChildren(node);
     }
 }

@@ -11,13 +11,11 @@ class SymbolTable {
     private HashMap<String, SymbolInfo> currentScope = new HashMap<>();
 
     void enterScope() {
-        scopes.add(currentScope);
         currentScope = new HashMap<>();
     }
 
     void leaveScope() {
-        int index = scopes.size() - 1;
-        currentScope = scopes.remove(index);
+        scopes.add(currentScope);
     }
 
     void put(String id, SymbolInfo si) throws Exception {
@@ -44,5 +42,12 @@ class SymbolTable {
         }
 
         return null;
+    }
+
+    boolean contains(String id) {
+        for (HashMap<String, SymbolInfo> scope : scopes)
+            if (scope.containsKey(id))
+                return true;
+        return false;
     }
 }
