@@ -686,7 +686,13 @@ public class CodeGenVisitor implements SimpleVisitor {
             leftHandType = leftHandExpr.getType();
         } else
             leftHandType = PrimitiveType.VOID;
-        PrimitiveType returnType = signatures.get(methodName).stream().findAny().get().getReturnType();
+        Optional<Signature> aSigFromSet=signatures.get(methodName).stream().findAny();
+        PrimitiveType returnType;
+        if(aSigFromSet.isPresent())
+            returnType = aSigFromSet.get().getReturnType();
+        else
+            //if there is not a method with this name
+            throw new Exception(methodName + "() not declared");
 
         //if return type of the method is not match with the signature
         try {
@@ -731,7 +737,7 @@ public class CodeGenVisitor implements SimpleVisitor {
             ExpressionNode parent = (ExpressionNode) node.getParent();
             reduceExpressionNode(result, parent, returnType);
 
-            stream.print("%"+result+" = ");
+            stream.print("%" + result + " = ");
         }
         //print call instruction
         stream.print("call " + returnType + " @" + methodName);
@@ -792,7 +798,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         stream.println("}");
     }
 
-    private List<Argument> visitArgumentNode(ASTNode node) throws Exception {
+    private void visitArgumentNode(ASTNode node) {
         List<Argument> arguments = new ArrayList<>();
 
         stream.print("(");
@@ -814,7 +820,6 @@ public class CodeGenVisitor implements SimpleVisitor {
             arguments.add(argument);
         }
         stream.print(")");
-        return arguments;
     }
 
     private void visitReturnStatementNode(ASTNode node) throws Exception {
@@ -831,16 +836,10 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     private void visitVarUse(ASTNode node) throws Exception {
         System.out.println("in VAR_USE");
-        IdentifierNode idNode = (IdentifierNode) node.getChild(0);
         System.out.println("id node is " + node.getChild(0));
         ((ExpressionNode) node.getParent()).setIsIdentifier();
         System.out.println("SURVIVED!");
-        SymbolInfo si = idNode.getSymbolInfo();
-        try {
-            returnGenerated = false;
-        } catch (NullPointerException e) {
-            throw new Exception(idNode.getValue() + " not declared");
-        }
+        returnGenerated = false;
     }
 
     private String generateLabel() {

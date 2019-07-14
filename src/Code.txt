@@ -15,5 +15,5 @@ function int fun()
 begin
     int a;
     int b;
-    fun(a,b);
+    fu(a,b);
 end
