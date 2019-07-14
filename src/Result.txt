@@ -10,10 +10,10 @@ entry:
 }
 define i32 @main() {
 entry:
-	call i32 @fun(i32 %a,float %b)
+	call i32 @fun(i32 %e,float %f)
 }
 declare void @f() {
 entry:
-	call i32 @fun(i32 %a,float %b)
+	call i32 @fun(i32 %g,float %h)
 	ret void
 }

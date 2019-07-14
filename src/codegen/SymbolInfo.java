@@ -1,4 +1,4 @@
-package semantic;
+package codegen;
 
 import ast.ASTNode;
 import ast.PrimitiveType;
@@ -11,7 +11,7 @@ public class SymbolInfo {
     private PrimitiveType type;
     private int localVarIndex = -1;
 
-    public SymbolInfo(ASTNode node) {
+    SymbolInfo(ASTNode node) {
         this.node = node;
     }
 
@@ -31,7 +31,7 @@ public class SymbolInfo {
         return localVarIndex;
     }
 
-    public void setLocalVarIndex(int index) {
+    void setLocalVarIndex(int index) {
         this.localVarIndex = index;
     }
 

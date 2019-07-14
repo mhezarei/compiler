@@ -10,13 +10,13 @@ function int main()
 begin
     int e;
     int f;
-    fun(a,b);
+    fun(e,f);
 end
 function void f()
 begin
     int g;
     int h;
-    fun(a,b);
+    fun(g,h);
 
     return;
 end

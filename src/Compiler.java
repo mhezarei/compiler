@@ -1,6 +1,5 @@
 import ast.Program;
 import codegen.CodeGenVisitor;
-import codegen.LocalVarMapVisitor;
 import parser.Parser;
 import scanner.Scanner;
 import codegen.TypeVisitor;
@@ -31,7 +30,6 @@ public class Compiler {
 //        PrintStream stream = System.out;
         Program cu = parse();
         performSemanticAnalysis(cu);
-        performLocalVarMapping(cu);
         generateCode(cu, stream);
     }
 
@@ -51,12 +49,6 @@ public class Compiler {
         System.out.println("in type visitor");
         cu.accept(new TypeVisitor());
         System.out.println("TV done\n");
-    }
-
-    private void performLocalVarMapping(Program cu) throws Exception {
-        System.out.println("in local var mapping");
-        cu.accept(new LocalVarMapVisitor());
-        System.out.println("LVM done\n");
     }
 
     private void generateCode(Program cu, PrintStream stream) throws Exception {

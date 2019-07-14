@@ -3,8 +3,8 @@ package codegen;
 
 import ast.ASTNode;
 import ast.IdentifierNode;
+import ast.PrimitiveType;
 import ast.TypeNode;
-import semantic.SymbolInfo;
 
 import java.util.*;
 
@@ -13,11 +13,16 @@ import java.util.*;
  * to Class nodes.
  */
 public class TypeVisitor implements SimpleVisitor {
-    private Map<String, SymbolInfo> symbolTable = new HashMap<>();
+    private PrimitiveType currentType;
+    private SymbolTable symbolTable = new SymbolTable();
 
     @Override
     public void visit(ASTNode node) throws Exception {
         switch (node.getNodeType()) {
+            case BLOCK:
+                visitBlockNode(node);
+                break;
+
             case IDENTIFIER:
                 visitIdentifierNode(node);
                 break;
@@ -42,6 +47,12 @@ public class TypeVisitor implements SimpleVisitor {
         }
     }
 
+    private void visitBlockNode(ASTNode node) throws Exception {
+        symbolTable.enterScope();
+        visitAllChildren(node);
+        symbolTable.leaveScope();
+    }
+
     private void visitIdentifierNode(ASTNode node) {
         IdentifierNode idNode = (IdentifierNode) node;
         String id = idNode.getValue();
@@ -54,6 +65,7 @@ public class TypeVisitor implements SimpleVisitor {
         IdentifierNode idNode = (IdentifierNode) node.getChild(1);
         String methodName = idNode.getValue();
 
+        symbolTable.enterScope();
         Signature signature = new Signature(returnType.getType(), methodName);
         signature.addArgs(visitArgumentNode(node.getChild(2)));
 
@@ -76,6 +88,7 @@ public class TypeVisitor implements SimpleVisitor {
         }
 
         visitAllChildren(node);
+        symbolTable.leaveScope();
     }
 
     private List<Argument> visitArgumentNode(ASTNode node) {
@@ -124,7 +137,7 @@ public class TypeVisitor implements SimpleVisitor {
         si.setType(typePrimitive.getType());
         idNode.setSymbolInfo(si);
 
-        if(symbolTable.containsKey(id))
+        if (symbolTable.get(id)!=null)
             throw new Exception(id + " declared before");
 
         symbolTable.put(id, si);

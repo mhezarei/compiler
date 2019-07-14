@@ -2,7 +2,7 @@ package ast;
 
 
 import codegen.SimpleVisitor;
-import semantic.SymbolInfo;
+import codegen.SymbolInfo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +16,7 @@ public class BaseASTNode implements ASTNode {
     private List<ASTNode> children = new ArrayList<>();
     private ASTNode parent;
     private NodeType nodeType;
-    SymbolInfo symbolInfo;
+    private SymbolInfo symbolInfo;
 
     public BaseASTNode(NodeType nodeType) {
         this.nodeType = nodeType;

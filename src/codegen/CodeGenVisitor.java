@@ -1,7 +1,6 @@
 package codegen;
 
 import ast.*;
-import semantic.SymbolInfo;
 
 import java.io.PrintStream;
 import java.util.*;
@@ -655,7 +654,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitWhileStatementNode(ASTNode node) {
-        // todo "while" code
+
     }
 
     private void visitLiteralNode(ASTNode node) throws Exception {
@@ -839,20 +838,6 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     private String generateLabel() {
         return "label" + (++labelIndex);
-    }
-
-    private void outputDefaultConstructor() {
-        //todo need to understand
-        stream.println("");
-        stream.println(";");
-        stream.println("; standard constructor");
-        stream.println(";");
-        stream.println(".method public <init>()V");
-        stream.println("  aload_0");
-        stream.println("  invokenonvirtual java/lang/Object/<init>()V");
-        stream.println("  return");
-        stream.println(".end method");
-        stream.println("");
     }
 
     private void outputMainMethod() {
