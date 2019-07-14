@@ -421,33 +421,74 @@ assignment ::=
 			v.setParent(RESULT);
 			e.setParent(RESULT);
         :}
+        // OPASS === assign (has v and expr as children). expr -> op -> v, e
     | variable:v ADDASS expr:e
         {:
-			RESULT = new BaseASTNode(NodeType.ADD_ASSIGN);
-			RESULT.addChild(v,e);
-			e.setParent(RESULT);
+			RESULT = new BaseASTNode(NodeType.ASSIGN);
+			ExpressionNode newExpr = new ExpressionNode();
+			ASTNode op = BaseASTNode(NodeType.ADDITION);
+
+			RESULT.addChild(v, newExpr);
+			newExpr.setParent(RESULT);
 			v.setParent(RESULT);
+
+			newExpr.addChild(op);
+			op.setParent(newExpr);
+
+			op.addChild(v, e);
+			v.setParent(op);
+			e.setParent(op);
         :}
     | variable:v SUBASS expr:e
         {:
-			RESULT = new BaseASTNode(NodeType.SUB_ASSIGN);
-			RESULT.addChild(v,e);
-			e.setParent(RESULT);
+			RESULT = new BaseASTNode(NodeType.ASSIGN);
+			ExpressionNode newExpr = new ExpressionNode();
+			ASTNode op = BaseASTNode(NodeType.SUBTRACTION);
+
+			RESULT.addChild(v, newExpr);
+			newExpr.setParent(RESULT);
 			v.setParent(RESULT);
+
+			newExpr.addChild(op);
+			op.setParent(newExpr);
+
+			op.addChild(v, e);
+			v.setParent(op);
+			e.setParent(op);
         :}
     | variable:v MULTASS expr:e
         {:
-			RESULT = new BaseASTNode(NodeType.MULT_ASSIGN);
-			RESULT.addChild(v,e);
-			e.setParent(RESULT);
+			RESULT = new BaseASTNode(NodeType.ASSIGN);
+			ExpressionNode newExpr = new ExpressionNode();
+			ASTNode op = BaseASTNode(NodeType.MULTIPLICATION);
+
+			RESULT.addChild(v, newExpr);
+			newExpr.setParent(RESULT);
 			v.setParent(RESULT);
+
+			newExpr.addChild(op);
+			op.setParent(newExpr);
+
+			op.addChild(v, e);
+			v.setParent(op);
+			e.setParent(op);
         :}
     | variable:v DIVASS expr:e
         {:
-			RESULT = new BaseASTNode(NodeType.DIV_ASSIGN);
-			RESULT.addChild(v,e);
-			e.setParent(RESULT);
+			RESULT = new BaseASTNode(NodeType.ASSIGN);
+			ExpressionNode newExpr = new ExpressionNode();
+			ASTNode op = BaseASTNode(NodeType.DIVISION);
+
+			RESULT.addChild(v, newExpr);
+			newExpr.setParent(RESULT);
 			v.setParent(RESULT);
+
+			newExpr.addChild(op);
+			op.setParent(newExpr);
+
+			op.addChild(v, e);
+			v.setParent(op);
+			e.setParent(op);
         :};
 
 method_call ::=
