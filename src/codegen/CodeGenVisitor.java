@@ -154,6 +154,10 @@ public class CodeGenVisitor implements SimpleVisitor {
         System.out.println("--FINISHED VAC\n");
     }
 
+    private void visitVariableDeclaration(ASTNode node) {
+        //todo alloca
+    }
+
     private void visitUnaryOperation(ASTNode node) throws Exception {
         ExpressionNode parent = (ExpressionNode) node.getParent();
         ExpressionNode e = (ExpressionNode) node.getChild(0);
@@ -592,6 +596,7 @@ public class CodeGenVisitor implements SimpleVisitor {
       OR if it's a literal, pushes the literal then assigns that val
       OR if it's an ID loads the ID's value and assigns*/
     private void visitAssignNode(ASTNode node) throws Exception {
+        //todo store
         System.out.println("assign children are " + node.getChildren());
         //node -> EXPRESSION -> VAR_USE -> ID
         IdentifierNode idNode = (IdentifierNode) node.getChild(0).getChild(0).getChild(0);
@@ -830,6 +835,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitVarUse(ASTNode node) throws Exception {
+        //todo laod
         System.out.println("in VAR_USE");
         System.out.println("id node is " + node.getChild(0));
         ((ExpressionNode) node.getParent()).setIsIdentifier();
