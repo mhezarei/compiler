@@ -3,6 +3,7 @@ package codegen;
 import ast.*;
 import semantic.SymbolInfo;
 
+import javax.xml.soap.Node;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -165,8 +166,117 @@ public class CodeGenVisitor implements SimpleVisitor {
         System.out.println("--FINISHED VAC\n");
     }
 
-    private void visitUnaryOperation(ASTNode node) {
+    private void visitUnaryOperation(ASTNode node) throws Exception {
+        ExpressionNode parent = (ExpressionNode) node.getParent();
+        ExpressionNode e = (ExpressionNode) node.getChild(0);
 
+        e.accept(this);
+
+        String op = getUnaryOperationCommand(node.getNodeType(), e);
+        stream.println(op);
+
+        reduceExpressionNode(op.substring(1, op.indexOf('=') - 1), parent, e.getType());
+    }
+
+    private String getUnaryOperationCommand(NodeType nodeType, ExpressionNode e) throws Exception {
+        if (!e.isIdentifier())
+            throw new Exception(e + " not generated");
+
+        PrimitiveType pt = e.getType();
+        String command = "\t%tmp" + getTemp();
+        command += " = ";
+
+        switch (nodeType) {
+            case PRE_DECREMENT:
+            case POST_DECREMENT:
+                if (pt == PrimitiveType.INT) {
+                    command += "sub i32 ";
+                    command += e.getResultName();
+                    command += ", 1";
+                } else if (pt == PrimitiveType.CHAR) {
+                    command += "sub i8";
+                    command += e.getResultName();
+                    command += ", 1";
+                } else {
+                    throw new Exception("POST/PRE DEC bad type");
+                }
+            case POST_INCREMENT:
+            case PRE_INCREMENT:
+                if (pt == PrimitiveType.INT) {
+                    command += "add i32";
+                    command += e.getResultName();
+                    command += ", 1";
+                } else if (pt == PrimitiveType.CHAR) {
+                    command += "add i8";
+                    command += e.getResultName();
+                    command += ", 1";
+                } else {
+                    throw new Exception("POST/PRE INC bad type");
+                }
+
+            case BITWISE_NEGATIVE:
+                if (pt == PrimitiveType.FLOAT) {
+                    command += "fneg float ";
+                    command += e.getResultName();
+                } else if (pt == PrimitiveType.DOUBLE) {
+                    command += "fneg double ";
+                    command += e.getResultName();
+                } else {
+                    throw new Exception("bitwise neg bad type");
+                }
+
+            case UNARY_PLUS:
+                break;
+
+            case UNARY_MINUS:
+                if (pt == PrimitiveType.INT) {
+                    command += "sub i32";
+                    command += " 0, ";
+                    command += e.getResultName();
+                } else if (pt == PrimitiveType.BOOL) {
+                    command += "sub i1";
+                    command += " 0, ";
+                    command += e.getResultName();
+                } else if (pt == PrimitiveType.CHAR) {
+                    command += "sub i8";
+                    command += " 0, ";
+                    command += e.getResultName();
+                } else if (pt == PrimitiveType.FLOAT) {
+                    command += "fsub float";
+                    command += " 0.0, ";
+                    command += e.getResultName();
+                } else if (pt == PrimitiveType.DOUBLE) {
+                    command += "fsub double";
+                    command += " 0.0, ";
+                    command += e.getResultName();
+                } else if (pt == PrimitiveType.LONG) {
+                    command += "fsub i64";
+                    command += " 0.0, ";
+                    command += e.getResultName();
+                } else {
+                    throw new Exception("UMINUS bad type");
+                }
+
+            case BOOLEAN_NOT:
+                // TODO
+        }
+
+
+
+
+        return command;
+    }
+
+    private void reduceExpressionNode(String result, ExpressionNode parent, PrimitiveType resultType) throws Exception {
+        ASTNode v = new BaseASTNode(NodeType.VAR_USE);
+        ASTNode id = new IdentifierNode(result);
+        SymbolInfo si = new SymbolInfo(id);
+        si.setType(resultType);
+        id.setSymbolInfo(si);
+        v.addChild(id);
+        v.setParent(parent);
+        parent.setChildren(v);
+        parent.setIsIdentifier();
     }
 
     private void visitBinaryOperation(ASTNode node) throws Exception {
@@ -183,9 +293,9 @@ public class CodeGenVisitor implements SimpleVisitor {
         e1.accept(this);
         e2.accept(this);
 
-        PrimitiveType resultType = checkType(e1, e2, node.getNodeType());
+        PrimitiveType resultType = checkBinaryOpType(e1, e2, node.getNodeType());
         // operands are casted now
-        String op = getBinaryOperationCommand(node.getNodeType(), e1);
+        String op = getBinaryOperationCommand(node.getNodeType(), resultType);
         String result = "tmp" + getTemp();
 
         stream.println("\t%" + result + " = " + op + " " + resultType + " " + e1.getResultName() + ", " + e2.getResultName());
@@ -200,115 +310,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         System.out.println("finished the binary op " + node + "\n");
     }
 
-    private void reduceExpressionNode(String result, ExpressionNode parent,PrimitiveType resultType) throws Exception {
-        ASTNode v = new BaseASTNode(NodeType.VAR_USE);
-        ASTNode id = new IdentifierNode(result);
-        SymbolInfo si = new SymbolInfo(id);
-        si.setType(resultType);
-        id.setSymbolInfo(si);
-        v.addChild(id);
-        v.setParent(parent);
-        parent.setChildren(v);
-        parent.setIsIdentifier();
-    }
-
-    private String getBinaryOperationCommand(NodeType nodeType, ExpressionNode e1) throws Exception {
-        String result = "";
-
-        switch (e1.getType()) {
-            case FLOAT:
-            case DOUBLE:
-                result = "f";
-                break;
-            case LONG:
-            case CHAR:
-            case INT:
-            case BOOL:
-                if (nodeType == NodeType.GREATER_THAN ||
-                        nodeType == NodeType.GREATER_THAN_OR_EQUAL ||
-                        nodeType == NodeType.LESS_THAN ||
-                        nodeType == NodeType.LESS_THAN_OR_EQUAL ||
-                        nodeType == NodeType.EQUAL ||
-                        nodeType == NodeType.NOT_EQUAL) {
-                    result = "i";
-                } else if (nodeType == NodeType.DIVISION || nodeType == NodeType.MOD) {
-                    result = "s";
-                }
-        } // command has f for float, i for normal cmp and s for normal div and rem
-
-        switch (nodeType) {
-            case ADDITION:
-                return result + "add";
-            case SUBTRACTION:
-                return result + "sub";
-            case MULTIPLICATION:
-                return result + "mul";
-            case DIVISION:
-                return result + "div";
-            case MOD:
-                return result + "rem";
-            case EQUAL:
-            case NOT_EQUAL:
-            case GREATER_THAN:
-            case GREATER_THAN_OR_EQUAL:
-            case LESS_THAN:
-            case LESS_THAN_OR_EQUAL:
-                result = result + "cmp ";
-                break;
-            case BOOLEAN_AND:
-            case ARITHMETIC_AND:
-                return result + "and";
-            case BOOLEAN_OR:
-            case ARITHMETIC_OR:
-                return result + "or";
-            case XOR:
-                return result + "xor";
-        } // command has the name
-
-        //Only compares can reach here
-        switch (e1.getType()) {
-            case FLOAT:
-            case DOUBLE:
-                result = result + "o";
-                break;
-            case LONG:
-            case CHAR:
-            case INT:
-            case BOOL:
-                if (nodeType != NodeType.EQUAL && nodeType != NodeType.NOT_EQUAL) {
-                    result = result + "s";
-                }
-        } // has o for float, s for {le, ge, lt, gt} and nothing for integer eq and ne
-
-        switch (nodeType) {
-            case EQUAL:
-                return result + "eq";
-            case NOT_EQUAL:
-                return result + "ne";
-            case GREATER_THAN:
-                return result + "gt";
-            case GREATER_THAN_OR_EQUAL:
-                return result + "ge";
-            case LESS_THAN:
-                return result + "lt";
-            case LESS_THAN_OR_EQUAL:
-                return result + "le";
-        }
-
-        throw new Exception("No operation found!");
-    }
-
-    private int getTemp() {
-        int i = 0;
-
-        while (usedTemps.contains(i))
-            i++;
-        usedTemps.add(i);
-
-        return i;
-    }
-
-    private PrimitiveType checkType(ExpressionNode e1, ExpressionNode e2, NodeType nodeType) throws Exception {
+    private PrimitiveType checkBinaryOpType(ExpressionNode e1, ExpressionNode e2, NodeType nodeType) throws Exception {
         // todo reduce complexity
         if (!e1.isIdentifier())
             throw new Exception(e1 + " not generated");
@@ -316,6 +318,8 @@ public class CodeGenVisitor implements SimpleVisitor {
             throw new Exception(e2 + " not generated");
 
         switch (nodeType) {
+            case BOOLEAN_AND:
+            case BOOLEAN_OR:
             case EQUAL:
             case NOT_EQUAL:
             case GREATER_THAN:
@@ -475,7 +479,103 @@ public class CodeGenVisitor implements SimpleVisitor {
                     throw new Exception("can't add");
                 }
         }
-        throw new Exception("general can't add");
+        throw new Exception("general can't do " + nodeType);
+    }
+
+    private int getTemp() {
+        int i = 0;
+
+        while (usedTemps.contains(i))
+            i++;
+        usedTemps.add(i);
+
+        return i;
+    }
+
+        private String getBinaryOperationCommand(NodeType nodeType, PrimitiveType pt) throws Exception {
+        String result = "";
+
+        switch (pt) {
+            case FLOAT:
+            case DOUBLE:
+                result = "f";
+                break;
+            case LONG:
+            case CHAR:
+            case INT:
+            case BOOL:
+                if (nodeType == NodeType.GREATER_THAN ||
+                        nodeType == NodeType.GREATER_THAN_OR_EQUAL ||
+                        nodeType == NodeType.LESS_THAN ||
+                        nodeType == NodeType.LESS_THAN_OR_EQUAL ||
+                        nodeType == NodeType.EQUAL ||
+                        nodeType == NodeType.NOT_EQUAL) {
+                    result = "i";
+                } else if (nodeType == NodeType.DIVISION || nodeType == NodeType.MOD) {
+                    result = "s";
+                }
+        } // command has f for float, i for normal cmp and s for normal div and rem
+
+        switch (nodeType) {
+            case ADDITION:
+                return result + "add";
+            case SUBTRACTION:
+                return result + "sub";
+            case MULTIPLICATION:
+                return result + "mul";
+            case DIVISION:
+                return result + "div";
+            case MOD:
+                return result + "rem";
+            case EQUAL:
+            case NOT_EQUAL:
+            case GREATER_THAN:
+            case GREATER_THAN_OR_EQUAL:
+            case LESS_THAN:
+            case LESS_THAN_OR_EQUAL:
+                result = result + "cmp ";
+                break;
+            case BOOLEAN_AND:
+            case ARITHMETIC_AND:
+                return result + "and";
+            case BOOLEAN_OR:
+            case ARITHMETIC_OR:
+                return result + "or";
+            case XOR:
+                return result + "xor";
+        } // command has the name
+
+        //Only compares can reach here
+        switch (pt) {
+            case FLOAT:
+            case DOUBLE:
+                result = result + "o";
+                break;
+            case LONG:
+            case CHAR:
+            case INT:
+            case BOOL:
+                if (nodeType != NodeType.EQUAL && nodeType != NodeType.NOT_EQUAL) {
+                    result = result + "s";
+                }
+        } // has o for float, s for {le, ge, lt, gt} and nothing for integer eq and ne
+
+        switch (nodeType) {
+            case EQUAL:
+                return result + "eq";
+            case NOT_EQUAL:
+                return result + "ne";
+            case GREATER_THAN:
+                return result + "gt";
+            case GREATER_THAN_OR_EQUAL:
+                return result + "ge";
+            case LESS_THAN:
+                return result + "lt";
+            case LESS_THAN_OR_EQUAL:
+                return result + "le";
+        }
+
+        throw new Exception("No operation found!");
     }
 
     private void visitUnaryMinusNode(ASTNode node) throws Exception {

@@ -18,7 +18,11 @@ public class ExpressionNode extends BaseASTNode {
         if (getChild(0).getNodeType() == NodeType.VAR_USE) {
             //EXPR -> VAR_USE -> ID
             IdentifierNode id = ((IdentifierNode) getChild(0).getChild(0));
-            resultName = "%" + id.getValue();
+            if (!id.getValue().startsWith("%")) {
+                resultName = "%" + id.getValue();
+            } else {
+                resultName = id.getValue();
+            }
             if (id.getSymbolInfo() == null)
                 throw new Exception(id.getValue() + " not declared");
             type = id.getSymbolInfo().getType();
