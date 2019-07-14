@@ -235,22 +235,15 @@ public class CodeGenVisitor implements SimpleVisitor {
                 else
                     id = (IdentifierNode) node.getChild(i).getChild(0).getChild(0).getChild(0);
 
-                stream.println("\t%" + id.getValue() + " = alloca " + type.getType() + ", align " + alignNum());
+                stream.println("\t%" + id.getValue() + " = alloca " + type.getType() + ", align " + type.getType().getAlign());
 
                 if (!(node.getChild(i) instanceof IdentifierNode)) {
                     ExpressionNode rightSide= (ExpressionNode) node.getChild(i).getChild(1);
-                    //todo fix after cast fix
-//                    PrimitiveType castType= cast(id.getSymbolInfo().getType(), rightSide);
-//                    stream.println("\tstore " + castType + " " + rightSide.getResultName() + ", " + castType + "* " + id + ", align " + alignNum());
+                    ExpressionNode cast= cast(id.getSymbolInfo().getType(), rightSide);
+                    stream.println("\tstore " + cast.getType() + " " + cast.getResultName() + ", " + cast.getType() + "* " + id + ", align " + type.getType().getAlign());
                 }
             }
         }
-    }
-
-    private String alignNum() {
-        //todo must set
-        //need to understand
-        return "4";
     }
 
     private void visitUnaryOperation(ASTNode node) throws Exception {
@@ -686,7 +679,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         String result = ""+getTemp();
 
-//        stream.print("\t%"+result+" = sitofp "+);
+        stream.println("\t%"+result+" = sitofp "+type2+" "+e2.getResultName()+" to "+type1);
 
         ExpressionNode parent=new ExpressionNode();
 
@@ -732,9 +725,9 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     private void visitIfStatementNode(ASTNode node) throws Exception {
         // BIG TODO NEED TO FIX SCOPE PROBLEMS
-        // BIG TODO NEED TO FIX SCOPE PROBLEMS
-        // BIG TODO NEED TO FIX SCOPE PROBLEMS
-        String ifType = (node.getChildren().size() == 2) ? "if" : ((node.getChildren().size() == 3) ? "if_else" : "invalid");
+        String ifType;
+        if (node.getChildren().size() == 2) ifType = "if";
+        else ifType = (node.getChildren().size() == 3) ? "if_else" : "invalid";
 
         visitBinaryOperation(node.getChild(0).getChild(0));
 
@@ -752,12 +745,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         if (ifType.equals("if_else")) {
             visitBlockNode(node.getChild(2));
         }
-
-        // BIG TODO NEED TO FIX SCOPE PROBLEMS
-        // BIG TODO NEED TO FIX SCOPE PROBLEMS
-        // BIG TODO NEED TO FIX SCOPE PROBLEMS
     }
-
     /*Assigns thing at top of stack,
       OR if it's a literal, pushes the literal then assigns that val
       OR if it's an ID loads the ID's value and assigns*/
@@ -770,7 +758,9 @@ public class CodeGenVisitor implements SimpleVisitor {
         ExpressionNode leftSide = (ExpressionNode) node.getChild(0);
         ExpressionNode rightSide = (ExpressionNode) node.getChild(1);
 
-        stream.println("\tstore " + rightSide.getType() + " " + rightSide.getResultName() + ", " + leftSide.getType() + "* " + idNode + ", align " + alignNum());
+        ExpressionNode resultOfCast=cast(leftSide.getType(), rightSide);
+
+        stream.println("\tstore " + resultOfCast.getType() + " " + rightSide.getResultName() + ", " + resultOfCast.getType() + "* " + resultOfCast.getResultName() + ", align " + resultOfCast.getType().getAlign());
 
         System.out.println("assign children are " + node.getChildren());
 
@@ -999,7 +989,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         String result = "" + getTemp();
 
-        stream.println("\t%" + result + " = load "+id.getSymbolInfo().getType()+", " + id.getSymbolInfo().getType() + "* " + id + ", align " + alignNum());
+        stream.println("\t%" + result + " = load "+id.getSymbolInfo().getType()+", " + id.getSymbolInfo().getType() + "* " + id + ", align " + id.getSymbolInfo().getType().getAlign());
 
         //this var is not in this scope
         if (symbolTable.get(id.getValue()) == null)

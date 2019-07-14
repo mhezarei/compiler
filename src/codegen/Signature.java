@@ -3,6 +3,7 @@ package codegen;
 import ast.ExpressionNode;
 import ast.PrimitiveType;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -73,7 +74,7 @@ public class Signature {
             try {
                 ExpressionNode e=new ExpressionNode();
                 e.setType(args2[i].getType());
-                CodeGenVisitor.cast(args1[i].getType(),e);
+                new CodeGenVisitor(new PrintStream("")).cast(args1[i].getType(),e);
             } catch (Exception e) {
                 return false;
             }

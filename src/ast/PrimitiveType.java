@@ -30,4 +30,8 @@ public enum PrimitiveType {
     @Override
     public String toString() {
         return signature;
+    }
+
+    public int getAlign() {
+        return align;
     }}

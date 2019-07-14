@@ -1,39 +1,11 @@
 function int main(int a,float b)
 begin
-    float c, f = 0;
     int d;
+    float c,f=2 + 2;
     d = 1 * c + f;
-    bool q = 2 > 3;
-    q = 2 == 3;
-
-    if (q == true)
+    if(c==2)
     begin
-        int t = 2 * 121;
-        int w = 2 * 121;
-        int j = 2 * 121;
-        int i = 2 * 121;
-        int o = 2 * 121;
-        int z = 2 * 121;
-        int x = 2 * 121;
-        return 4;
+        return 1;
     end
-    else
-    begin
-	    t = 2 * 121;
-        /#int w = 2 * 121;
-        int j = 2 * 121;
-        int i = 2 * 121;
-        int o = 2 * 121;
-        int z = 2 * 121;
-        int x = 2 * 121;#/
-        return 4;
-        return 5;
-    end
-
-    t = 2 - 3;
-
-    return 2;
-    return 2;
-    return 2;
-    return 2;
+    return 2.0;
 end
