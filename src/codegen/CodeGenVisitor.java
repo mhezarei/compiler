@@ -10,6 +10,8 @@ public class CodeGenVisitor implements SimpleVisitor {
     private int labelIndex;
     static Map<String, HashSet<Signature>> signatures = new HashMap<>();
     private Set<Integer> usedTemps = new HashSet<>();
+    private SymbolTable symbolTable = new SymbolTable();
+    private boolean inMethodBlock;
 
     public CodeGenVisitor(PrintStream stream) {
         this.stream = stream;
@@ -103,9 +105,20 @@ public class CodeGenVisitor implements SimpleVisitor {
                 //todo
                 break;
 
+            case ARGUMENT:
             case VARIABLE_DECLARATION:
                 visitVariableDeclaration(node);
                 break;
+
+            case BLOCK:
+                visitBlockNode(node);
+                break;
+
+            case IDENTIFIER:
+                visitIdentifierNode(node);
+                break;
+
+
             case STRUCT_DECLARATION:
             case CONTINUE_STATEMENT:
             case FOREACH_STATEMENT:
@@ -119,8 +132,6 @@ public class CodeGenVisitor implements SimpleVisitor {
             case PARAMETERS:
             case VARIABLE_CONST_DECLARATION:
             case FOR_STATEMENT:
-            case ARGUMENT:
-            case BLOCK:
             case BOOLEAN_TYPE:
             case CHAR_TYPE:
             case START:
@@ -128,7 +139,6 @@ public class CodeGenVisitor implements SimpleVisitor {
             case DOUBLE_TYPE:
             case EMPTY_STATEMENT:
             case FIELD_DECLARATION:
-            case IDENTIFIER:
             case NULL_LITERAL:
             case INT_TYPE:
             case LOCAL_VAR_DECLARATION:
@@ -157,11 +167,68 @@ public class CodeGenVisitor implements SimpleVisitor {
         System.out.println("--FINISHED VAC\n");
     }
 
-    private void visitVariableDeclaration(ASTNode node) {
-        TypeNode type= (TypeNode) node.getChild(0);
+    private void visitBlockNode(ASTNode node) throws Exception {
+        if (!inMethodBlock) {
+            symbolTable.enterScopeType();
+            visitAllChildren(node);
+            symbolTable.leaveScopeType();
+        } else
+            visitAllChildren(node);
+    }
+
+    private void visitIdentifierNode(ASTNode node) {
+        IdentifierNode idNode = (IdentifierNode) node;
+        String id = idNode.getValue();
+        SymbolInfo si = symbolTable.get(id);
+        node.setSymbolInfo(si);
+    }
+
+    private void visitVariableDeclaration(ASTNode node) throws Exception {
+        //may has not child
+        if (node.getChildren().isEmpty())
+            return;
+
+        TypeNode typePrimitive = null;
+        IdentifierNode typeID = null;
+        boolean isPrimitive;
+        if (node.getChild(0) instanceof TypeNode) {
+            isPrimitive = true;
+            typePrimitive = (TypeNode) node.getChild(0);
+        } else {
+            isPrimitive = false;
+            typeID = (IdentifierNode) node.getChild(0);
+        }
+
+        if (!isPrimitive && typeID.getSymbolInfo() == null)
+            throw new Exception(typeID.getValue() + " not declared");
+
         for (int i = 1; i < node.getChildren().size(); i++) {
-            IdentifierNode id = (IdentifierNode) node.getChild(i);
-            stream.println("\t%"+id.getValue()+" = alloca "+type.getType()+", align "+alignNum());
+            IdentifierNode idNode;
+            if (node.getChild(i) instanceof IdentifierNode)
+                //DEC -> ID
+                idNode = (IdentifierNode) node.getChild(i);
+            else
+                //DEC -> ASSIGN -> EXPR -> VAR_USE -> ID
+                idNode = (IdentifierNode) node.getChild(i).getChild(0).getChild(0).getChild(0);
+            String id = idNode.getValue();
+
+            SymbolInfo si = new SymbolInfo(idNode);
+            si.setType(typePrimitive.getType());
+            idNode.setSymbolInfo(si);
+
+            if (id.equals("d"))
+                System.out.println("**");
+            if (symbolTable.contains(id))
+                throw new Exception(id + " declared before");
+
+            symbolTable.put(id, si);
+        }
+        if (node.getNodeType() == NodeType.VARIABLE_DECLARATION) {
+            TypeNode type = (TypeNode) node.getChild(0);
+            for (int i = 1; i < node.getChildren().size(); i++) {
+                IdentifierNode id = (IdentifierNode) node.getChild(i);
+                stream.println("\t%" + id.getValue() + " = alloca " + type.getType() + ", align " + alignNum());
+            }
         }
     }
 
@@ -188,7 +255,7 @@ public class CodeGenVisitor implements SimpleVisitor {
             throw new Exception(e + " not generated");
 
         PrimitiveType pt = e.getType();
-        String command = "\t%tmp" + getTemp();
+        String command = "\t%" + getTemp();
         command += " = ";
 
         switch (nodeType) {
@@ -299,7 +366,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         PrimitiveType resultType = checkBinaryOpType(e1.getType(), e2.getType(), node.getNodeType());
         // operands are casted now
         String op = getBinaryOperationCommand(node.getNodeType(), resultType);
-        String result = "tmp" + getTemp();
+        String result = "" + getTemp();
 
         stream.println("\t%" + result + " = " + op + " " + resultType + " " + e1.getResultName() + ", " + e2.getResultName());
 
@@ -609,6 +676,7 @@ public class CodeGenVisitor implements SimpleVisitor {
       OR if it's a literal, pushes the literal then assigns that val
       OR if it's an ID loads the ID's value and assigns*/
     private void visitAssignNode(ASTNode node) throws Exception {
+        visitAllChildren(node);
         //todo store
         System.out.println("assign children are " + node.getChildren());
         //node -> EXPRESSION -> VAR_USE -> ID
@@ -744,7 +812,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         stream.print("\t");
         if (node.getParent().getNodeType() == NodeType.EXPRESSION_STATEMENT) {
             //it is an expression
-            String result = "tmp" + getTemp();
+            String result = "" + getTemp();
 
             ExpressionNode parent = (ExpressionNode) node.getParent();
             reduceExpressionNode(result, parent, returnType);
@@ -792,17 +860,22 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         stream.print(returnSig + " @" + methodName);
 
+        symbolTable.enterScopeType();
+        inMethodBlock = true;
         visitArgumentNode(node.getChild(2));
 
         stream.println(" {");
         stream.println("entry:");
         //block
         node.getChild(3).accept(this);
-
+        symbolTable.leaveScopeType();
         stream.println("}");
     }
 
-    private void visitArgumentNode(ASTNode node) {
+    private void visitArgumentNode(ASTNode node) throws Exception {
+        //set symInfos
+        visitAllChildren(node);
+
         stream.print("(");
         ASTNode[] params = node.getChildren().toArray(new ASTNode[0]);
         for (int i = 0; i < params.length; i++) {
@@ -848,9 +921,19 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitVarUse(ASTNode node) throws Exception {
+        visitAllChildren(node);
+
+        IdentifierNode id = (IdentifierNode) node.getChild(0);
         //todo laod
         System.out.println("in VAR_USE");
         System.out.println("id node is " + node.getChild(0));
+        //this var is not in this scope
+        if (id.getValue().equals("a")) {
+            System.out.println("***");
+        }
+        if (symbolTable.get(id.getValue()) == null)
+            throw new Exception(id.getValue() + " is not in this scope");
+
         ((ExpressionNode) node.getParent()).setIsIdentifier();
         System.out.println("SURVIVED!");
     }

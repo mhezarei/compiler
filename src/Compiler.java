@@ -2,7 +2,7 @@ import ast.Program;
 import codegen.CodeGenVisitor;
 import parser.Parser;
 import scanner.Scanner;
-import codegen.TypeVisitor;
+import codegen.MethodVisitor;
 
 import java.io.*;
 
@@ -47,7 +47,7 @@ public class Compiler {
 
     private void performSemanticAnalysis(Program cu) throws Exception {
         System.out.println("in type visitor");
-        cu.accept(new TypeVisitor());
+        cu.accept(new MethodVisitor());
         System.out.println("TV done\n");
     }
 

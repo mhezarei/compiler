@@ -10,11 +10,11 @@ class SymbolTable {
     private ArrayList<HashMap<String, SymbolInfo>> scopes = new ArrayList<>();
     private HashMap<String, SymbolInfo> currentScope = new HashMap<>();
 
-    void enterScope() {
+    void enterScopeType() {
         currentScope = new HashMap<>();
     }
 
-    void leaveScope() {
+    void leaveScopeType() {
         scopes.add(currentScope);
     }
 
@@ -27,21 +27,7 @@ class SymbolTable {
     }
 
     SymbolInfo get(String id) {
-        SymbolInfo si = currentScope.get(id);
-
-        if (si != null) {
-            return si;
-        }
-
-        for (int i = scopes.size() - 1; i >= 0; --i) {
-            HashMap<String, SymbolInfo> scope = scopes.get(i);
-            si = scope.get(id);
-            if (si != null) {
-                return si;
-            }
-        }
-
-        return null;
+        return currentScope.get(id);
     }
 
     boolean contains(String id) {
