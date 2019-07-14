@@ -1,7 +1,7 @@
 declare i32 @fun(i32 %a,float %b) {
 entry:
 	%tmp0 = mul i32 1, 2
-	%tmp1 = add i32 %tmp0, %b
+	%tmp1 = fadd float %tmp0, %b
 	%tmp2 = srem i32 12, 3
 	%tmp3 = call i32 @fun(i32 %tmp1,float %tmp2)
 	%a = %tmp3

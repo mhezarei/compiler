@@ -124,6 +124,9 @@ public class TypeVisitor implements SimpleVisitor {
         si.setType(typePrimitive.getType());
         idNode.setSymbolInfo(si);
 
+        if(symbolTable.containsKey(id))
+            throw new Exception(id + " declared before");
+
         symbolTable.put(id, si);
 
         visitAllChildren(node);

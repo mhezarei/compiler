@@ -1,21 +1,21 @@
 function int fun(int a,float b)
 begin
-    float a;
-    int b;
+    float c;
+    int d;
     a = fun(1 * 2 + b, 12 % 3);
     return 2 + 2;
 end
 
 function int main()
 begin
-    int a;
-    int b;
+    int e;
+    int f;
     fun(a,b);
 end
 function void f()
 begin
-    int a;
-    int b;
+    int g;
+    int h;
     fun(a,b);
 
     return;

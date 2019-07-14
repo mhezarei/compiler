@@ -10,7 +10,6 @@ public class CodeGenVisitor implements SimpleVisitor {
     private PrintStream stream;
     private int labelIndex;
     static Map<String, HashSet<Signature>> signatures = new HashMap<>();
-    private boolean returnGenerated;
     private Set<Integer> usedTemps = new HashSet<>();
 
     public CodeGenVisitor(PrintStream stream) {
@@ -53,10 +52,6 @@ public class CodeGenVisitor implements SimpleVisitor {
             case PRE_INCREMENT:
                 visitUnaryOperation(node);
                 break;
-
-//            case CLASS:
-//                visitClassNode(node);
-//                break;
 
             case IF_STATEMENT:
                 visitIfStatementNode(node);
@@ -742,7 +737,6 @@ public class CodeGenVisitor implements SimpleVisitor {
         //print call instruction
         stream.print("call " + returnType + " @" + methodName);
         visitParameterNode(node.getChild(1), argumentList);
-        returnGenerated = false;
     }
 
     private void visitParameterNode(ASTNode node, List<Argument> argumentList) {
@@ -762,7 +756,6 @@ public class CodeGenVisitor implements SimpleVisitor {
             stream.print(paramValue);
         }
         stream.println(")");
-        returnGenerated = false;
     }
 
 
@@ -842,7 +835,6 @@ public class CodeGenVisitor implements SimpleVisitor {
         System.out.println("id node is " + node.getChild(0));
         ((ExpressionNode) node.getParent()).setIsIdentifier();
         System.out.println("SURVIVED!");
-        returnGenerated = false;
     }
 
     private String generateLabel() {
