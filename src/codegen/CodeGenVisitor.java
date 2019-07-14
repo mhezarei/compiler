@@ -779,7 +779,24 @@ public class CodeGenVisitor implements SimpleVisitor {
         // todo loop
         if (node.getNodeType() == NodeType.FOR_STATEMENT) {
             visitForNode(node);
+        } else if (node.getNodeType() == NodeType.REPEAT_STATEMENT) {
+            visitRepeatNode(node);
         }
+    }
+
+    private void visitRepeatNode(ASTNode node) throws Exception {
+        // BIG TODO SCOPE
+        String loopLabel = generateLabel();
+        String outLabel = generateLabel();
+
+        stream.println(loopLabel + ":");
+        node.getChild(0).accept(this);
+
+        node.getChild(1).accept(this);
+        String result = ((IdentifierNode) node.getChild(1).getChild(0).getChild(0)).getValue();
+        stream.println("\tbr i1 %" + result + ", label %" + loopLabel + ", label %" + outLabel);
+
+        stream.println(outLabel + ":");
     }
 
     private void visitIfStatementNode(ASTNode node) throws Exception {

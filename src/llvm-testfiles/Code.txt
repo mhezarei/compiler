@@ -1,9 +1,3 @@
-function int fun(int ss, float bda, bool qw)
-begin
-	q = false;
-	return ss + bda;
-end
-
 function int main(int a, float b)
 begin
     bool q = 2 > 3;
@@ -15,7 +9,7 @@ begin
     begin
         int t = 2 * 121;
         int w = 2 * 121;
-        int j = 2 * 121;
+        int jsa = 2 * 121;
         int i = 2 * 121;
         int o = 2 * 121;
         int z = 2 * 121;
@@ -31,10 +25,21 @@ begin
 
     t = 2 - 3;
 
+	int j = 2;
+
     for (a = 3; a < 12; a += 2)
     begin
         b += 2;
+        b += 4;
     end
+
+    repeat
+    begin
+        j += 2;
+        j += 2;
+        j += 2;
+    end
+    until (2 < 3);
 
     return 2;
     return 2;

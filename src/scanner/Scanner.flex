@@ -87,7 +87,8 @@ WhiteSpace = {EOL} | [ \t\f]
     //"do"                 { return symbol(parser.sym.BOOL); }
     "if"                 { return symbol(sym.IF); }
     //"static"             { return symbol(parser.sym.STATIC); }
-    //"while"              { return symbol(parser.sym.WHILE); }
+    "repeat"             { return symbol(sym.REPEAT); }
+    "until"              { return symbol(sym.UNTIL); }
 
     // NEW SHIT
     "begin"				 { return symbol(sym.BEGIN); }
