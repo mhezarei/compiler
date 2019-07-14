@@ -216,8 +216,6 @@ public class CodeGenVisitor implements SimpleVisitor {
             si.setType(typePrimitive.getType());
             idNode.setSymbolInfo(si);
 
-            if (id.equals("d"))
-                System.out.println("**");
             if (symbolTable.contains(id))
                 throw new Exception(id + " declared before");
 
@@ -226,6 +224,8 @@ public class CodeGenVisitor implements SimpleVisitor {
         if (node.getNodeType() == NodeType.VARIABLE_DECLARATION) {
             TypeNode type = (TypeNode) node.getChild(0);
             for (int i = 1; i < node.getChildren().size(); i++) {
+                if(!(node.getChild(i) instanceof IdentifierNode))
+                    continue;
                 IdentifierNode id = (IdentifierNode) node.getChild(i);
                 stream.println("\t%" + id.getValue() + " = alloca " + type.getType() + ", align " + alignNum());
             }
@@ -330,7 +330,7 @@ public class CodeGenVisitor implements SimpleVisitor {
                 }
 
             case BOOLEAN_NOT:
-                // TODO
+                //todo boolean not
         }
 
 
@@ -350,8 +350,8 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitSizeOfNode(ASTNode node) throws Exception {
-        ExpressionNode parent= (ExpressionNode) node.getParent();
-        PrimitiveType type=((TypeNode)node.getChild(0)).getType();
+        ExpressionNode parent = (ExpressionNode) node.getParent();
+        PrimitiveType type = ((TypeNode) node.getChild(0)).getType();
 
         node.getChild(0).accept(this);
 
@@ -711,11 +711,19 @@ public class CodeGenVisitor implements SimpleVisitor {
       OR if it's a literal, pushes the literal then assigns that val
       OR if it's an ID loads the ID's value and assigns*/
     private void visitAssignNode(ASTNode node) throws Exception {
-        visitAllChildren(node);
-        //todo store
-        System.out.println("assign children are " + node.getChildren());
         //node -> EXPRESSION -> VAR_USE -> ID
         IdentifierNode idNode = (IdentifierNode) node.getChild(0).getChild(0).getChild(0);
+
+        visitAllChildren(node);
+
+        ExpressionNode leftSide = (ExpressionNode) node.getChild(0);
+        ExpressionNode rightSide = (ExpressionNode) node.getChild(1);
+
+        stream.println("\tstore " + rightSide.getType() + " " + rightSide.getResultName() + ", " + leftSide.getType() + "* " + idNode + ", align " + alignNum());
+
+
+        System.out.println("assign children are " + node.getChildren());
+
 
         SymbolInfo si = idNode.getSymbolInfo();
 
@@ -960,9 +968,9 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         IdentifierNode id = (IdentifierNode) node.getChild(0);
 
-        String result=""+getTemp();
+        String result = "" + getTemp();
 
-        stream.println("\t%"+result+" = load "+id.getSymbolInfo().getType()+"* "+id+", align "+alignNum());
+        stream.println("\t%" + result + " = load " + id.getSymbolInfo().getType() + "* " + id + ", align " + alignNum());
 
         System.out.println("in VAR_USE");
         System.out.println("id node is " + node.getChild(0));
@@ -973,7 +981,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         ((ExpressionNode) node.getParent()).setIsIdentifier();
         System.out.println("SURVIVED!");
 
-        reduceExpressionNode(result, (ExpressionNode) node.getParent(),id.getSymbolInfo().getType());
+        reduceExpressionNode(result, (ExpressionNode) node.getParent(), id.getSymbolInfo().getType());
     }
 
     private String generateLabel() {

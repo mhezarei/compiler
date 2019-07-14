@@ -12,7 +12,7 @@ function int fun(float y);
 function int main()
 begin
     int e;
-    int j;
+    int j=2;
     fun(e,e);
     fun();
 end
