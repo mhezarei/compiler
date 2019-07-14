@@ -1,7 +1,7 @@
 function int main(int a,float b)
 begin
-    float c,f=0;
     int d;
+    float c,f=2 + 2;
     d = 1 * c + f;
-    return 2 + 2;
+    return 2;
 end
