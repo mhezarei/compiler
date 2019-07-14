@@ -9,7 +9,7 @@ import java.io.*;
 public class Compiler {
     public static void main(String[] args) throws Exception {
         System.out.println(('a' + 1));
-        String source = "src/Code.txt";
+        String source = "src/llvm-testfiles/Code.txt";
 
         Compiler compiler = new Compiler(source);
         compiler.run();
@@ -26,7 +26,7 @@ public class Compiler {
     }
 
     private void processFile() throws Exception {
-        PrintStream stream = new PrintStream(new FileOutputStream("src/Result.txt"));
+        PrintStream stream = new PrintStream(new FileOutputStream("src/llvm-testfiles/Result.ll"));
 //        PrintStream stream = System.out;
         Program cu = parse();
         performSemanticAnalysis(cu);

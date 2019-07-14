@@ -765,22 +765,6 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     private void visitIfStatementNode(ASTNode node) throws Exception {
         //todo "if" code
-        stream.println("; if statement");
-        node.getChild(0).accept(this); //predicate
-        stream.println("  iconst_0");
-        String endIfLabel = generateLabel();
-        stream.println("ifeq " + endIfLabel);//if predicate false, then skip the "do if true" block
-
-
-        node.getChild(0).accept(this); //print the "do if true" block
-        stream.println("  goto " + endIfLabel); //bypass the "do If True" Block
-
-        if (node.getChildren().size() == 3) //We have an else statement
-        {
-            String elseLabel = generateLabel();
-            stream.println(elseLabel); //The else block
-            node.getChild(2).accept(this);
-        }
 
     }
 
@@ -890,7 +874,6 @@ public class CodeGenVisitor implements SimpleVisitor {
 
 
     private void visitMethodDeclarationNode(ASTNode node) throws Exception {
-        System.out.println("IN METHOD DCL THE CHILDREN ARE " + node.getChildren());
         //type
         TypeNode returnType = (TypeNode) node.getChild(0);
         String returnSig = returnType.getType().getSignature();
@@ -898,10 +881,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         IdentifierNode idNode = (IdentifierNode) node.getChild(1);
         String methodName = idNode.getValue();
 
-        if (methodName.equals("main"))
-            stream.print("define ");
-        else
-            stream.print("declare ");
+        stream.print("define ");
 
         stream.print(returnSig + " @" + methodName);
 
@@ -974,14 +954,11 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         stream.println("\t%" + result + " = load " + id.getSymbolInfo().getType() + "* " + id + ", align " + alignNum());
 
-        System.out.println("in VAR_USE");
-        System.out.println("id node is " + node.getChild(0));
         //this var is not in this scope
         if (symbolTable.get(id.getValue()) == null)
             throw new Exception(id.getValue() + " is not in this scope");
 
         ((ExpressionNode) node.getParent()).setIsIdentifier();
-        System.out.println("SURVIVED!");
 
         reduceExpressionNode(result, (ExpressionNode) node.getParent(), id.getSymbolInfo().getType());
     }

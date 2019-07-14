@@ -2,15 +2,8 @@
 
 int main()
 {
-	int e;
-    int j = 2;
-
-    e += j;
-    e -= j;
-    e /= j;
-    e *= j;
-
-
+    float j;
+    j = sizeof(int);
 
 	return 0;
 }
