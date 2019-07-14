@@ -83,7 +83,6 @@ nonterminal ASTNode cond_stmt_mid;
 nonterminal ASTNode variable_mid;
 nonterminal ASTNode identifier;
 nonterminal ASTNode expr_operation;
-nonterminal ASTNode expression_assignment;
 
 /* precedence part */
 precedence left COMMA;
@@ -594,42 +593,47 @@ cond_stmt_mid ::=
         :};
 
 loop_stmt ::=
-    FOR LPAREN assignment:i SEMICOLON expr:be SEMICOLON expression_assignment:ea RPAREN block:b
+    FOR LPAREN assignment:i SEMICOLON expr:be SEMICOLON expr:ea RPAREN block:b
         {:
             RESULT = new BaseASTNode(NodeType.FOR_STATEMENT);
-            RESULT.addChild(i, be, ea);
+            RESULT.addChild(i, be, ea, b);
             i.setParent(RESULT);
             be.setParent(RESULT);
             ea.setParent(RESULT);
+            b.setParent(RESULT);
         :}
-    | FOR LPAREN SEMICOLON expr:be SEMICOLON expression_assignment:ea RPAREN block:b
+    | FOR LPAREN SEMICOLON expr:be SEMICOLON expr:ea RPAREN block:b
         {:
             RESULT = new BaseASTNode(NodeType.FOR_STATEMENT);
-            ASTNode i = new BaseASTNode(NodeType.ASSIGN);
-            RESULT.addChild(i, be, ea);
-            i.setParent(RESULT);
+            ASTNode assign = new BaseASTNode(NodeType.ASSIGN);
+            RESULT.addChild(assign, be, ea, b);
+            assign.setParent(RESULT);
             be.setParent(RESULT);
             ea.setParent(RESULT);
+            b.setParent(RESULT);
         :}
-    | FOR LPAREN assignment:i SEMICOLON expr:be SEMICOLON RPAREN block
+    | FOR LPAREN assignment:i SEMICOLON expr:be SEMICOLON RPAREN block:b
         {:
             RESULT = new BaseASTNode(NodeType.FOR_STATEMENT);
-            ASTNode ea = new BaseASTNode(NodeType.ASSIGN);
-            RESULT.addChild(i, be, ea);
+            ASTNode e = new BaseASTNode(NodeType.ASSIGN);
+            RESULT.addChild(i, be, e, b);
             i.setParent(RESULT);
             be.setParent(RESULT);
-            ea.setParent(RESULT);
+            e.setParent(RESULT);
+            b.setParent(RESULT);
         :}
     | FOR LPAREN SEMICOLON expr:be SEMICOLON RPAREN block:b
         {:
             RESULT = new BaseASTNode(NodeType.FOR_STATEMENT);
-            ASTNode ea = new BaseASTNode(NodeType.ASSIGN);
             ASTNode i = new BaseASTNode(NodeType.ASSIGN);
-            RESULT.addChild(i, be, ea);
+            ASTNode e = new BaseASTNode(NodeType.ASSIGN);
+            RESULT.addChild(i, be, e, b);
             i.setParent(RESULT);
             be.setParent(RESULT);
-            ea.setParent(RESULT);
+            e.setParent(RESULT);
+            b.setParent(RESULT);
         :}
+
 	| REPEAT block:b UNTIL LPAREN expr:be RPAREN SEMICOLON
 	    {:
 	        RESULT = new BaseASTNode(NodeType.REPEAT_STATEMENT);
@@ -640,16 +644,11 @@ loop_stmt ::=
 	| FOREACH LPAREN identifier:r IN identifier:i RPAREN block:b
 	    {:
 	        RESULT = new BaseASTNode(NodeType.FOREACH_STATEMENT);
-	        RESULT.addChild(r, i);
+	        RESULT.addChild(r, i, b);
 	        i.setParent(RESULT);
 	        r.setParent(RESULT);
+	        b.setParent(RESULT);
 	    :};
-
-expression_assignment ::=
-    expr:t
-        {: RESULT = t; :}
-    | assignment:t
-        {: RESULT = t; :};
 
 expr ::=
     expr_operation:t

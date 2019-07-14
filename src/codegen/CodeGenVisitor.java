@@ -80,12 +80,16 @@ public class CodeGenVisitor implements SimpleVisitor {
                 visitVarUse(node);
                 break;
 
+            case FOR_STATEMENT:
+            case FOREACH_STATEMENT:
             case REPEAT_STATEMENT:
-                visitWhileStatementNode(node);
+                visitLoopNode(node);
                 break;
+
             case ARGUMENTS:
                 visitArgumentNode(node);
                 break;
+
             case EXPRESSION_STATEMENT:
                 visitExpressionNode(node);
                 break;
@@ -116,7 +120,6 @@ public class CodeGenVisitor implements SimpleVisitor {
 
             case STRUCT_DECLARATION:
             case CONTINUE_STATEMENT:
-            case FOREACH_STATEMENT:
             case BREAK_STATEMENT:
             case STRING_TYPE:
             case FLOAT_TYPE:
@@ -126,7 +129,6 @@ public class CodeGenVisitor implements SimpleVisitor {
             case CASE_STATEMENT:
             case PARAMETERS:
             case VARIABLE_CONST_DECLARATION:
-            case FOR_STATEMENT:
             case BOOLEAN_TYPE:
             case CHAR_TYPE:
             case START:
@@ -141,6 +143,10 @@ public class CodeGenVisitor implements SimpleVisitor {
             default:
                 visitAllChildren(node);
         }
+    }
+
+    private void visitForEachNode(ASTNode node) {
+
     }
 
     private void visitOpAssNode(ASTNode node) throws Exception {
@@ -161,12 +167,9 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitAllChildren(ASTNode node) throws Exception {
-        System.out.println("--THE NODE IN VAC IS " + node + " " + node.getNodeType());
-        System.out.println("--THE CHILDREN ARE " + node.getChildren());
         for (ASTNode child : node.getChildren()) {
             child.accept(this);
         }
-        System.out.println("--FINISHED VAC\n");
     }
 
     private void visitBlockNode(ASTNode node) throws Exception {
@@ -723,29 +726,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         parent.setChildren(iln);
     }
 
-    private void visitIfStatementNode(ASTNode node) throws Exception {
-        // BIG TODO NEED TO FIX SCOPE PROBLEMS
-        String ifType;
-        if (node.getChildren().size() == 2) ifType = "if";
-        else ifType = (node.getChildren().size() == 3) ? "if_else" : "invalid";
 
-        visitBinaryOperation(node.getChild(0).getChild(0));
-
-        String result = ((IdentifierNode) node.getChild(0).getChild(0).getChild(0)).getValue();
-        String ifTrueLabel = "%" + generateLabel();
-        String ifFalseLabel = "%" + generateLabel();
-
-        stream.println("\tbr i1 %" + result + ", label " + ifTrueLabel + ", label " + ifFalseLabel);
-        stream.println(ifTrueLabel.substring(1) + ":");
-
-        visitBlockNode(node.getChild(1));
-
-        stream.println(ifFalseLabel.substring(1) + ":");
-
-        if (ifType.equals("if_else")) {
-            visitBlockNode(node.getChild(2));
-        }
-    }
     /*Assigns thing at top of stack,
       OR if it's a literal, pushes the literal then assigns that val
       OR if it's an ID loads the ID's value and assigns*/
@@ -801,8 +782,71 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     }*/
 
-    private void visitWhileStatementNode(ASTNode node) {
+    private void visitLoopNode(ASTNode node) throws Exception {
+        // todo loop
+        if (node.getNodeType() == NodeType.FOR_STATEMENT) {
+            visitForNode(node);
+        }
+    }
 
+    private void visitIfStatementNode(ASTNode node) throws Exception {
+        // BIG TODO NEED TO FIX SCOPE PROBLEMS
+        String ifType;
+        if (node.getChildren().size() == 2) ifType = "if";
+        else ifType = (node.getChildren().size() == 3) ? "if_else" : "invalid";
+
+        node.getChild(0).getChild(0).accept(this);
+
+        String result = ((IdentifierNode) node.getChild(0).getChild(0).getChild(0)).getValue();
+        String ifTrueLabel = "%" + generateLabel();
+        String ifFalseLabel = "%" + generateLabel();
+
+        stream.println("\tbr i1 %" + result + ", label " + ifTrueLabel + ", label " + ifFalseLabel);
+        stream.println(ifTrueLabel.substring(1) + ":");
+
+        node.getChild(1).accept(this);
+
+        stream.println(ifFalseLabel.substring(1) + ":");
+
+        if (ifType.equals("if_else")) {
+            node.getChild(2).accept(this);
+        }
+    }
+
+    private void visitForNode(ASTNode node) throws Exception {
+        String loopLabel = generateLabel();
+        String mainLoopLabel = generateLabel();
+        String outLabel = generateLabel();
+
+        // child[0] is first assignment
+        node.getChild(0).accept(this);
+
+        // putting the label for the loop (loop label)
+        stream.println(loopLabel + ":");
+
+        // child[1] is the expr to be checked every time which is the br command
+        node.getChild(1).accept(this);
+        String result = ((IdentifierNode) node.getChild(1).getChild(0).getChild(0)).getValue();
+        stream.println("\tbr i1 %" + result + ", label %" + mainLoopLabel + ", label %" + outLabel);
+
+        // main loop label
+        stream.println(mainLoopLabel + ":");
+
+        // child[3] is the block
+        node.getChild(3).accept(this);
+
+        // child[2] is the assignment OR the expr to be done after block
+        node.getChild(2).accept(this);
+
+        // the unconditional branch to loop
+        stream.println("\tbr label %" + loopLabel);
+
+        // out of loop
+        stream.println(outLabel + ":");
+    }
+
+    private String generateLabel() {
+        return "label" + (++labelIndex);
     }
 
     private void visitLiteralNode(ASTNode node) throws Exception {
@@ -998,10 +1042,6 @@ public class CodeGenVisitor implements SimpleVisitor {
         ((ExpressionNode) node.getParent()).setIsIdentifier();
 
         reduceExpressionNode(result, (ExpressionNode) node.getParent(), id.getSymbolInfo().getType());
-    }
-
-    private String generateLabel() {
-        return "label" + (++labelIndex);
     }
 
     private void outputMainMethod() {
