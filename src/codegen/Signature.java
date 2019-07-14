@@ -1,7 +1,6 @@
 package codegen;
 
 import ast.PrimitiveType;
-import ast.TypeNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,11 +38,11 @@ class Argument {
 }
 
 public class Signature {
-    private TypeNode returnType;
+    private PrimitiveType returnType;
     private String name;
     private List<Argument> args = new ArrayList<>();
 
-    Signature(TypeNode returnType, String name) {
+    Signature(PrimitiveType returnType, String name) {
         this.returnType = returnType;
         this.name = name;
     }
@@ -52,7 +51,7 @@ public class Signature {
         args.addAll(arguments);
     }
 
-    public TypeNode getReturnType() {
+    public PrimitiveType getReturnType() {
         return returnType;
     }
 

@@ -289,7 +289,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         e1.accept(this);
         e2.accept(this);
 
-        PrimitiveType resultType = checkBinaryOpType(e1, e2, node.getNodeType());
+        PrimitiveType resultType = checkBinaryOpType(e1.getType(), e2.getType(), node.getNodeType());
         // operands are casted now
         String op = getBinaryOperationCommand(node.getNodeType(), resultType);
         String result = "tmp" + getTemp();
@@ -306,13 +306,10 @@ public class CodeGenVisitor implements SimpleVisitor {
         System.out.println("finished the binary op " + node + "\n");
     }
 
-    private  PrimitiveType checkBinaryOpType(ExpressionNode e1, ExpressionNode e2, NodeType nodeType) throws Exception {
-        // todo reduce complexity
-        if (!e1.isIdentifier())
-            throw new Exception(e1 + " not generated");
-        if (!e2.isIdentifier())
-            throw new Exception(e2 + " not generated");
 
+
+    private  PrimitiveType checkBinaryOpType(PrimitiveType e1, PrimitiveType e2, NodeType nodeType) throws Exception {
+        // todo reduce complexity
         switch (nodeType) {
             case BOOLEAN_AND:
             case BOOLEAN_OR:
@@ -322,12 +319,12 @@ public class CodeGenVisitor implements SimpleVisitor {
             case GREATER_THAN_OR_EQUAL:
             case LESS_THAN:
             case LESS_THAN_OR_EQUAL:
-                switch (e1.getType()) {
+                switch (e1) {
                     case INT:
                     case BOOL:
                     case CHAR:
                     case LONG:
-                        switch (e2.getType()) {
+                        switch (e2) {
                             case INT:
                             case CHAR:
                             case BOOL:
@@ -344,7 +341,7 @@ public class CodeGenVisitor implements SimpleVisitor {
                         }
                     case FLOAT:
                     case DOUBLE:
-                        switch (e2.getType()) {
+                        switch (e2) {
                             case INT:
                             case LONG:
                             case DOUBLE:
@@ -370,10 +367,10 @@ public class CodeGenVisitor implements SimpleVisitor {
             case MULTIPLICATION:
             case MOD:
             case DIVISION:
-                switch (e1.getType()) {
+                switch (e1) {
                     case INT:
                     case BOOL:
-                        switch (e2.getType()) {
+                        switch (e2) {
                             case INT:
                             case CHAR:
                             case BOOL:
@@ -391,7 +388,7 @@ public class CodeGenVisitor implements SimpleVisitor {
                                 //todo
                         }
                     case CHAR:
-                        switch (e2.getType()) {
+                        switch (e2) {
                             case INT:
                             case BOOL:
                             case CHAR:
@@ -407,7 +404,7 @@ public class CodeGenVisitor implements SimpleVisitor {
                                 //todo
                         }
                     case LONG:
-                        switch (e2.getType()) {
+                        switch (e2) {
                             case INT:
                             case LONG:
                             case BOOL:
@@ -424,7 +421,7 @@ public class CodeGenVisitor implements SimpleVisitor {
                                 //todo
                         }
                     case FLOAT:
-                        switch (e2.getType()) {
+                        switch (e2) {
                             case INT:
                             case LONG:
                             case BOOL:
@@ -440,7 +437,7 @@ public class CodeGenVisitor implements SimpleVisitor {
                                 //todo
                         }
                     case DOUBLE:
-                        switch (e2.getType()) {
+                        switch (e2) {
                             case INT:
                             case LONG:
                             case DOUBLE:
@@ -460,13 +457,14 @@ public class CodeGenVisitor implements SimpleVisitor {
                     case AUTO:
                         //todo
                 }
+                break;
 
             case ARITHMETIC_AND:
             case ARITHMETIC_OR:
             case XOR:
-                if ((e1.getType() == PrimitiveType.INT || e1.getType() == PrimitiveType.LONG) &&
-                        (e2.getType() == PrimitiveType.INT || e2.getType() == PrimitiveType.LONG)) {
-                    if (e1.getType() == PrimitiveType.INT && e2.getType() == PrimitiveType.INT) {
+                if ((e1 == PrimitiveType.INT || e1 == PrimitiveType.LONG) &&
+                        (e2 == PrimitiveType.INT || e2 == PrimitiveType.LONG)) {
+                    if (e1 == PrimitiveType.INT && e2 == PrimitiveType.INT) {
                         return PrimitiveType.INT;
                     } else {
                         return PrimitiveType.LONG;
@@ -574,6 +572,41 @@ public class CodeGenVisitor implements SimpleVisitor {
         throw new Exception("No operation found!");
     }
 
+    private PrimitiveType canCast(PrimitiveType type1, PrimitiveType type2) throws Exception {
+        if (type1 == type2)
+            return type1;
+
+        switch (type1) {
+            case INT:
+                switch (type2) {
+                    case FLOAT:
+                    case DOUBLE:
+                    case BOOL:
+                        return type2;
+                    case CHAR:
+                        return type1;
+                    case AUTO:
+                    case VOID:
+                    case STRING:
+                    case LONG:
+                        throw new Exception("can't cast");
+                }
+            case DOUBLE:
+            case FLOAT:
+            case BOOL:
+                return type1;
+            case CHAR:
+                if (type2 == PrimitiveType.INT)
+                    return type2;
+            case VOID:
+            case STRING:
+            case AUTO:
+            case LONG:
+                throw new Exception("can't cast");
+        }
+        throw new Exception("can't cast");
+    }
+
     private void visitUnaryMinusNode(ASTNode node) throws Exception {
         //todo
     }
@@ -667,23 +700,33 @@ public class CodeGenVisitor implements SimpleVisitor {
         String methodName = idNode.getValue();
 
         //todo must detect left hand side of assign
-        TypeNode returnType = new TypeNode(NodeType.VOID, PrimitiveType.VOID);
 
         if (!signatures.containsKey(methodName))
             throw new Exception(methodName + " not declared");
 
+        ExpressionNode leftHandExpr = (ExpressionNode) node.getParent().getParent().getChild(0);
+        leftHandExpr.accept(this);
+
+        PrimitiveType leftHandType = leftHandExpr.getType();
+        PrimitiveType returnType = signatures.get(methodName).stream().findAny().get().getReturnType();
+
+        try {
+            canCast(leftHandType, returnType);
+        } catch (Exception e) {
+            throw new Exception("return type is not correct");
+        }
         Set<Signature> signatureList = signatures.get(methodName);
 
         Signature newSig = new Signature(returnType, methodName);
         List<Argument> argumentSet = new ArrayList<>();
 
 
-        List<ASTNode> parameters= node.getChild(1).getChildren();
+        List<ASTNode> parameters = node.getChild(1).getChildren();
         for (ASTNode child : parameters)
             child.getChild(0).accept(this);
         //all of parameters accepted, now we can count them
         for (ASTNode parameter : parameters) {
-            ExpressionNode expr=(ExpressionNode)parameter.getChild(0);
+            ExpressionNode expr = (ExpressionNode) parameter.getChild(0);
             argumentSet.add(new Argument(expr.getType(), ""));
         }
         newSig.addArgs(argumentSet);
@@ -700,19 +743,21 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         ExpressionNode parent = (ExpressionNode) node.getParent();
 
-        reduceExpressionNode(result, parent, returnType.getType());
+        reduceExpressionNode(result, parent, returnType);
     }
 
     private void visitParameterNode(ASTNode node) {
-        //todo check type of parameter with signature
         stream.print("(");
         ASTNode[] params = node.getChildren().toArray(new ASTNode[0]);
         for (int i = 0; i < params.length; i++) {
             if (i > 0)
                 stream.print(",");
             ASTNode paramNode = params[i];
-            ASTNode paramValue = paramNode.getChild(0).getChild(0);
+            ExpressionNode expr = (ExpressionNode) paramNode.getChild(0);
+            stream.print(expr.getType() + " ");
+            ASTNode paramValue = expr.getChild(0);
             if (paramValue.getNodeType() == NodeType.VAR_USE)
+                //this an id
                 paramValue = paramValue.getChild(0);
             stream.print(paramValue);
         }
@@ -730,7 +775,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         IdentifierNode idNode = (IdentifierNode) node.getChild(1);
         String methodName = idNode.getValue();
 
-        Signature signature = new Signature(returnType, methodName);
+        Signature signature = new Signature(returnType.getType(), methodName);
 
         stream.print("define ");
         stream.print(returnSig + " @" + methodName);
