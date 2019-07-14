@@ -478,6 +478,7 @@ method_call ::=
 parameters ::=
     expr:e
         {:
+            //PARAMETERS (result) -> PARAMETER (p) -> EXPR (e)
             RESULT = new BaseASTNode(NodeType.PARAMETERS);
             ASTNode p = new BaseASTNode(NodeType.PARAMETER);
             p.addChild(e);
@@ -731,6 +732,7 @@ expr ::=
 variable ::=
     identifier:i
         {:
+            //EXPR (result) -> VAR_USE (v) -> ID (i)
             RESULT = new ExpressionNode();
             ASTNode v = new BaseASTNode(NodeType.VAR_USE);
             v.addChild(i);

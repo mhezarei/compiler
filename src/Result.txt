@@ -1,6 +1,2 @@
-define i32 @fun() {
+define i32 @fun(i32 %a,float %b) {
 entry:
-	%tmp0 = call VOID @fun(1)
-	%a = %tmp0
-  return
-}

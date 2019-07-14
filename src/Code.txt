@@ -1,5 +1,5 @@
-function int fun()
+function int fun(int a,float b)
 begin
-    float a;
-    a = fun(1);
+    int a;
+    a = fun(1, a);
 end
