@@ -753,13 +753,6 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         /* Expression node */
         node.getChild(1).accept(this);
-
-        ASTNode exprNode = node.getChild(1).getChild(0);
-
-        if (exprNode.getNodeType() == NodeType.VAR_USE)
-            exprNode = exprNode.getChild(0);
-
-        stream.println("\t" + idNode + " = " + exprNode);
     }
 
     /*private void visitClassNode(ASTNode node) throws Exception {

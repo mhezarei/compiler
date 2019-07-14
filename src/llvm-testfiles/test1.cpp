@@ -5,10 +5,12 @@ int main()
     bool asd;
     char a='s';
     double b=9;
-    int d;
+    int d,kk;
+    long jj;
     float c,f=2 + d;
     d = 1 * c + f;
-    if(d==c)
+    asd=b;
+    if(jj==kk)
         c=3;
     else
         c=4;
