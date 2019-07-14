@@ -1844,7 +1844,7 @@ class CUP$Parser$actions {
 		
 			RESULT = new BaseASTNode(NodeType.ASSIGN);
 			ExpressionNode newExpr = new ExpressionNode();
-			ASTNode op = BaseASTNode(NodeType.ADDITION);
+			ASTNode op = new BaseASTNode(NodeType.ADDITION);
 
 			RESULT.addChild(v, newExpr);
 			newExpr.setParent(RESULT);
@@ -1874,7 +1874,7 @@ class CUP$Parser$actions {
 		
 			RESULT = new BaseASTNode(NodeType.ASSIGN);
 			ExpressionNode newExpr = new ExpressionNode();
-			ASTNode op = BaseASTNode(NodeType.SUBTRACTION);
+			ASTNode op = new BaseASTNode(NodeType.SUBTRACTION);
 
 			RESULT.addChild(v, newExpr);
 			newExpr.setParent(RESULT);
@@ -1904,7 +1904,7 @@ class CUP$Parser$actions {
 		
 			RESULT = new BaseASTNode(NodeType.ASSIGN);
 			ExpressionNode newExpr = new ExpressionNode();
-			ASTNode op = BaseASTNode(NodeType.MULTIPLICATION);
+			ASTNode op = new BaseASTNode(NodeType.MULTIPLICATION);
 
 			RESULT.addChild(v, newExpr);
 			newExpr.setParent(RESULT);
@@ -1934,7 +1934,7 @@ class CUP$Parser$actions {
 		
 			RESULT = new BaseASTNode(NodeType.ASSIGN);
 			ExpressionNode newExpr = new ExpressionNode();
-			ASTNode op = BaseASTNode(NodeType.DIVISION);
+			ASTNode op = new BaseASTNode(NodeType.DIVISION);
 
 			RESULT.addChild(v, newExpr);
 			newExpr.setParent(RESULT);
