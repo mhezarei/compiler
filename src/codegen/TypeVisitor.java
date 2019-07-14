@@ -1,30 +1,25 @@
-package semantic;
+package codegen;
 
 
-import ast.*;
-import codegen.SimpleVisitor;
+import ast.ASTNode;
+import ast.IdentifierNode;
+import ast.TypeNode;
+import semantic.SymbolInfo;
+
+import java.util.*;
 
 /**
  * A visitor which attaches SymbolInfo to Identifier nodes and method signatures
  * to Class nodes.
  */
 public class TypeVisitor implements SimpleVisitor {
-    private SymbolTable symbolTable = new SymbolTable();
-    private PrimitiveType currentType;
+    private Map<String, SymbolInfo> symbolTable = new HashMap<>();
 
     @Override
     public void visit(ASTNode node) throws Exception {
         switch (node.getNodeType()) {
-            case BLOCK:
-                visitBlockNode(node);
-                break;
-
             case IDENTIFIER:
                 visitIdentifierNode(node);
-                break;
-
-            case LOCAL_VAR_DECLARATION:
-                visitLocalVarDeclarationNode(node);
                 break;
 
             case METHOD_DECLARATION:
@@ -32,9 +27,6 @@ public class TypeVisitor implements SimpleVisitor {
                 break;
 
             case ARGUMENT:
-                visitParameterNode(node);
-                break;
-
             case VARIABLE_DECLARATION:
                 visitVariableDeclarationNode(node);
                 break;
@@ -50,15 +42,6 @@ public class TypeVisitor implements SimpleVisitor {
         }
     }
 
-    private void visitBlockNode(ASTNode node) throws Exception {
-        symbolTable.enterScope();
-        visitAllChildren(node);
-        symbolTable.leaveScope();
-    }
-
-    /**
-     * Sets symbolInfo
-     */
     private void visitIdentifierNode(ASTNode node) {
         IdentifierNode idNode = (IdentifierNode) node;
         String id = idNode.getValue();
@@ -66,51 +49,41 @@ public class TypeVisitor implements SimpleVisitor {
         node.setSymbolInfo(si);
     }
 
-    private void visitLocalVarDeclarationNode(ASTNode node) throws Exception {
-        //todo need to understand
-        TypeNode typeNode = (TypeNode) node.getChild(0);
-        currentType = typeNode.getType();
-
-        node.getChild(1).accept(this);
-
-        currentType = null;
-    }
-
     private void visitMethodDeclarationNode(ASTNode node) throws Exception {
-        StringBuilder sig = new StringBuilder();
-        //type
-        TypeNode typeNode = (TypeNode) node.getChild(0);
-        sig.append(typeNode.getType().getSignature()).append(" ");
-        //identifier
+        TypeNode returnType = (TypeNode) node.getChild(0);
         IdentifierNode idNode = (IdentifierNode) node.getChild(1);
         String methodName = idNode.getValue();
-        sig.append("@").append(methodName).append("(");
 
-        //parameters
-        ASTNode[] params = node.getChild(2).getChildren().toArray(new ASTNode[0]);
-        for (int i = 0; i < params.length; i++) {
-            ASTNode paramNode = params[i];
-            TypeNode paramTypeNode = (TypeNode) paramNode.getChild(0);
-            sig.append(paramTypeNode.getType().getSignature());
-            IdentifierNode paramIDNode = (IdentifierNode) paramNode.getChild(1);
-            sig.append(" ").append("%").append(paramIDNode.getValue());
-            if (i > 0 && i < params.length - 1)
-                sig.append(",");
-        }
-        sig.append(")");
+        Signature signature = new Signature(returnType.getType(), methodName);
+        signature.addArgs(visitArgumentNode(node.getChild(2)));
 
-        symbolTable.enterScope();
+        if(CodeGenVisitor.signatures.containsKey(methodName))
+            if(methodName.equals("main")){
+                throw new Exception("main declared before");}
+            else{
+
+                Set<Signature> signatures = CodeGenVisitor.signatures.get(methodName);
+                if (signatures.contains(signature))
+                    throw new Exception(methodName + " with this signature declared before");
+                signatures.add(signature);
+            }
+        CodeGenVisitor.signatures.put(methodName, Collections.singleton(signature));
+
         visitAllChildren(node);
-        symbolTable.leaveScope();
     }
 
-    private void visitParameterNode(ASTNode node) throws Exception {
-        TypeNode typeNode = (TypeNode) node.getChild(0);
-        currentType = typeNode.getType();
+    private List<Argument> visitArgumentNode(ASTNode node) {
+        List<Argument> arguments = new ArrayList<>();
 
-        node.getChild(0).accept(this);
+        ASTNode[] params = node.getChildren().toArray(new ASTNode[0]);
+        for (ASTNode paramNode : params) {
+            TypeNode paramTypeNode = (TypeNode) paramNode.getChild(0);
+            IdentifierNode paramIDNode = (IdentifierNode) paramNode.getChild(1);
 
-        currentType = null;
+            arguments.add(new Argument(paramTypeNode.getType(), paramIDNode.getValue()));
+        }
+
+        return arguments;
     }
 
     private void visitVariableDeclarationNode(ASTNode node) throws Exception {

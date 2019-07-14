@@ -4,3 +4,10 @@ begin
     int b;
     a = fun(1 * 2 + b, 12 % 3);
 end
+
+function int main()
+begin
+    int a;
+    int b;
+    fun(a,b);
+end

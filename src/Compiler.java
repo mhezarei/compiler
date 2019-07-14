@@ -1,10 +1,9 @@
-import ast.ASTNode;
 import ast.Program;
 import codegen.CodeGenVisitor;
 import codegen.LocalVarMapVisitor;
 import parser.Parser;
 import scanner.Scanner;
-import semantic.TypeVisitor;
+import codegen.TypeVisitor;
 
 import java.io.*;
 

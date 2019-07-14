@@ -9,8 +9,7 @@ import java.util.*;
 public class CodeGenVisitor implements SimpleVisitor {
     private PrintStream stream;
     private int labelIndex;
-    private String className;
-    private Map<String, Set<Signature>> signatures = new HashMap<>();
+    static Map<String, Set<Signature>> signatures = new HashMap<>();
     private boolean returnGenerated;
     private Set<Integer> usedTemps = new HashSet<>();
 
@@ -581,11 +580,11 @@ public class CodeGenVisitor implements SimpleVisitor {
             case DOUBLE:
             case FLOAT:
             case BOOL:
+            case VOID:
                 return type1;
             case CHAR:
                 if (type2 == PrimitiveType.INT)
                     return type2;
-            case VOID:
             case STRING:
             case AUTO:
             case LONG:
@@ -677,10 +676,16 @@ public class CodeGenVisitor implements SimpleVisitor {
         if (!signatures.containsKey(methodName))
             throw new Exception(methodName + " not declared");
 
-        ExpressionNode leftHandExpr = (ExpressionNode) node.getParent().getParent().getChild(0);
-        leftHandExpr.accept(this);
+        PrimitiveType leftHandType;
 
-        PrimitiveType leftHandType = leftHandExpr.getType();
+        if (node.getParent().getParent().getNodeType() == NodeType.ASSIGN) {
+            //it is an assign
+            ExpressionNode leftHandExpr = (ExpressionNode) node.getParent().getParent().getChild(0);
+            leftHandExpr.accept(this);
+
+            leftHandType = leftHandExpr.getType();
+        } else
+            leftHandType = PrimitiveType.VOID;
         PrimitiveType returnType = signatures.get(methodName).stream().findAny().get().getReturnType();
 
         //if return type of the method is not match with the signature
@@ -717,22 +722,27 @@ public class CodeGenVisitor implements SimpleVisitor {
                 break;
             }
 
-        String result = "tmp" + getTemp();
 
+        stream.print("\t");
+        if (node.getParent().getNodeType() == NodeType.EXPRESSION_STATEMENT) {
+            //it is an expression
+            String result = "tmp" + getTemp();
+
+            ExpressionNode parent = (ExpressionNode) node.getParent();
+            reduceExpressionNode(result, parent, returnType);
+
+            stream.print("%"+result+" = ");
+        }
         //print call instruction
-        stream.print("\t%" + result + " = call " + returnType + " @" + methodName);
+        stream.print("call " + returnType + " @" + methodName);
         visitParameterNode(node.getChild(1), argumentList);
         returnGenerated = false;
-
-        ExpressionNode parent = (ExpressionNode) node.getParent();
-
-        reduceExpressionNode(result, parent, returnType);
     }
 
     private void visitParameterNode(ASTNode node, List<Argument> argumentList) {
         stream.print("(");
         ASTNode[] params = node.getChildren().toArray(new ASTNode[0]);
-        Argument[] arguments=argumentList.toArray(new Argument[0]);
+        Argument[] arguments = argumentList.toArray(new Argument[0]);
         for (int i = 0; i < params.length; i++) {
             if (i > 0)
                 stream.print(",");
@@ -759,13 +769,14 @@ public class CodeGenVisitor implements SimpleVisitor {
         IdentifierNode idNode = (IdentifierNode) node.getChild(1);
         String methodName = idNode.getValue();
 
-        Signature signature = new Signature(returnType.getType(), methodName);
+        if (methodName.equals("main"))
+            stream.print("define ");
+        else
+            stream.print("declare ");
 
-        stream.print("define ");
         stream.print(returnSig + " @" + methodName);
-        //arguments
-        signature.addArgs(visitArgumentNode(node.getChild(2)));
-        signatures.put(methodName, Collections.singleton((signature)));
+
+        visitArgumentNode(node.getChild(2));
 
         stream.println(" {");
         stream.println("entry:");
@@ -799,8 +810,7 @@ public class CodeGenVisitor implements SimpleVisitor {
             stream.print("%" + paramIDNode.getValue());
 
             Argument argument = new Argument(paramTypeNode.getType(), paramIDNode.getValue());
-            if (arguments.contains(argument))
-                throw new Exception(paramIDNode.getValue() + " is declared before");
+
             arguments.add(argument);
         }
         stream.print(")");
@@ -858,7 +868,6 @@ public class CodeGenVisitor implements SimpleVisitor {
         stream.println("; main method");
         stream.println(";");
         stream.println(".method public static main([Ljava/lang/String;)V");
-        stream.println("  invokestatic " + className + "/program()V");
         stream.println("  return");
         stream.println(".end method");
         stream.println("");

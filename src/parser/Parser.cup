@@ -127,40 +127,36 @@ const_val ::=
     | NULL
     	{: RESULT = new BaseASTNode(NodeType.NULL_LITERAL); :};
 
-program ::=
-    program2:t
-        {:
-			Program p = new Program();
-			p.addChild(t);
-			t.setParent(p);
-			setRoot(p);
-        :};
 
-program2 ::=
-    program2:p var_dcl:t
+program ::=
+    program:p var_dcl:t
         {:
 			RESULT = p;
 			RESULT.addChild(t);
-			t.setParent(RESULT);
+
         :}
-    | program2:p func_extern:t
+    | program:p func_extern:t
         {:
 			RESULT = p;
 			RESULT.addChild(t);
-			t.setParent(RESULT);
         :}
-    | program2:p struct_dec:t
+    | program:p struct_dec:t
         {:
 			RESULT = p;
 			RESULT.addChild(t);
-			t.setParent(RESULT);
         :}
     | var_dcl:t
-        {: RESULT = t; :}
+        {:
+            RESULT = new Program();
+			RESULT.addChild(t);
+			setRoot((Program)RESULT);
+        :}
     | func_extern:t
-	    {: RESULT = t; :}
-    | struct_dec:t
-	    {: RESULT = t; :};
+        {:
+            RESULT = new Program();
+			RESULT.addChild(t);
+			setRoot((Program)RESULT);
+        :};
 
 func_extern ::=
     func_dcl:t
