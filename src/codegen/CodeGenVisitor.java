@@ -686,9 +686,9 @@ public class CodeGenVisitor implements SimpleVisitor {
             leftHandType = leftHandExpr.getType();
         } else
             leftHandType = PrimitiveType.VOID;
-        Optional<Signature> aSigFromSet=signatures.get(methodName).stream().findAny();
+        Optional<Signature> aSigFromSet = signatures.get(methodName).stream().findAny();
         PrimitiveType returnType;
-        if(aSigFromSet.isPresent())
+        if (aSigFromSet.isPresent())
             returnType = aSigFromSet.get().getReturnType();
         else
             //if there is not a method with this name
@@ -789,18 +789,10 @@ public class CodeGenVisitor implements SimpleVisitor {
         //block
         node.getChild(3).accept(this);
 
-        //todo return must do
-        if (!returnGenerated) {
-            stream.println("  return");
-            returnGenerated = true;
-        }
-
         stream.println("}");
     }
 
     private void visitArgumentNode(ASTNode node) {
-        List<Argument> arguments = new ArrayList<>();
-
         stream.print("(");
         ASTNode[] params = node.getChildren().toArray(new ASTNode[0]);
         for (int i = 0; i < params.length; i++) {
@@ -814,24 +806,35 @@ public class CodeGenVisitor implements SimpleVisitor {
             //identifier
             IdentifierNode paramIDNode = (IdentifierNode) paramNode.getChild(1);
             stream.print("%" + paramIDNode.getValue());
-
-            Argument argument = new Argument(paramTypeNode.getType(), paramIDNode.getValue());
-
-            arguments.add(argument);
         }
         stream.print(")");
     }
 
     private void visitReturnStatementNode(ASTNode node) throws Exception {
-        // todo "return" code
         visitAllChildren(node);
 
-        returnGenerated = true;
+        //return type in signature
+        PrimitiveType returnType = ((TypeNode) node.getParent().getParent().getChild(0)).getType();
+
+        stream.print("\tret " + returnType);
+
         if (node.getChildren().isEmpty()) {
-            stream.println("  return");
-        } else {
-            stream.println("  ireturn");
+            //return; must be void
+            if(returnType!=PrimitiveType.VOID)
+                throw new Exception("return type is wrong");
+        }else {
+            if(returnType==PrimitiveType.VOID)
+                throw new Exception("return type is wrong");
+            ExpressionNode returnExpr=((ExpressionNode)node.getChild(0));
+            try {
+                canCast(returnType, returnExpr.getType());
+                stream.print(" " + returnExpr.getResultName());
+            } catch (Exception e) {
+                throw new Exception("return type is wrong");
+            }
         }
+
+        stream.println();
     }
 
     private void visitVarUse(ASTNode node) throws Exception {

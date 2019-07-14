@@ -3,6 +3,7 @@ begin
     float a;
     int b;
     a = fun(1 * 2 + b, 12 % 3);
+    return 2 + 2;
 end
 
 function int main()
@@ -11,9 +12,11 @@ begin
     int b;
     fun(a,b);
 end
-function int fun()
+function void f()
 begin
     int a;
     int b;
-    fu(a,b);
+    fun(a,b);
+
+    return;
 end
