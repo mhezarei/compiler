@@ -3,18 +3,14 @@ package codegen;
 import ast.*;
 import semantic.SymbolInfo;
 
-import javax.xml.soap.Node;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class CodeGenVisitor implements SimpleVisitor {
     private PrintStream stream;
     private int labelIndex;
     private String className;
-    private Set<Signature> signatures=new HashSet<>();
+    private Map<String, Set<Signature>> signatures = new HashMap<>();
     private boolean returnGenerated;
     private Set<Integer> usedTemps = new HashSet<>();
 
@@ -25,9 +21,9 @@ public class CodeGenVisitor implements SimpleVisitor {
     @Override
     public void visit(ASTNode node) throws Exception {
         switch (node.getNodeType()) {
-	        case ASSIGN:
-		        visitAssignNode(node);
-		        break;
+            case ASSIGN:
+                visitAssignNode(node);
+                break;
 
             case DIVISION:
             case ADDITION:
@@ -49,9 +45,9 @@ public class CodeGenVisitor implements SimpleVisitor {
                 break;
 
             case BOOLEAN_NOT:
-	        case UNARY_PLUS:
-	        case UNARY_MINUS:
-	        case BITWISE_NEGATIVE:
+            case UNARY_PLUS:
+            case UNARY_MINUS:
+            case BITWISE_NEGATIVE:
             case POST_DECREMENT:
             case POST_INCREMENT:
             case PRE_DECREMENT:
@@ -86,32 +82,32 @@ public class CodeGenVisitor implements SimpleVisitor {
             case RETURN_STATEMENT:
                 visitReturnStatementNode(node);
                 break;
-	        case VAR_USE:
+            case VAR_USE:
                 visitVarUse(node);
                 break;
 
-	        case REPEAT_STATEMENT:
+            case REPEAT_STATEMENT:
                 visitWhileStatementNode(node);
                 break;
-	        case ARGUMENTS:
+            case ARGUMENTS:
                 visitArgumentNode(node);
                 break;
-	        case EXPRESSION_STATEMENT:
+            case EXPRESSION_STATEMENT:
                 visitExpressionNode(node);
                 break;
-	        case SIZEOF:
+            case SIZEOF:
                 //todo
                 break;
-	        case ADD_ASSIGN:
+            case ADD_ASSIGN:
                 //todo
                 break;
-	        case DIV_ASSIGN:
+            case DIV_ASSIGN:
                 //todo
                 break;
-	        case SUB_ASSIGN:
+            case SUB_ASSIGN:
                 //todo
                 break;
-	        case MULT_ASSIGN:
+            case MULT_ASSIGN:
                 //todo
                 break;
             case STRUCT_DECLARATION:
@@ -310,7 +306,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         System.out.println("finished the binary op " + node + "\n");
     }
 
-    private PrimitiveType checkBinaryOpType(ExpressionNode e1, ExpressionNode e2, NodeType nodeType) throws Exception {
+    private  PrimitiveType checkBinaryOpType(ExpressionNode e1, ExpressionNode e2, NodeType nodeType) throws Exception {
         // todo reduce complexity
         if (!e1.isIdentifier())
             throw new Exception(e1 + " not generated");
@@ -672,21 +668,34 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         //todo must detect left hand side of assign
         TypeNode returnType = new TypeNode(NodeType.VOID, PrimitiveType.VOID);
-        //todo must check parameters
-        Signature newSig = new Signature(returnType, methodName);
 
-        //Expression
-        node.getChild(1).accept(this);
+        if (!signatures.containsKey(methodName))
+            throw new Exception(methodName + " not declared");
+
+        Set<Signature> signatureList = signatures.get(methodName);
+
+        Signature newSig = new Signature(returnType, methodName);
+        List<Argument> argumentSet = new ArrayList<>();
+
+
+        List<ASTNode> parameters= node.getChild(1).getChildren();
+        for (ASTNode child : parameters)
+            child.getChild(0).accept(this);
+        //all of parameters accepted, now we can count them
+        for (ASTNode parameter : parameters) {
+            ExpressionNode expr=(ExpressionNode)parameter.getChild(0);
+            argumentSet.add(new Argument(expr.getType(), ""));
+        }
+        newSig.addArgs(argumentSet);
+
+        if (!signatureList.contains(newSig))
+            throw new Exception(methodName + " with this signature not declared");
+
 
         String result = "tmp" + getTemp();
 
-        stream.print("\t%"+result+" = call " + returnType + " @" + methodName);
+        stream.print("\t%" + result + " = call " + returnType + " @" + methodName);
         visitParameterNode(node.getChild(1));
-        if (node.getParent() != null) {
-            //it is an expr
-            node.getChild(1).accept(this);
-        }
-
         returnGenerated = false;
 
         ExpressionNode parent = (ExpressionNode) node.getParent();
@@ -694,7 +703,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         reduceExpressionNode(result, parent, returnType.getType());
     }
 
-    private void visitParameterNode(ASTNode node) throws Exception {
+    private void visitParameterNode(ASTNode node) {
         //todo check type of parameter with signature
         stream.print("(");
         ASTNode[] params = node.getChildren().toArray(new ASTNode[0]);
@@ -702,10 +711,10 @@ public class CodeGenVisitor implements SimpleVisitor {
             if (i > 0)
                 stream.print(",");
             ASTNode paramNode = params[i];
-            ASTNode paramValue=paramNode.getChild(0).getChild(0);
-            if(paramValue.getNodeType()==NodeType.VAR_USE)
-                paramNode=paramValue.getChild(0);
-            stream.print(paramNode);
+            ASTNode paramValue = paramNode.getChild(0).getChild(0);
+            if (paramValue.getNodeType() == NodeType.VAR_USE)
+                paramValue = paramValue.getChild(0);
+            stream.print(paramValue);
         }
         stream.println(")");
         returnGenerated = false;
@@ -727,7 +736,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         stream.print(returnSig + " @" + methodName);
         //arguments
         signature.addArgs(visitArgumentNode(node.getChild(2)));
-        signatures.add(signature);
+        signatures.put(methodName, Collections.singleton((signature)));
 
         stream.println(" {");
         stream.println("entry:");
@@ -743,8 +752,8 @@ public class CodeGenVisitor implements SimpleVisitor {
         stream.println("}");
     }
 
-    private List<Signature.Argument> visitArgumentNode(ASTNode node) throws Exception {
-        List<Signature.Argument> arguments = new ArrayList<>();
+    private List<Argument> visitArgumentNode(ASTNode node) throws Exception {
+        List<Argument> arguments = new ArrayList<>();
 
         stream.print("(");
         ASTNode[] params = node.getChildren().toArray(new ASTNode[0]);
@@ -760,7 +769,7 @@ public class CodeGenVisitor implements SimpleVisitor {
             IdentifierNode paramIDNode = (IdentifierNode) paramNode.getChild(1);
             stream.print("%" + paramIDNode.getValue());
 
-            Signature.Argument argument = new Signature.Argument(paramTypeNode, paramIDNode.getValue());
+            Argument argument = new Argument(paramTypeNode.getType(), paramIDNode.getValue());
             if (arguments.contains(argument))
                 throw new Exception(paramIDNode.getValue() + " is declared before");
             arguments.add(argument);
