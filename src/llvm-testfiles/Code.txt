@@ -1,7 +1,15 @@
-function int main(int a,float b)
+function int fun(int ss, float bda, bool qw)
+begin
+	q = false;
+	return ss + bda;
+end
+
+function int main(int a, float b)
 begin
     bool q = 2 > 3;
     q = 2 == 3;
+
+    fun(a, b);
 
     if (q == true)
     begin
@@ -33,3 +41,4 @@ begin
     return 2;
     return 2;
 end
+
