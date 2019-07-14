@@ -114,7 +114,6 @@ public class CodeGenVisitor implements SimpleVisitor {
                 visitIdentifierNode(node);
                 break;
 
-
             case STRUCT_DECLARATION:
             case CONTINUE_STATEMENT:
             case FOREACH_STATEMENT:
@@ -144,8 +143,11 @@ public class CodeGenVisitor implements SimpleVisitor {
         }
     }
 
-    private void visitOpAssNode(ASTNode node) {
-
+    private void visitOpAssNode(ASTNode node) throws Exception {
+        System.out.println("####saw opass " + node.getChild(0).getChild(1).getChild(0));
+        visitBinaryOperation(node.getChild(0).getChild(1).getChild(0));
+        visitAssignNode(node.getChild(0));
+        System.out.println("####finished op ass " + node.getChild(0).getChild(1).getChild(0));
     }
 
     private void visitExpressionNode(ASTNode node) throws Exception {
@@ -719,7 +721,7 @@ public class CodeGenVisitor implements SimpleVisitor {
         ExpressionNode leftSide = (ExpressionNode) node.getChild(0);
         ExpressionNode rightSide = (ExpressionNode) node.getChild(1);
 
-        stream.println("\tstore " + rightSide.getType() + " " + rightSide.getResultName() + ", " + leftSide.getType() + "* " + idNode + ", align " + alignNum());
+        stream.println("\tstore " + rightSide.getType() + " " + rightSide.getResultName() + ", " + leftSide.getType() + " " + idNode + ", align " + alignNum());
 
 
         System.out.println("assign children are " + node.getChildren());
@@ -970,7 +972,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         String result = "" + getTemp();
 
-        stream.println("\t%" + result + " = load " + id.getSymbolInfo().getType() + "* " + id + ", align " + alignNum());
+        stream.println("\t%" + result + " = load " + id.getSymbolInfo().getType() + " " + id + ", align " + alignNum());
 
         System.out.println("in VAR_USE");
         System.out.println("id node is " + node.getChild(0));

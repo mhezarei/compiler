@@ -421,16 +421,20 @@ assignment ::=
 			v.setParent(RESULT);
 			e.setParent(RESULT);
         :}
-        // OPASS === assign (has v and expr as children). expr -> op -> v, e
+        // OPASS -> assign (has v and expr as children). expr -> op -> v, e
     | variable:v ADDASS expr:e
         {:
-			RESULT = new BaseASTNode(NodeType.ASSIGN);
+			RESULT = new BaseASTNode(NodeType.ADD_ASSIGN);
+			ASTNode assign = new BaseASTNode(NodeType.ASSIGN);
 			ExpressionNode newExpr = new ExpressionNode();
 			ASTNode op = new BaseASTNode(NodeType.ADDITION);
 
-			RESULT.addChild(v, newExpr);
-			newExpr.setParent(RESULT);
-			v.setParent(RESULT);
+			RESULT.addChild(assign);
+			assign.setParent(RESULT);
+
+			assign.addChild(v, newExpr);
+			newExpr.setParent(assign);
+			v.setParent(assign);
 
 			newExpr.addChild(op);
 			op.setParent(newExpr);
@@ -441,13 +445,17 @@ assignment ::=
         :}
     | variable:v SUBASS expr:e
         {:
-			RESULT = new BaseASTNode(NodeType.ASSIGN);
+			RESULT = new BaseASTNode(NodeType.SUB_ASSIGN);
+			ASTNode assign = new BaseASTNode(NodeType.ASSIGN);
 			ExpressionNode newExpr = new ExpressionNode();
 			ASTNode op = new BaseASTNode(NodeType.SUBTRACTION);
 
-			RESULT.addChild(v, newExpr);
-			newExpr.setParent(RESULT);
-			v.setParent(RESULT);
+			RESULT.addChild(assign);
+			assign.setParent(RESULT);
+
+			assign.addChild(v, newExpr);
+			newExpr.setParent(assign);
+			v.setParent(assign);
 
 			newExpr.addChild(op);
 			op.setParent(newExpr);
@@ -458,13 +466,17 @@ assignment ::=
         :}
     | variable:v MULTASS expr:e
         {:
-			RESULT = new BaseASTNode(NodeType.ASSIGN);
+			RESULT = new BaseASTNode(NodeType.MULT_ASSIGN);
+			ASTNode assign = new BaseASTNode(NodeType.ASSIGN);
 			ExpressionNode newExpr = new ExpressionNode();
 			ASTNode op = new BaseASTNode(NodeType.MULTIPLICATION);
 
-			RESULT.addChild(v, newExpr);
-			newExpr.setParent(RESULT);
-			v.setParent(RESULT);
+			RESULT.addChild(assign);
+			assign.setParent(RESULT);
+
+			assign.addChild(v, newExpr);
+			newExpr.setParent(assign);
+			v.setParent(assign);
 
 			newExpr.addChild(op);
 			op.setParent(newExpr);
@@ -475,13 +487,17 @@ assignment ::=
         :}
     | variable:v DIVASS expr:e
         {:
-			RESULT = new BaseASTNode(NodeType.ASSIGN);
+			RESULT = new BaseASTNode(NodeType.DIV_ASSIGN);
+			ASTNode assign = new BaseASTNode(NodeType.ASSIGN);
 			ExpressionNode newExpr = new ExpressionNode();
 			ASTNode op = new BaseASTNode(NodeType.DIVISION);
 
-			RESULT.addChild(v, newExpr);
-			newExpr.setParent(RESULT);
-			v.setParent(RESULT);
+			RESULT.addChild(assign);
+			assign.setParent(RESULT);
+
+			assign.addChild(v, newExpr);
+			newExpr.setParent(assign);
+			v.setParent(assign);
 
 			newExpr.addChild(op);
 			op.setParent(newExpr);

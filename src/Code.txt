@@ -12,9 +12,15 @@ function int fun(float y);
 function int main()
 begin
     int e;
-    int j=2;
+    int j = 2;
     fun(e,e);
     fun();
+
+    ## testing OpAss
+    e += j;
+    e -= j;
+    e /= j;
+    e *= j;
 end
 function int fun()
 begin
