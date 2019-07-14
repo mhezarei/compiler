@@ -2,6 +2,7 @@ package codegen;
 
 import ast.*;
 
+import javax.xml.soap.Node;
 import java.io.PrintStream;
 import java.util.*;
 
@@ -349,63 +350,16 @@ public class CodeGenVisitor implements SimpleVisitor {
         return command;
     }
 
-    private void reduceExpressionNode(String result, ExpressionNode parent, PrimitiveType resultType) throws Exception {
-        ASTNode v = new BaseASTNode(NodeType.VAR_USE);
-        ASTNode id = new IdentifierNode(result);
-        SymbolInfo si = new SymbolInfo(id);
-        si.setType(resultType);
-        id.setSymbolInfo(si);
-        v.addChild(id);
-        v.setParent(parent);
-        parent.setChildren(v);
-        parent.setIsIdentifier();
-    }
-
-    private void visitSizeOfNode(ASTNode node) throws Exception {
-        ExpressionNode parent = (ExpressionNode) node.getParent();
-        PrimitiveType type = ((TypeNode) node.getChild(0)).getType();
-
-        node.getChild(0).accept(this);
-
-        int val;
-
-        switch (type) {
-            case BOOL:
-            case CHAR:
-            case VOID:
-                val = 1;
-                break;
-            case INT:
-            case FLOAT:
-                val = 4;
-                break;
-            case LONG:
-            case DOUBLE:
-                val = 8;
-                break;
-            case STRING:
-            case AUTO:
-                throw new Exception("bad types for sizeof");
-            default:
-                throw new IllegalStateException("Unexpected value: " + type);
-        }
-
-        //reduce
-        IntegerLiteralNode iln = new IntegerLiteralNode(val);
-        iln.setParent(parent);
-        parent.setChildren(iln);
-    }
-
     private void visitBinaryOperation(ASTNode node) throws Exception {
         ExpressionNode parent = (ExpressionNode) node.getParent();
-        System.out.println("node is " + node);
-        System.out.println("parent is " + parent);
-        System.out.println("G parent is " + parent.getParent());
-        System.out.println("parent child is " + parent.getChildren());
+//        System.out.println("node is " + node);
+//        System.out.println("parent is " + parent);
+//        System.out.println("G parent is " + parent.getParent());
+//        System.out.println("parent child is " + parent.getChildren());
         ExpressionNode e1 = (ExpressionNode) node.getChild(0);
-        System.out.println("first child is " + e1.getChildren());
+//        System.out.println("first child is " + e1.getChildren());
         ExpressionNode e2 = (ExpressionNode) node.getChild(1);
-        System.out.println("second child is " + e2.getChildren());
+//        System.out.println("second child is " + e2.getChildren());
 
         e1.accept(this);
         e2.accept(this);
@@ -427,6 +381,91 @@ public class CodeGenVisitor implements SimpleVisitor {
         System.out.println("finished the binary op " + node + "\n");
     }
 
+    private String getBinaryOperationCommand(NodeType nodeType, PrimitiveType pt) throws Exception {
+        String result = "";
+
+        switch (pt) {
+            case FLOAT:
+            case DOUBLE:
+                result = "f";
+                break;
+            case LONG:
+            case CHAR:
+            case INT:
+            case BOOL:
+                if (nodeType == NodeType.GREATER_THAN ||
+                        nodeType == NodeType.GREATER_THAN_OR_EQUAL ||
+                        nodeType == NodeType.LESS_THAN ||
+                        nodeType == NodeType.LESS_THAN_OR_EQUAL ||
+                        nodeType == NodeType.EQUAL ||
+                        nodeType == NodeType.NOT_EQUAL) {
+                    result = "i";
+                } else if (nodeType == NodeType.DIVISION || nodeType == NodeType.MOD) {
+                    result = "s";
+                }
+        } // command has f for float, i for normal cmp and s for normal div and rem
+
+        switch (nodeType) {
+            case ADDITION:
+                return result + "add";
+            case SUBTRACTION:
+                return result + "sub";
+            case MULTIPLICATION:
+                return result + "mul";
+            case DIVISION:
+                return result + "div";
+            case MOD:
+                return result + "rem";
+            case EQUAL:
+            case NOT_EQUAL:
+            case GREATER_THAN:
+            case GREATER_THAN_OR_EQUAL:
+            case LESS_THAN:
+            case LESS_THAN_OR_EQUAL:
+                result = result + "cmp ";
+                break;
+            case BOOLEAN_AND:
+            case ARITHMETIC_AND:
+                return result + "and";
+            case BOOLEAN_OR:
+            case ARITHMETIC_OR:
+                return result + "or";
+            case XOR:
+                return result + "xor";
+        } // command has the name
+
+        //Only compares can reach here
+        switch (pt) {
+            case FLOAT:
+            case DOUBLE:
+                result = result + "o";
+                break;
+            case LONG:
+            case CHAR:
+            case INT:
+            case BOOL:
+                if (nodeType != NodeType.EQUAL && nodeType != NodeType.NOT_EQUAL) {
+                    result = result + "s";
+                }
+        } // has o for float, s for {le, ge, lt, gt} and nothing for integer eq and ne
+
+        switch (nodeType) {
+            case EQUAL:
+                return result + "eq";
+            case NOT_EQUAL:
+                return result + "ne";
+            case GREATER_THAN:
+                return result + "gt";
+            case GREATER_THAN_OR_EQUAL:
+                return result + "ge";
+            case LESS_THAN:
+                return result + "lt";
+            case LESS_THAN_OR_EQUAL:
+                return result + "le";
+        }
+
+        throw new Exception("No operation found!");
+    }
 
     private PrimitiveType checkBinaryOpType(PrimitiveType e1, PrimitiveType e2, NodeType nodeType) throws Exception {
         //todo auto
@@ -587,100 +626,16 @@ public class CodeGenVisitor implements SimpleVisitor {
         throw new Exception("general can't do " + nodeType);
     }
 
-    private int getTemp() {
-        int i = 0;
-
-        while (usedTemps.contains(i))
-            i++;
-        usedTemps.add(i);
-
-        return i;
-    }
-
-    private String getBinaryOperationCommand(NodeType nodeType, PrimitiveType pt) throws Exception {
-        String result = "";
-
-        switch (pt) {
-            case FLOAT:
-            case DOUBLE:
-                result = "f";
-                break;
-            case LONG:
-            case CHAR:
-            case INT:
-            case BOOL:
-                if (nodeType == NodeType.GREATER_THAN ||
-                        nodeType == NodeType.GREATER_THAN_OR_EQUAL ||
-                        nodeType == NodeType.LESS_THAN ||
-                        nodeType == NodeType.LESS_THAN_OR_EQUAL ||
-                        nodeType == NodeType.EQUAL ||
-                        nodeType == NodeType.NOT_EQUAL) {
-                    result = "i";
-                } else if (nodeType == NodeType.DIVISION || nodeType == NodeType.MOD) {
-                    result = "s";
-                }
-        } // command has f for float, i for normal cmp and s for normal div and rem
-
-        switch (nodeType) {
-            case ADDITION:
-                return result + "add";
-            case SUBTRACTION:
-                return result + "sub";
-            case MULTIPLICATION:
-                return result + "mul";
-            case DIVISION:
-                return result + "div";
-            case MOD:
-                return result + "rem";
-            case EQUAL:
-            case NOT_EQUAL:
-            case GREATER_THAN:
-            case GREATER_THAN_OR_EQUAL:
-            case LESS_THAN:
-            case LESS_THAN_OR_EQUAL:
-                result = result + "cmp ";
-                break;
-            case BOOLEAN_AND:
-            case ARITHMETIC_AND:
-                return result + "and";
-            case BOOLEAN_OR:
-            case ARITHMETIC_OR:
-                return result + "or";
-            case XOR:
-                return result + "xor";
-        } // command has the name
-
-        //Only compares can reach here
-        switch (pt) {
-            case FLOAT:
-            case DOUBLE:
-                result = result + "o";
-                break;
-            case LONG:
-            case CHAR:
-            case INT:
-            case BOOL:
-                if (nodeType != NodeType.EQUAL && nodeType != NodeType.NOT_EQUAL) {
-                    result = result + "s";
-                }
-        } // has o for float, s for {le, ge, lt, gt} and nothing for integer eq and ne
-
-        switch (nodeType) {
-            case EQUAL:
-                return result + "eq";
-            case NOT_EQUAL:
-                return result + "ne";
-            case GREATER_THAN:
-                return result + "gt";
-            case GREATER_THAN_OR_EQUAL:
-                return result + "ge";
-            case LESS_THAN:
-                return result + "lt";
-            case LESS_THAN_OR_EQUAL:
-                return result + "le";
-        }
-
-        throw new Exception("No operation found!");
+    private void reduceExpressionNode(String result, ExpressionNode parent, PrimitiveType resultType) throws Exception {
+        ASTNode v = new BaseASTNode(NodeType.VAR_USE);
+        ASTNode id = new IdentifierNode(result);
+        SymbolInfo si = new SymbolInfo(id);
+        si.setType(resultType);
+        id.setSymbolInfo(si);
+        v.addChild(id);
+        v.setParent(parent);
+        parent.setChildren(v);
+        parent.setIsIdentifier();
     }
 
     static PrimitiveType canCast(PrimitiveType type1, PrimitiveType type2) throws Exception {
@@ -718,6 +673,68 @@ public class CodeGenVisitor implements SimpleVisitor {
         throw new Exception("can't cast");
     }
 
+    private void visitSizeOfNode(ASTNode node) throws Exception {
+        ExpressionNode parent = (ExpressionNode) node.getParent();
+        PrimitiveType type = ((TypeNode) node.getChild(0)).getType();
+
+        node.getChild(0).accept(this);
+
+        int val;
+
+        switch (type) {
+            case BOOL:
+            case CHAR:
+            case VOID:
+                val = 1;
+                break;
+            case INT:
+            case FLOAT:
+                val = 4;
+                break;
+            case LONG:
+            case DOUBLE:
+                val = 8;
+                break;
+            case STRING:
+            case AUTO:
+                throw new Exception("bad types for sizeof");
+            default:
+                throw new IllegalStateException("Unexpected value: " + type);
+        }
+
+        //reduce
+        IntegerLiteralNode iln = new IntegerLiteralNode(val);
+        iln.setParent(parent);
+        parent.setChildren(iln);
+    }
+
+    private void visitIfStatementNode(ASTNode node) throws Exception {
+        // BIG TODO NEED TO FIX SCOPE PROBLEMS
+        // BIG TODO NEED TO FIX SCOPE PROBLEMS
+        // BIG TODO NEED TO FIX SCOPE PROBLEMS
+        String ifType = (node.getChildren().size() == 2) ? "if" : ((node.getChildren().size() == 3) ? "if_else" : "invalid");
+
+        visitBinaryOperation(node.getChild(0).getChild(0));
+
+        String result = ((IdentifierNode) node.getChild(0).getChild(0).getChild(0)).getValue();
+        String ifTrueLabel = "%" + generateLabel();
+        String ifFalseLabel = "%" + generateLabel();
+
+        stream.println("\tbr i1 %" + result + ", label " + ifTrueLabel + ", label " + ifFalseLabel);
+        stream.println(ifTrueLabel.substring(1) + ":");
+
+        visitBlockNode(node.getChild(1));
+
+        stream.println(ifFalseLabel.substring(1) + ":");
+
+        if (ifType.equals("if_else")) {
+            visitBlockNode(node.getChild(2));
+        }
+
+        // BIG TODO NEED TO FIX SCOPE PROBLEMS
+        // BIG TODO NEED TO FIX SCOPE PROBLEMS
+        // BIG TODO NEED TO FIX SCOPE PROBLEMS
+    }
 
     /*Assigns thing at top of stack,
       OR if it's a literal, pushes the literal then assigns that val
@@ -772,11 +789,6 @@ public class CodeGenVisitor implements SimpleVisitor {
         node.getChild(1).accept(this);
 
     }*/
-
-    private void visitIfStatementNode(ASTNode node) throws Exception {
-        //todo "if" code
-
-    }
 
     private void visitWhileStatementNode(ASTNode node) {
 
@@ -932,7 +944,11 @@ public class CodeGenVisitor implements SimpleVisitor {
         visitAllChildren(node);
 
         //return type in signature
-        PrimitiveType returnType = ((TypeNode) node.getParent().getParent().getChild(0)).getType();
+        ASTNode n = node;
+        while (n.getNodeType() != NodeType.METHOD_DECLARATION) {
+            n = n.getParent();
+        }
+        PrimitiveType returnType = ((TypeNode) n.getChild(0)).getType();
 
         stream.print("\tret " + returnType);
 
@@ -974,7 +990,7 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private String generateLabel() {
-        return "label" + (++labelIndex);
+        return "label" + ++labelIndex;
     }
 
     private void outputMainMethod() {
@@ -1003,5 +1019,15 @@ public class CodeGenVisitor implements SimpleVisitor {
         stream.println("  return");
         stream.println(".end method");
         stream.println("");
+    }
+
+    private int getTemp() {
+        int i = 0;
+
+        while (usedTemps.contains(i))
+            i++;
+        usedTemps.add(i);
+
+        return i;
     }
 }
