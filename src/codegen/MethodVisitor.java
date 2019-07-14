@@ -10,11 +10,11 @@ import java.util.*;
  * to Class nodes.
  */
 public class MethodVisitor implements SimpleVisitor {
+    private Map<String, HashSet<Signature>> signatures = CodeGenVisitor.signatures;
+
     @Override
     public void visit(ASTNode node) throws Exception {
         switch (node.getNodeType()) {
-
-
             case METHOD_DECLARATION:
                 visitMethodDeclarationNode(node);
                 break;
@@ -24,9 +24,19 @@ public class MethodVisitor implements SimpleVisitor {
                 visitVariableDeclarationNode(node);
                 break;
 
+            case START:
+                visitAllChildren(node);
+                checkMain();
+                break;
+
             default:
                 visitAllChildren(node);
         }
+    }
+
+    private void checkMain() throws Exception {
+        if (signatures.get("main")==null||signatures.get("main").isEmpty())
+            throw new Exception("there is no main in code");
     }
 
     private void visitAllChildren(ASTNode node) throws Exception {
@@ -45,23 +55,23 @@ public class MethodVisitor implements SimpleVisitor {
         Signature signature = new Signature(returnType.getType(), methodName);
         signature.addArgs(visitArgumentNode(node.getChild(2)));
 
-        if (CodeGenVisitor.signatures.containsKey(methodName))
+        if (signatures.containsKey(methodName))
             if (methodName.equals("main")) {
                 throw new Exception("main() declared before");
             } else {
 
-                HashSet<Signature> signatures = CodeGenVisitor.signatures.get(methodName);
-                Optional<Signature> aSig = signatures.stream().findAny();
-                if (signatures.contains(signature))
+                HashSet<Signature> signatureSet = signatures.get(methodName);
+                Optional<Signature> aSig = signatureSet.stream().findAny();
+                if (signatureSet.contains(signature))
                     throw new Exception(methodName + "() with this signature declared before");
                 if (aSig.isPresent() && (aSig.get().getReturnType() != returnType.getType()))
                     throw new Exception(methodName + "() can't be declare by this return type");
-                signatures.add(signature);
+                signatureSet.add(signature);
             }
         else {
             HashSet<Signature> set = new HashSet<>();
             set.add(signature);
-            CodeGenVisitor.signatures.put(methodName, set);
+            signatures.put(methodName, set);
         }
 
         visitAllChildren(node);

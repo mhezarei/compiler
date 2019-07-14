@@ -1,32 +1,7 @@
-function int fun(int a,float b)
+function int main(int a,float b)
 begin
-    float c,f;
+    float c,f=0;
     int d;
-    f = sizeof(int);
-    d = fun(1 * 2 + b, 12 % 3);
+    d = 1 * c + f;
     return 2 + 2;
-end
-
-function int fun(float y);
-
-function int main()
-begin
-    int e;
-    int j = 2;
-    fun(e,e);
-    fun();
-
-    ## testing OpAss
-    e += j;
-    e -= j;
-    e /= j;
-    e *= j;
-end
-function int fun()
-begin
-    int g;
-    int h;
-    fun(g,h);
-    g = 5;
-    return g;
 end
