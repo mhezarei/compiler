@@ -615,16 +615,36 @@ cond_stmt_mid ::=
         :};
 
 loop_stmt ::=
-    FOR LPAREN assignment:i SEMICOLON expr:be SEMICOLON expr:ea RPAREN block:b
+    FOR LPAREN assignment:i SEMICOLON expr:be SEMICOLON expr:ee RPAREN block:b
         {:
             RESULT = new BaseASTNode(NodeType.FOR_STATEMENT);
-            RESULT.addChild(i, be, ea, b);
+            RESULT.addChild(i, be, ee, b);
             i.setParent(RESULT);
             be.setParent(RESULT);
-            ea.setParent(RESULT);
+            ee.setParent(RESULT);
             b.setParent(RESULT);
         :}
-    | FOR LPAREN SEMICOLON expr:be SEMICOLON expr:ea RPAREN block:b
+    | FOR LPAREN assignment:i SEMICOLON expr:be SEMICOLON assignment:ea RPAREN block:b
+		{:
+			RESULT = new BaseASTNode(NodeType.FOR_STATEMENT);
+			RESULT.addChild(i, be, ea, b);
+			i.setParent(RESULT);
+			be.setParent(RESULT);
+			ea.setParent(RESULT);
+			b.setParent(RESULT);
+		:}
+		/////////////////////////////////
+    | FOR LPAREN SEMICOLON expr:be SEMICOLON expr:ee RPAREN block:b
+        {:
+            RESULT = new BaseASTNode(NodeType.FOR_STATEMENT);
+            ASTNode assign = new BaseASTNode(NodeType.ASSIGN);
+            RESULT.addChild(assign, be, ee, b);
+            assign.setParent(RESULT);
+            be.setParent(RESULT);
+            ee.setParent(RESULT);
+            b.setParent(RESULT);
+        :}
+    | FOR LPAREN SEMICOLON expr:be SEMICOLON assignment:ea RPAREN block:b
         {:
             RESULT = new BaseASTNode(NodeType.FOR_STATEMENT);
             ASTNode assign = new BaseASTNode(NodeType.ASSIGN);
@@ -634,6 +654,7 @@ loop_stmt ::=
             ea.setParent(RESULT);
             b.setParent(RESULT);
         :}
+        /////////////////////////////////
     | FOR LPAREN assignment:i SEMICOLON expr:be SEMICOLON RPAREN block:b
         {:
             RESULT = new BaseASTNode(NodeType.FOR_STATEMENT);
@@ -811,7 +832,7 @@ expr ::=
 variable ::=
     identifier:i
         {:
-            //EXPR (result) -> VAR_USE (v) -> ID (i)
+            // EXPR (result) -> VAR_USE (v) -> ID (i)
             RESULT = new ExpressionNode();
             ASTNode v = new BaseASTNode(NodeType.VAR_USE);
             v.addChild(i);

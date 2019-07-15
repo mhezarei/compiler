@@ -4,7 +4,7 @@ package ast;
  * An enum that shows type of a var
  */
 public enum PrimitiveType {
-    BOOL ("i8", 1),
+    BOOL ("i1", 1),
     CHAR ("i8", 1),
     INT ("i32", 4),
     LONG("i64", 8),
