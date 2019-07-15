@@ -12,6 +12,7 @@ begin
 	        int t = 2 * 121;
 	        int w = 2 * 121;
 	        int jsa = 2 * 121;
+	        continue;
 	        int i = 2 * 121;
 	        int o = 2 * 121;
 	        int z = 2 * 121;
@@ -25,6 +26,7 @@ begin
 		    int jsa = 2 * 121;
 		    int i = 2 * 121;
 		    int o = 2 * 121;
+		    break;
 		    int z = 2 * 121;
 		    int j = 2 * 121;
 		    t = 2 * 121;
@@ -37,12 +39,26 @@ begin
     for (a = 3; a < 12; a += 2)
     begin
         b += 2;
+        b += 2;
+        continue;
+        b += 2;
+        b += 2;
+        b += 2;
+        b += 2;
+        break;
+        b += 2;
         b += 4;
     end
 
     repeat
     begin
         j += 2;
+        j += 2;
+        continue;
+        j += 2;
+        j += 2;
+        j += 2;
+        break;
         j += 2;
         j += 2;
     end
@@ -60,10 +76,24 @@ begin
         case 6:
         begin
             tasd += 2;
+            tasd += 2;
+            break;
+            tasd += 2;
+            tasd += 2;
+            tasd += 2;
         end
 
         case 10:
         begin
+            tasd += 2;
+            tasd += 2;
+            tasd += 2;
+            tasd += 2;
+            tasd += 2;
+            continue;
+            tasd += 2;
+            tasd += 2;
+            tasd += 2;
             tasd += 2;
         end
 
