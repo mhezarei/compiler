@@ -98,6 +98,11 @@
             <set />
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/src/ast/ArrayType.java">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/src/ast/BaseASTNode.java">
           <value>
             <set />
@@ -168,6 +173,11 @@
             <set />
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/src/ast/Type.java">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/src/ast/TypeNode.java">
           <value>
             <set />
@@ -209,6 +219,11 @@
           </value>
         </entry>
         <entry key="$PROJECT_DIR$/src/codegen/SymbolTable.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/codegen/Type.java">
           <value>
             <set />
           </value>

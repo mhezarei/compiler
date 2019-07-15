@@ -1,14 +1,14 @@
 package codegen;
 
 import ast.ASTNode;
-import ast.PrimitiveType;
+import ast.Type;
 
 /**
  * Descriptor of identifiers
  */
 public class SymbolInfo implements Symbol{
     private ASTNode node;
-    private PrimitiveType type;
+    private Type type;
     private int localVarIndex = -1;
 
     SymbolInfo(ASTNode node) {
@@ -19,11 +19,11 @@ public class SymbolInfo implements Symbol{
         return node;
     }
 
-    public PrimitiveType getType() {
+    public Type getType() {
         return type;
     }
 
-    public void setType(PrimitiveType type) {
+    public void setType(Type type) {
         this.type = type;
     }
 

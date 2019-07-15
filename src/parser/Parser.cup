@@ -356,6 +356,13 @@ var_dcl_cnt ::=
             RESULT.addChild(expr,e);
             e.setParent(RESULT);
             expr.setParent(RESULT);
+        :}
+    | identifier:id LBRACK INTCONST:num RBRACK
+        {:
+            RESULT = new BaseASTNode(NodeType.ARRAY_DECLARATION);
+            Literal l=new IntegerLiteralNode(num);
+            RESULT.addChild(id,l);
+            id.setParent(RESULT);
         :};
 
 block ::=

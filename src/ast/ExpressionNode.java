@@ -3,7 +3,7 @@ package ast;
 public class ExpressionNode extends BaseASTNode {
     private boolean isIdentifier;
     private String resultName;
-    private PrimitiveType type;
+    private Type type;
 
     public ExpressionNode() {
         super(NodeType.EXPRESSION_STATEMENT);
@@ -40,11 +40,11 @@ public class ExpressionNode extends BaseASTNode {
         return resultName;
     }
 
-    public PrimitiveType getType() {
+    public Type getType() {
         return type;
     }
 
-    public void setType(PrimitiveType type) {
+    public void setType(Type type) {
         this.type = type;
     }
 }

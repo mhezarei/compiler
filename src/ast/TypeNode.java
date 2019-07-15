@@ -4,14 +4,14 @@ package ast;
  * A class to keep a type like int or char
  */
 public class TypeNode extends BaseASTNode {
-    private PrimitiveType type;
+    private Type type;
 
-    public TypeNode(NodeType nodeType, PrimitiveType type) {
+    public TypeNode(NodeType nodeType, Type type) {
         super(nodeType);
         this.type = type;
     }
     
-    public PrimitiveType getType() {
+    public Type getType() {
         return type;
     }
 }

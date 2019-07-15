@@ -54,6 +54,7 @@ public enum NodeType {
     METHOD_DECLARATION,
     STRUCT_DECLARATION,
     DECLARATIONS,
+    ARRAY_DECLARATION,
 
     /*Assignments*/
     ASSIGN,
@@ -84,6 +85,7 @@ public enum NodeType {
     PARAMETERS,
     BLOCK,
     VAR_USE,
+    ARRAY_USE,
     CLASS,
     NULL_LITERAL,
     START

@@ -1,7 +1,7 @@
 package codegen;
 
 import ast.ExpressionNode;
-import ast.PrimitiveType;
+import ast.Type;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -9,15 +9,15 @@ import java.util.List;
 import java.util.Objects;
 
 class Argument {
-    private PrimitiveType type;
+    private Type type;
     private String name;
 
-    Argument(PrimitiveType type, String name) {
+    Argument(Type type, String name) {
         this.type = type;
         this.name = name;
     }
 
-    public PrimitiveType getType() {
+    public Type getType() {
         return type;
     }
 
@@ -40,11 +40,11 @@ class Argument {
 }
 
 public class Signature {
-    private PrimitiveType returnType;
+    private Type returnType;
     private String name;
     private List<Argument> args = new ArrayList<>();
 
-    Signature(PrimitiveType returnType, String name) {
+    Signature(Type returnType, String name) {
         this.returnType = returnType;
         this.name = name;
     }
@@ -53,7 +53,7 @@ public class Signature {
         args.addAll(arguments);
     }
 
-    PrimitiveType getReturnType() {
+    Type getReturnType() {
         return returnType;
     }
 
@@ -74,7 +74,7 @@ public class Signature {
             try {
                 ExpressionNode e=new ExpressionNode();
                 e.setType(args2[i].getType());
-                new CodeGenVisitor(new PrintStream("")).cast(args1[i].getType(),e);
+                new CodeGenVisitor(new PrintStream("")).cast(args1[i].getType().getPrimitive(),e);
             } catch (Exception e) {
                 return false;
             }
