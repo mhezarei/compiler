@@ -132,6 +132,10 @@ public class CodeGenVisitor implements SimpleVisitor {
                 visitBreakNode(node);
                 break;
 
+			case VARIABLE_CONST_DECLARATION:
+				visitVariableDeclaration(node);
+				break;
+
             case STRUCT_DECLARATION:
             case STRING_TYPE:
             case FLOAT_TYPE:
@@ -139,7 +143,6 @@ public class CodeGenVisitor implements SimpleVisitor {
             case AUTO_TYPE:
             case CASE_STATEMENT:
             case PARAMETERS:
-            case VARIABLE_CONST_DECLARATION:
             case BOOLEAN_TYPE:
             case CHAR_TYPE:
             case START:
@@ -283,6 +286,8 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private void visitVariableDeclaration(ASTNode node) throws Exception {
+		boolean b = false;
+	    System.out.println("@#!!@#@!#!@# var dcl children " + node.getChildren());
         //may has not child
         if (node.getChildren().isEmpty())
             return;
@@ -310,12 +315,19 @@ public class CodeGenVisitor implements SimpleVisitor {
                 idNode = (IdentifierNode) node.getChild(i);
                 if (isAuto)
                     throw new Exception("Auto variable must initialize");
+
+	            if (node.getNodeType() == NodeType.VARIABLE_CONST_DECLARATION) {
+		            throw new Exception("constant variable should be initialized");
+	            }
             } else {
                 //DEC -> ASSIGN -> EXPR -> VAR_USE -> ID
                 idNode = (IdentifierNode) node.getChild(i).getChild(0).getChild(0).getChild(0);
-                ExpressionNode expr = (ExpressionNode) node.getChild(i).getChild(1);
+	            if (node.getNodeType() == NodeType.VARIABLE_CONST_DECLARATION) {
+		            b = true;
+	            }
+	            ExpressionNode expr= (ExpressionNode) node.getChild(i).getChild(1);
 
-                expr.accept(this);
+	            expr.accept(this);
 
                 if (isAuto)
                     typePrimitive = expr.getType();
@@ -324,6 +336,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
             SymbolInfo si = new SymbolInfo(idNode);
             si.setType(typePrimitive);
+            si.setConst(b);
             idNode.setSymbolInfo(si);
 
             if (symbolTable.contains(id))
@@ -929,7 +942,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
     private void visitAssignNode(ASTNode node) throws Exception {
         // node -> EXPRESSION -> VAR_USE -> ID
-        IdentifierNode idNode = (IdentifierNode) node.getChild(0).getChild(0).getChild(0);
+		IdentifierNode idNode = (IdentifierNode) node.getChild(0).getChild(0).getChild(0);
 
         visitAllChildren(node);
 

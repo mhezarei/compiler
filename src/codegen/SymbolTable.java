@@ -46,6 +46,14 @@ class SymbolTable implements Symbol {
         return currentScope.get(id);
     }
 
+    boolean getSI(String id) {
+        for (HashMap<String, Symbol> scope : scopes) {
+            if(scope.get(id)!=null)
+                return ((SymbolInfo) scope.get(id)).isConst();
+        }
+        return ((SymbolInfo) currentScope.get(id)).isConst();
+    }
+
     boolean contains(String id) {
         for (HashMap<String, Symbol> scope : scopes)
             if (scope.containsKey(id))
