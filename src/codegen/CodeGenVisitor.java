@@ -660,7 +660,6 @@ public class CodeGenVisitor implements SimpleVisitor {
     }
 
     private Type checkBinaryOpType(PrimitiveType e1, PrimitiveType e2, NodeType nodeType) throws Exception {
-        //todo auto
         switch (nodeType) {
             case BOOLEAN_AND:
             case BOOLEAN_OR:
@@ -1076,7 +1075,7 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         //if there is not a method with this name
         if (!signatures.containsKey(methodName))
-            throw new Exception(methodName + "() not declared");
+            callCMethod(node);
 
         Type leftHandType;
 
@@ -1143,6 +1142,30 @@ public class CodeGenVisitor implements SimpleVisitor {
 
         if (isExpr)
             cast(leftHandType.getPrimitive(), parent);
+    }
+
+    private void callCMethod(ASTNode node) throws Exception {
+        IdentifierNode idNode = (IdentifierNode) node.getChild(0);
+        String methodName = idNode.getValue();
+        String result = "" + getTemp();
+
+        ExpressionNode parent = (ExpressionNode) node.getParent();
+        reduceExpressionNode(result, parent, PrimitiveType.INT);
+
+        List<Argument> argumentList = new ArrayList<>();
+
+        List<ASTNode> parameters = node.getChild(1).getChildren();
+        for (ASTNode child : parameters)
+            child.getChild(0).accept(this);
+
+        for (ASTNode parameter : parameters) {
+            ExpressionNode expr = (ExpressionNode) parameter.getChild(0);
+            argumentList.add(new Argument(expr.getType(), ""));
+        }
+
+        stream.print("%" + result + " = ");
+        stream.print("call i32 (i8*, ...) @" + methodName);
+        visitParameterNode(node.getChild(1), argumentList);
     }
 
     private void visitParameterNode(ASTNode node, List<Argument> argumentList) {
@@ -1259,18 +1282,6 @@ public class CodeGenVisitor implements SimpleVisitor {
         ((ExpressionNode) node.getParent()).setIsIdentifier();
 
         reduceExpressionNode(result, (ExpressionNode) node.getParent(), id.getSymbolInfo().getType());
-    }
-
-    private void outputMainMethod() {
-        //todo "main" code
-        stream.println("");
-        stream.println(";");
-        stream.println("; main method");
-        stream.println(";");
-        stream.println(".method public static main([Ljava/lang/String;)V");
-        stream.println("  return");
-        stream.println(".end method");
-        stream.println("");
     }
 
     private void outputPrintlnMethod() {
